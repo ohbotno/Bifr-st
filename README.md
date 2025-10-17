@@ -1,6 +1,10 @@
-# Asgard
+# Bifrost
 
-Asgard is a Graphical User Interface (GUI) for [Thor](https://github.com/AngelLM/Thor) designed and programmed with [PyQt5](https://riverbankcomputing.com/software/pyqt/download5).
+Bifrost is a Graphical User Interface (GUI) for [Thor](https://github.com/AngelLM/Thor) designed and programmed with [PyQt5](https://riverbankcomputing.com/software/pyqt/download5).
+
+Originally forked from [Asgard](https://github.com/AngelLM/Asgard), Bifrost has undergone extensive rewrites and improvements to become its own project. True to its Norse mythology namesake, Bifrost serves as the bridge between Midgard (the user) and Asgard (the Thor robot).
+
+**Key Difference:** Unlike the original Asgard, Bifrost has been rewritten to control RepRap Firmware-based systems, specifically targeting the Fly Super Pro 8 controller board.
 
 * Key features:
   *  User-friendly Graphical Interface
