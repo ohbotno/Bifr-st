@@ -612,54 +612,54 @@ class BifrostGUI(Ui_MainWindow):
         """Create sequence recorder GUI controls programmatically"""
         # Create group box for sequence controls
         self.sequenceGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.sequenceGroupBox.setGeometry(QtCore.QRect(390, 590, 380, 280))
+        self.sequenceGroupBox.setGeometry(QtCore.QRect(910, 100, 280, 480))
         self.sequenceGroupBox.setTitle("Sequence Programmer")
 
         # List widget for sequence points
         self.sequencePointsList = QtWidgets.QListWidget(self.sequenceGroupBox)
-        self.sequencePointsList.setGeometry(QtCore.QRect(10, 25, 360, 120))
+        self.sequencePointsList.setGeometry(QtCore.QRect(10, 25, 260, 200))
 
-        # Record controls row
+        # Record controls
         self.sequenceRecordButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceRecordButton.setGeometry(QtCore.QRect(10, 150, 110, 30))
+        self.sequenceRecordButton.setGeometry(QtCore.QRect(10, 235, 120, 30))
         self.sequenceRecordButton.setText("Record Point")
         self.sequenceRecordButton.pressed.connect(self.recordSequencePoint)
 
         self.sequenceDeleteButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceDeleteButton.setGeometry(QtCore.QRect(135, 150, 110, 30))
+        self.sequenceDeleteButton.setGeometry(QtCore.QRect(150, 235, 120, 30))
         self.sequenceDeleteButton.setText("Delete Point")
         self.sequenceDeleteButton.pressed.connect(self.deleteSequencePoint)
 
         self.sequenceClearButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceClearButton.setGeometry(QtCore.QRect(260, 150, 110, 30))
+        self.sequenceClearButton.setGeometry(QtCore.QRect(10, 270, 260, 30))
         self.sequenceClearButton.setText("Clear All")
         self.sequenceClearButton.pressed.connect(self.clearSequence)
 
-        # Playback controls row
+        # Playback controls
         self.sequencePlayButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequencePlayButton.setGeometry(QtCore.QRect(10, 185, 110, 30))
+        self.sequencePlayButton.setGeometry(QtCore.QRect(10, 310, 80, 30))
         self.sequencePlayButton.setText("Play")
         self.sequencePlayButton.pressed.connect(self.playSequence)
 
         self.sequencePauseButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequencePauseButton.setGeometry(QtCore.QRect(135, 185, 110, 30))
+        self.sequencePauseButton.setGeometry(QtCore.QRect(100, 310, 80, 30))
         self.sequencePauseButton.setText("Pause")
         self.sequencePauseButton.setEnabled(False)
         self.sequencePauseButton.pressed.connect(self.pauseSequence)
 
         self.sequenceStopButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceStopButton.setGeometry(QtCore.QRect(260, 185, 110, 30))
+        self.sequenceStopButton.setGeometry(QtCore.QRect(190, 310, 80, 30))
         self.sequenceStopButton.setText("Stop")
         self.sequenceStopButton.setEnabled(False)
         self.sequenceStopButton.pressed.connect(self.stopSequence)
 
-        # Speed and loop controls
+        # Speed control
         speedLabel = QtWidgets.QLabel(self.sequenceGroupBox)
-        speedLabel.setGeometry(QtCore.QRect(10, 220, 50, 20))
+        speedLabel.setGeometry(QtCore.QRect(10, 350, 50, 20))
         speedLabel.setText("Speed:")
 
         self.sequenceSpeedSpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
-        self.sequenceSpeedSpinBox.setGeometry(QtCore.QRect(60, 220, 70, 22))
+        self.sequenceSpeedSpinBox.setGeometry(QtCore.QRect(60, 350, 80, 22))
         self.sequenceSpeedSpinBox.setMinimum(0.1)
         self.sequenceSpeedSpinBox.setMaximum(10.0)
         self.sequenceSpeedSpinBox.setSingleStep(0.1)
@@ -667,15 +667,16 @@ class BifrostGUI(Ui_MainWindow):
         self.sequenceSpeedSpinBox.setSuffix("x")
 
         self.sequenceLoopCheckBox = QtWidgets.QCheckBox(self.sequenceGroupBox)
-        self.sequenceLoopCheckBox.setGeometry(QtCore.QRect(145, 220, 60, 20))
+        self.sequenceLoopCheckBox.setGeometry(QtCore.QRect(150, 350, 60, 20))
         self.sequenceLoopCheckBox.setText("Loop")
 
+        # Delay control
         delayLabel = QtWidgets.QLabel(self.sequenceGroupBox)
-        delayLabel.setGeometry(QtCore.QRect(220, 220, 50, 20))
+        delayLabel.setGeometry(QtCore.QRect(10, 380, 50, 20))
         delayLabel.setText("Delay:")
 
         self.sequenceDelaySpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
-        self.sequenceDelaySpinBox.setGeometry(QtCore.QRect(270, 220, 70, 22))
+        self.sequenceDelaySpinBox.setGeometry(QtCore.QRect(60, 380, 80, 22))
         self.sequenceDelaySpinBox.setMinimum(0.0)
         self.sequenceDelaySpinBox.setMaximum(60.0)
         self.sequenceDelaySpinBox.setSingleStep(0.1)
@@ -684,12 +685,12 @@ class BifrostGUI(Ui_MainWindow):
 
         # File buttons
         self.sequenceSaveButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceSaveButton.setGeometry(QtCore.QRect(10, 245, 175, 30))
+        self.sequenceSaveButton.setGeometry(QtCore.QRect(10, 415, 260, 30))
         self.sequenceSaveButton.setText("Save Sequence")
         self.sequenceSaveButton.pressed.connect(self.saveSequence)
 
         self.sequenceLoadButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceLoadButton.setGeometry(QtCore.QRect(195, 245, 175, 30))
+        self.sequenceLoadButton.setGeometry(QtCore.QRect(10, 450, 260, 30))
         self.sequenceLoadButton.setText("Load Sequence")
         self.sequenceLoadButton.pressed.connect(self.loadSequence)
 
