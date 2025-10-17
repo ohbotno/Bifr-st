@@ -8,6 +8,7 @@ from about import Ui_Dialog as About_Ui_Dialog
 
 
 import serial_port_finder as spf
+import sequence_recorder as seq_rec
 
 import serial
 import time
