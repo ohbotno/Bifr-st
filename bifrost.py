@@ -628,15 +628,16 @@ class BifrostGUI(Ui_MainWindow):
 
 # Inverse Kinematics Functions
     def calculateIK(self):
-        """Calculate inverse kinematics for current target position"""
+        """Calculate 6-DOF inverse kinematics for current target position"""
         x = self.IKInputSpinBoxX.value()
         y = self.IKInputSpinBoxY.value()
         z = self.IKInputSpinBoxZ.value()
 
-        logger.info(f"IK: Calculating for target X={x}, Y={y}, Z={z}")
+        logger.info(f"IK 6-DOF: Calculating for target X={x}, Y={y}, Z={z}")
 
-        # Solve IK
-        solution = ik.solve_ik_position(x, y, z)
+        # Solve full 6-DOF IK with default tool-down orientation
+        # Future enhancement: add orientation input controls
+        solution = ik.solve_ik_full(x, y, z, roll=0, pitch=-np.pi/2, yaw=0)
 
         # Update output displays
         if solution.valid:
@@ -644,14 +645,17 @@ class BifrostGUI(Ui_MainWindow):
             self.IkOutputValueY.setText(f"{solution.q2:.2f}º")
             self.IkOutputValueZ.setText(f"{solution.q3:.2f}º")
 
-            # Update FK spinboxes with calculated values
+            # Update FK spinboxes with all 6 calculated joint angles
             self.SpinBoxArt1.setValue(solution.q1)
             self.SpinBoxArt2.setValue(solution.q2)
             self.SpinBoxArt3.setValue(solution.q3)
+            self.SpinBoxArt4.setValue(solution.q4)
+            self.SpinBoxArt5.setValue(solution.q5)
+            self.SpinBoxArt6.setValue(solution.q6)
 
             # Style valid solution
             self.IkOutputValueFrame.setStyleSheet("background-color:rgb(200, 255, 200)")  # Light green
-            logger.info(f"IK: Valid solution - q1={solution.q1:.2f}°, q2={solution.q2:.2f}°, q3={solution.q3:.2f}°")
+            logger.info(f"IK 6-DOF: Valid solution - q1={solution.q1:.2f}°, q2={solution.q2:.2f}°, q3={solution.q3:.2f}°, q4={solution.q4:.2f}°, q5={solution.q5:.2f}°, q6={solution.q6:.2f}°")
         else:
             self.IkOutputValueX.setText("--")
             self.IkOutputValueY.setText("--")
@@ -659,7 +663,7 @@ class BifrostGUI(Ui_MainWindow):
 
             # Style invalid solution
             self.IkOutputValueFrame.setStyleSheet("background-color:rgb(255, 200, 200)")  # Light red
-            logger.warning(f"IK: Invalid solution - {solution.error_msg}")
+            logger.warning(f"IK 6-DOF: Invalid solution - {solution.error_msg}")
 
     def IkIncX(self):
         val = self.IKInputSpinBoxX.value() + 10
