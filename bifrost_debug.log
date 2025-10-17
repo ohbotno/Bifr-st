@@ -1,0 +1,14 @@
+2025-10-17 19:14:49,687 - INFO - [__init__] ============================================================
+2025-10-17 19:14:49,687 - INFO - [__init__] BIFROST GUI - MOTOR TO AXIS MAPPING
+2025-10-17 19:14:49,688 - INFO - [__init__] ============================================================
+2025-10-17 19:14:49,688 - INFO - [__init__] Firmware type: RRF
+2025-10-17 19:14:49,688 - INFO - [__init__] GUI Control -> Firmware Axis -> Physical Motor
+2025-10-17 19:14:49,688 - INFO - [__init__] ------------------------------------------------------------
+2025-10-17 19:14:49,688 - INFO - [__init__] Art1 (Joint 1) -> W axis -> Drive 6
+2025-10-17 19:14:49,688 - INFO - [__init__] Art2 (Joint 2) -> V axis -> Drive 5
+2025-10-17 19:14:49,688 - INFO - [__init__] Art3 (Joint 3) -> U axis -> Drive 4
+2025-10-17 19:14:49,688 - INFO - [__init__] Art4 (Joint 4) -> Z axis -> Drive 3
+2025-10-17 19:14:49,688 - INFO - [__init__] Art5 (Joint 5) -> DIFFERENTIAL -> Drives 0+1
+2025-10-17 19:14:49,688 - INFO - [__init__] Art6 (Joint 6) -> DIFFERENTIAL -> Drives 0+1
+2025-10-17 19:14:49,688 - INFO - [__init__]   DIFFERENTIAL: Motor_X(D0) = Art6+Art5, Motor_Y(D1) = Art6-Art5
+2025-10-17 19:14:49,688 - INFO - [__init__] ============================================================
