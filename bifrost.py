@@ -8,12 +8,14 @@ from about import Ui_Dialog as About_Ui_Dialog
 
 
 import serial_port_finder as spf
+import inverse_kinematics as ik
 
 import serial
 import time
 import json
 import threading
 import logging
+import numpy as np
 
 # Configure logging for debugging
 logging.basicConfig(
@@ -185,6 +187,30 @@ class BifrostGUI(Ui_MainWindow):
 
         self.ConsoleButtonSend.pressed.connect(self.sendSerialCommand)
         self.ConsoleInput.returnPressed.connect(self.sendSerialCommand)
+
+        # IK Control connections
+        self.IKInputSpinBoxX.valueChanged.connect(self.calculateIK)
+        self.IKInputSpinBoxY.valueChanged.connect(self.calculateIK)
+        self.IKInputSpinBoxZ.valueChanged.connect(self.calculateIK)
+        self.IkIncButtonX.pressed.connect(self.IkIncX)
+        self.IkDecButtonX.pressed.connect(self.IkDecX)
+        self.IkIncButtonY.pressed.connect(self.IkIncY)
+        self.IkDecButtonY.pressed.connect(self.IkDecY)
+        self.IkIncButtonZ.pressed.connect(self.IkIncZ)
+        self.IkDecButtonZ.pressed.connect(self.IkDecZ)
+
+        # Enable IK controls
+        self.InverseKinematicsLabel.setEnabled(True)
+        self.IKInputSpinBoxX.setEnabled(True)
+        self.IKInputSpinBoxY.setEnabled(True)
+        self.IKInputSpinBoxZ.setEnabled(True)
+        self.IkOutputValueFrame.setEnabled(True)
+        self.IkIncButtonX.setEnabled(True)
+        self.IkDecButtonX.setEnabled(True)
+        self.IkIncButtonY.setEnabled(True)
+        self.IkDecButtonY.setEnabled(True)
+        self.IkIncButtonZ.setEnabled(True)
+        self.IkDecButtonZ.setEnabled(True)
 
     def close_application(self):
         # Properly cleanup serial connection and thread
@@ -599,6 +625,69 @@ class BifrostGUI(Ui_MainWindow):
     def Inc10Gripper(self):
         val=self.SpinBoxGripper.value()+10
         self.SpinBoxGripper.setValue(val)
+
+# Inverse Kinematics Functions
+    def calculateIK(self):
+        """Calculate 6-DOF inverse kinematics for current target position"""
+        x = self.IKInputSpinBoxX.value()
+        y = self.IKInputSpinBoxY.value()
+        z = self.IKInputSpinBoxZ.value()
+
+        logger.info(f"IK 6-DOF: Calculating for target X={x}, Y={y}, Z={z}")
+
+        # Solve full 6-DOF IK with default tool-down orientation
+        # Future enhancement: add orientation input controls
+        solution = ik.solve_ik_full(x, y, z, roll=0, pitch=-np.pi/2, yaw=0)
+
+        # Update output displays
+        if solution.valid:
+            self.IkOutputValueX.setText(f"{solution.q1:.2f}º")
+            self.IkOutputValueY.setText(f"{solution.q2:.2f}º")
+            self.IkOutputValueZ.setText(f"{solution.q3:.2f}º")
+
+            # Update FK spinboxes with all 6 calculated joint angles
+            self.SpinBoxArt1.setValue(solution.q1)
+            self.SpinBoxArt2.setValue(solution.q2)
+            self.SpinBoxArt3.setValue(solution.q3)
+            self.SpinBoxArt4.setValue(solution.q4)
+            self.SpinBoxArt5.setValue(solution.q5)
+            self.SpinBoxArt6.setValue(solution.q6)
+
+            # Style valid solution
+            self.IkOutputValueFrame.setStyleSheet("background-color:rgb(200, 255, 200)")  # Light green
+            logger.info(f"IK 6-DOF: Valid solution - q1={solution.q1:.2f}°, q2={solution.q2:.2f}°, q3={solution.q3:.2f}°, q4={solution.q4:.2f}°, q5={solution.q5:.2f}°, q6={solution.q6:.2f}°")
+        else:
+            self.IkOutputValueX.setText("--")
+            self.IkOutputValueY.setText("--")
+            self.IkOutputValueZ.setText("--")
+
+            # Style invalid solution
+            self.IkOutputValueFrame.setStyleSheet("background-color:rgb(255, 200, 200)")  # Light red
+            logger.warning(f"IK 6-DOF: Invalid solution - {solution.error_msg}")
+
+    def IkIncX(self):
+        val = self.IKInputSpinBoxX.value() + 10
+        self.IKInputSpinBoxX.setValue(val)
+
+    def IkDecX(self):
+        val = self.IKInputSpinBoxX.value() - 10
+        self.IKInputSpinBoxX.setValue(val)
+
+    def IkIncY(self):
+        val = self.IKInputSpinBoxY.value() + 10
+        self.IKInputSpinBoxY.setValue(val)
+
+    def IkDecY(self):
+        val = self.IKInputSpinBoxY.value() - 10
+        self.IKInputSpinBoxY.setValue(val)
+
+    def IkIncZ(self):
+        val = self.IKInputSpinBoxZ.value() + 10
+        self.IKInputSpinBoxZ.setValue(val)
+
+    def IkDecZ(self):
+        val = self.IKInputSpinBoxZ.value() - 10
+        self.IKInputSpinBoxZ.setValue(val)
 
 # Serial Connection functions
     def getSerialPorts(self):
