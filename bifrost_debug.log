@@ -12,3 +12,1261 @@
 2025-10-17 19:14:49,688 - INFO - [__init__] Art6 (Joint 6) -> DIFFERENTIAL -> Drives 0+1
 2025-10-17 19:14:49,688 - INFO - [__init__]   DIFFERENTIAL: Motor_X(D0) = Art6+Art5, Motor_Y(D1) = Art6-Art5
 2025-10-17 19:14:49,688 - INFO - [__init__] ============================================================
+2025-10-17 20:54:31,776 - INFO - [__init__] ============================================================
+2025-10-17 20:54:31,777 - INFO - [__init__] BIFROST GUI - MOTOR TO AXIS MAPPING
+2025-10-17 20:54:31,777 - INFO - [__init__] ============================================================
+2025-10-17 20:54:31,778 - INFO - [__init__] Firmware type: RRF
+2025-10-17 20:54:31,778 - INFO - [__init__] GUI Control -> Firmware Axis -> Physical Motor
+2025-10-17 20:54:31,779 - INFO - [__init__] ------------------------------------------------------------
+2025-10-17 20:54:31,779 - INFO - [__init__] Art1 (Joint 1) -> W axis -> Drive 6
+2025-10-17 20:54:31,779 - INFO - [__init__] Art2 (Joint 2) -> U+V axes -> Drives 4+5 (COUPLED for torque)
+2025-10-17 20:54:31,780 - INFO - [__init__] Art3 (Joint 3) -> Z axis -> Drive 3
+2025-10-17 20:54:31,780 - INFO - [__init__] Art4 (Joint 4) -> A axis -> Drive 2
+2025-10-17 20:54:31,781 - INFO - [__init__] Art5 (Joint 5) -> DIFFERENTIAL -> Drives 0+1
+2025-10-17 20:54:31,781 - INFO - [__init__] Art6 (Joint 6) -> DIFFERENTIAL -> Drives 0+1
+2025-10-17 20:54:31,782 - INFO - [__init__]   DIFFERENTIAL: Motor_X(D0) = Art6+Art5, Motor_Y(D1) = Art6-Art5
+2025-10-17 20:54:31,782 - INFO - [__init__] ============================================================
+2025-10-17 20:59:25,569 - INFO - [__init__] ============================================================
+2025-10-17 20:59:25,569 - INFO - [__init__] BIFROST GUI - MOTOR TO AXIS MAPPING
+2025-10-17 20:59:25,570 - INFO - [__init__] ============================================================
+2025-10-17 20:59:25,570 - INFO - [__init__] Firmware type: RRF
+2025-10-17 20:59:25,570 - INFO - [__init__] GUI Control -> Firmware Axis -> Physical Motor
+2025-10-17 20:59:25,571 - INFO - [__init__] ------------------------------------------------------------
+2025-10-17 20:59:25,571 - INFO - [__init__] Art1 (Joint 1) -> W axis -> Drive 6
+2025-10-17 20:59:25,571 - INFO - [__init__] Art2 (Joint 2) -> U+V axes -> Drives 4+5 (COUPLED for torque)
+2025-10-17 20:59:25,572 - INFO - [__init__] Art3 (Joint 3) -> Z axis -> Drive 3
+2025-10-17 20:59:25,572 - INFO - [__init__] Art4 (Joint 4) -> A axis -> Drive 2
+2025-10-17 20:59:25,572 - INFO - [__init__] Art5 (Joint 5) -> DIFFERENTIAL -> Drives 0+1
+2025-10-17 20:59:25,572 - INFO - [__init__] Art6 (Joint 6) -> DIFFERENTIAL -> Drives 0+1
+2025-10-17 20:59:25,573 - INFO - [__init__]   DIFFERENTIAL: Motor_X(D0) = Art6+Art5, Motor_Y(D1) = Art6-Art5
+2025-10-17 20:59:25,573 - INFO - [__init__] ============================================================
+2025-10-17 20:59:54,706 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=10.0, Z=0.0
+2025-10-17 20:59:54,707 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=10.00, Z=0.00
+2025-10-17 20:59:54,707 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:54,709 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:54,710 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=10.00, Z=-0.00
+2025-10-17 20:59:54,711 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=8.47°, q2=-42.49°, q3=106.97°
+2025-10-17 20:59:54,712 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 8.92565927e-01  1.47295973e-01 -4.26180669e-01]
+ [ 1.32921210e-01 -9.89092461e-01 -6.34669649e-02]
+ [-4.30880516e-01  1.16488954e-16 -9.02408988e-01]]
+2025-10-17 20:59:54,713 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-4.30880516e-01  1.32921210e-01 -8.92565927e-01]
+ [ 1.25508231e-16 -9.89092461e-01 -1.47295973e-01]
+ [-9.02408988e-01 -6.34669649e-02  4.26180669e-01]]
+2025-10-17 20:59:54,713 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-170.63°, q5=64.77°, q6=-4.02°
+2025-10-17 20:59:54,714 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=8.47°, q2=-42.49°, q3=106.97°, q4=-170.63°, q5=64.77°, q6=-4.02°
+2025-10-17 20:59:54,717 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=8.47°, q2=-42.49°, q3=106.97°, q4=-170.63°, q5=64.77°, q6=-4.02°
+2025-10-17 20:59:55,728 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=20.0, Z=0.0
+2025-10-17 20:59:55,729 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=20.00, Z=0.00
+2025-10-17 20:59:55,729 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:55,730 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:55,731 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=20.00, Z=-0.00
+2025-10-17 20:59:55,732 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=16.59°, q2=-41.76°, q3=106.68°
+2025-10-17 20:59:55,733 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 8.68063992e-01  2.85448694e-01 -4.06182162e-01]
+ [ 2.58544748e-01 -9.58393991e-01 -1.20977561e-01]
+ [-4.23815430e-01  1.16693445e-16 -9.05748575e-01]]
+2025-10-17 20:59:55,734 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-4.23815430e-01  2.58544748e-01 -8.68063992e-01]
+ [ 1.34172136e-16 -9.58393991e-01 -2.85448694e-01]
+ [-9.05748575e-01 -1.20977561e-01  4.06182162e-01]]
+2025-10-17 20:59:55,735 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-161.80°, q5=66.03°, q6=-7.61°
+2025-10-17 20:59:55,736 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=16.59°, q2=-41.76°, q3=106.68°, q4=-161.80°, q5=66.03°, q6=-7.61°
+2025-10-17 20:59:55,740 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=16.59°, q2=-41.76°, q3=106.68°, q4=-161.80°, q5=66.03°, q6=-7.61°
+2025-10-17 20:59:56,202 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=30.0, Z=0.0
+2025-10-17 20:59:56,203 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=30.00, Z=0.00
+2025-10-17 20:59:56,203 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:56,204 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:56,205 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=30.00, Z=-0.00
+2025-10-17 20:59:56,206 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=24.07°, q2=-40.58°, q3=106.20°
+2025-10-17 20:59:56,207 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 8.31650455e-01  4.07903889e-01 -3.76791638e-01]
+ [ 3.71548975e-01 -9.13024872e-01 -1.68335802e-01]
+ [-4.12684965e-01  1.17007275e-16 -9.10873822e-01]]
+2025-10-17 20:59:56,208 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-4.12684965e-01  3.71548975e-01 -8.31650455e-01]
+ [ 1.41984185e-16 -9.13024872e-01 -4.07903889e-01]
+ [-9.10873822e-01 -1.68335802e-01  3.76791638e-01]]
+2025-10-17 20:59:56,208 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-153.87°, q5=67.86°, q6=-10.47°
+2025-10-17 20:59:56,209 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=24.07°, q2=-40.58°, q3=106.20°, q4=-153.87°, q5=67.86°, q6=-10.47°
+2025-10-17 20:59:56,213 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=24.07°, q2=-40.58°, q3=106.20°, q4=-153.87°, q5=67.86°, q6=-10.47°
+2025-10-17 20:59:56,445 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=40.0, Z=0.0
+2025-10-17 20:59:56,446 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=40.00, Z=0.00
+2025-10-17 20:59:56,446 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:56,447 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:56,447 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=40.00, Z=-0.00
+2025-10-17 20:59:56,448 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=30.78°, q2=-39.01°, q3=105.53°
+2025-10-17 20:59:56,449 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 7.88039623e-01  5.11764993e-01 -3.42184373e-01]
+ [ 4.69420475e-01 -8.59125481e-01 -2.03832836e-01]
+ [-3.98293824e-01  1.17398187e-16 -9.17257886e-01]]
+2025-10-17 20:59:56,450 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.98293824e-01  4.69420475e-01 -7.88039623e-01]
+ [ 1.48734755e-16 -8.59125481e-01 -5.11764993e-01]
+ [-9.17257886e-01 -2.03832836e-01  3.42184373e-01]]
+2025-10-17 20:59:56,450 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-147.00°, q5=69.99°, q6=-12.53°
+2025-10-17 20:59:56,451 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=30.78°, q2=-39.01°, q3=105.53°, q4=-147.00°, q5=69.99°, q6=-12.53°
+2025-10-17 20:59:56,454 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=30.78°, q2=-39.01°, q3=105.53°, q4=-147.00°, q5=69.99°, q6=-12.53°
+2025-10-17 20:59:56,633 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=50.0, Z=0.0
+2025-10-17 20:59:56,634 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=50.00, Z=0.00
+2025-10-17 20:59:56,634 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:56,635 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:56,636 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=50.00, Z=-0.00
+2025-10-17 20:59:56,636 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=36.67°, q2=-37.11°, q3=104.68°
+2025-10-17 20:59:56,637 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 7.41401706e-01  5.97225275e-01 -3.06015491e-01]
+ [ 5.52048925e-01 -8.02073544e-01 -2.27859636e-01]
+ [-3.81530463e-01  1.17832837e-16 -9.24356266e-01]]
+2025-10-17 20:59:56,638 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.81530463e-01  5.52048925e-01 -7.41401706e-01]
+ [ 1.54402338e-16 -8.02073544e-01 -5.97225275e-01]
+ [-9.24356266e-01 -2.27859636e-01  3.06015491e-01]]
+2025-10-17 20:59:56,639 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-141.15°, q5=72.18°, q6=-13.85°
+2025-10-17 20:59:56,640 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=36.67°, q2=-37.11°, q3=104.68°, q4=-141.15°, q5=72.18°, q6=-13.85°
+2025-10-17 20:59:56,644 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=36.67°, q2=-37.11°, q3=104.68°, q4=-141.15°, q5=72.18°, q6=-13.85°
+2025-10-17 20:59:56,806 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=60.0, Z=0.0
+2025-10-17 20:59:56,806 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=60.00, Z=0.00
+2025-10-17 20:59:56,807 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:56,808 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:56,808 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=60.00, Z=-0.00
+2025-10-17 20:59:56,809 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=41.78°, q2=-34.94°, q3=103.64°
+2025-10-17 20:59:56,810 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 6.94752190e-01  6.66291572e-01 -2.70878082e-01]
+ [ 6.20776343e-01 -7.45691318e-01 -2.42035516e-01]
+ [-3.63257659e-01  1.18281820e-16 -9.31688721e-01]]
+2025-10-17 20:59:56,811 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.63257659e-01  6.20776343e-01 -6.94752190e-01]
+ [ 1.59080413e-16 -7.45691318e-01 -6.66291572e-01]
+ [-9.31688721e-01 -2.42035516e-01  2.70878082e-01]]
+2025-10-17 20:59:56,812 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-136.20°, q5=74.28°, q6=-14.56°
+2025-10-17 20:59:56,812 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=41.78°, q2=-34.94°, q3=103.64°, q4=-136.20°, q5=74.28°, q6=-14.56°
+2025-10-17 20:59:56,816 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=41.78°, q2=-34.94°, q3=103.64°, q4=-136.20°, q5=74.28°, q6=-14.56°
+2025-10-17 20:59:56,993 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=70.0, Z=0.0
+2025-10-17 20:59:56,994 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=70.00, Z=0.00
+2025-10-17 20:59:56,994 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:56,995 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:56,996 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=70.00, Z=-0.00
+2025-10-17 20:59:56,997 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=46.19°, q2=-32.55°, q3=102.41°
+2025-10-17 20:59:56,998 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 6.49950545e-01  7.21644787e-01 -2.38313010e-01]
+ [ 6.77535937e-01 -6.92263535e-01 -2.48427561e-01]
+ [-3.44251861e-01  1.18721996e-16 -9.38877338e-01]]
+2025-10-17 20:59:57,005 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.44251861e-01  6.77535937e-01 -6.49950545e-01]
+ [ 1.62909995e-16 -6.92263535e-01 -7.21644787e-01]
+ [-9.38877338e-01 -2.48427561e-01  2.38313010e-01]]
+2025-10-17 20:59:57,006 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-132.01°, q5=76.21°, q6=-14.82°
+2025-10-17 20:59:57,007 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=46.19°, q2=-32.55°, q3=102.41°, q4=-132.01°, q5=76.21°, q6=-14.82°
+2025-10-17 20:59:57,013 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=46.19°, q2=-32.55°, q3=102.41°, q4=-132.01°, q5=76.21°, q6=-14.82°
+2025-10-17 20:59:57,166 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=80.0, Z=0.0
+2025-10-17 20:59:57,166 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=80.00, Z=0.00
+2025-10-17 20:59:57,167 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:57,168 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:57,169 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=80.00, Z=-0.00
+2025-10-17 20:59:57,169 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=49.99°, q2=-29.98°, q3=101.01°
+2025-10-17 20:59:57,170 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 6.07970412e-01  7.65940577e-01 -2.09062217e-01]
+ [ 7.24313223e-01 -6.42911372e-01 -2.49068911e-01]
+ [-3.25180462e-01  1.19136823e-16 -9.45651980e-01]]
+2025-10-17 20:59:57,171 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.25180462e-01  7.24313223e-01 -6.07970412e-01]
+ [ 1.66037157e-16 -6.42911372e-01 -7.65940577e-01]
+ [-9.45651980e-01 -2.49068911e-01  2.09062217e-01]]
+2025-10-17 20:59:57,172 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-128.44°, q5=77.93°, q6=-14.76°
+2025-10-17 20:59:57,172 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=49.99°, q2=-29.98°, q3=101.01°, q4=-128.44°, q5=77.93°, q6=-14.76°
+2025-10-17 20:59:57,177 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=49.99°, q2=-29.98°, q3=101.01°, q4=-128.44°, q5=77.93°, q6=-14.76°
+2025-10-17 20:59:57,353 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=90.0, Z=0.0
+2025-10-17 20:59:57,354 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=90.00, Z=0.00
+2025-10-17 20:59:57,354 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:57,355 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:57,356 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=90.00, Z=-0.00
+2025-10-17 20:59:57,356 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=53.27°, q2=-27.27°, q3=99.42°
+2025-10-17 20:59:57,357 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.69202278e-01  8.01493634e-01 -1.83348631e-01]
+ [ 7.62892108e-01 -5.98003306e-01 -2.45739043e-01]
+ [-3.06601366e-01  1.19515609e-16 -9.51838013e-01]]
+2025-10-17 20:59:57,358 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.06601366e-01  7.62892108e-01 -5.69202278e-01]
+ [ 1.68592939e-16 -5.98003306e-01 -8.01493634e-01]
+ [-9.51838013e-01 -2.45739043e-01  1.83348631e-01]]
+2025-10-17 20:59:57,359 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-125.38°, q5=79.44°, q6=-14.48°
+2025-10-17 20:59:57,359 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=53.27°, q2=-27.27°, q3=99.42°, q4=-125.38°, q5=79.44°, q6=-14.48°
+2025-10-17 20:59:57,364 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=53.27°, q2=-27.27°, q3=99.42°, q4=-125.38°, q5=79.44°, q6=-14.48°
+2025-10-17 20:59:57,511 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=100.0, Z=0.0
+2025-10-17 20:59:57,512 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=100.00, Z=0.00
+2025-10-17 20:59:57,512 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:57,513 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:57,514 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=100.00, Z=-0.00
+2025-10-17 20:59:57,515 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=56.12°, q2=-24.45°, q3=97.65°
+2025-10-17 20:59:57,516 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.33691619e-01  8.30193686e-01 -1.61095308e-01]
+ [ 7.94775308e-01 -5.57475060e-01 -2.39903661e-01]
+ [-2.88973121e-01  1.19852337e-16 -9.57337211e-01]]
+2025-10-17 20:59:57,517 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.88973121e-01  7.94775308e-01 -5.33691619e-01]
+ [ 1.70687040e-16 -5.57475060e-01 -8.30193686e-01]
+ [-9.57337211e-01 -2.39903661e-01  1.61095308e-01]]
+2025-10-17 20:59:57,517 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-122.74°, q5=80.73°, q6=-14.07°
+2025-10-17 20:59:57,518 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=56.12°, q2=-24.45°, q3=97.65°, q4=-122.74°, q5=80.73°, q6=-14.07°
+2025-10-17 20:59:57,522 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=56.12°, q2=-24.45°, q3=97.65°, q4=-122.74°, q5=80.73°, q6=-14.07°
+2025-10-17 20:59:57,715 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=110.0, Z=0.0
+2025-10-17 20:59:57,716 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=110.00, Z=0.00
+2025-10-17 20:59:57,716 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:57,717 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:57,718 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=110.00, Z=-0.00
+2025-10-17 20:59:57,718 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=58.60°, q2=-21.54°, q3=95.71°
+2025-10-17 20:59:57,719 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.01298573e-01  8.53531082e-01 -1.42071928e-01]
+ [ 8.21189024e-01 -5.21041929e-01 -2.32731379e-01]
+ [-2.72668897e-01  1.20144460e-16 -9.62107932e-01]]
+2025-10-17 20:59:57,720 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.72668897e-01  8.21189024e-01 -5.01298573e-01]
+ [ 1.72408165e-16 -5.21041929e-01 -8.53531082e-01]
+ [-9.62107932e-01 -2.32731379e-01  1.42071928e-01]]
+2025-10-17 20:59:57,721 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-120.43°, q5=81.83°, q6=-13.60°
+2025-10-17 20:59:57,722 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=58.60°, q2=-21.54°, q3=95.71°, q4=-120.43°, q5=81.83°, q6=-13.60°
+2025-10-17 20:59:57,726 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=58.60°, q2=-21.54°, q3=95.71°, q4=-120.43°, q5=81.83°, q6=-13.60°
+2025-10-17 20:59:59,031 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=120.0, Z=0.0
+2025-10-17 20:59:59,032 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=120.00, Z=0.00
+2025-10-17 20:59:59,032 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:59,033 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:59,034 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=120.00, Z=-0.00
+2025-10-17 20:59:59,035 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=60.77°, q2=-18.55°, q3=93.59°
+2025-10-17 20:59:59,036 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.71795367e-01  8.72660982e-01 -1.25983897e-01]
+ [ 8.43119048e-01 -4.88326541e-01 -2.25138758e-01]
+ [-2.57991090e-01  1.20391800e-16 -9.66147296e-01]]
+2025-10-17 20:59:59,036 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.57991090e-01  8.43119048e-01 -4.71795367e-01]
+ [ 1.73826874e-16 -4.88326541e-01 -8.72660982e-01]
+ [-9.66147296e-01 -2.25138758e-01  1.25983897e-01]]
+2025-10-17 20:59:59,037 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-118.40°, q5=82.76°, q6=-13.12°
+2025-10-17 20:59:59,037 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=60.77°, q2=-18.55°, q3=93.59°, q4=-118.40°, q5=82.76°, q6=-13.12°
+2025-10-17 20:59:59,040 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=60.77°, q2=-18.55°, q3=93.59°, q4=-118.40°, q5=82.76°, q6=-13.12°
+2025-10-17 20:59:59,263 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=130.0, Z=0.0
+2025-10-17 20:59:59,263 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=130.00, Z=0.00
+2025-10-17 20:59:59,264 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:59,265 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:59,265 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=130.00, Z=-0.00
+2025-10-17 20:59:59,266 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=62.68°, q2=-15.49°, q3=91.30°
+2025-10-17 20:59:59,267 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.44921867e-01  8.88472354e-01 -1.12522922e-01]
+ [ 8.61352833e-01 -4.58930143e-01 -2.17840356e-01]
+ [-2.45185295e-01  1.20595638e-16 -9.69476235e-01]]
+2025-10-17 20:59:59,268 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.45185295e-01  8.61352833e-01 -4.44921867e-01]
+ [ 1.74998880e-16 -4.58930143e-01 -8.88472354e-01]
+ [-9.69476235e-01 -2.17840356e-01  1.12522922e-01]]
+2025-10-17 20:59:59,269 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-116.60°, q5=83.54°, q6=-12.66°
+2025-10-17 20:59:59,269 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=62.68°, q2=-15.49°, q3=91.30°, q4=-116.60°, q5=83.54°, q6=-12.66°
+2025-10-17 20:59:59,273 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=62.68°, q2=-15.49°, q3=91.30°, q4=-116.60°, q5=83.54°, q6=-12.66°
+2025-10-17 20:59:59,454 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=140.0, Z=0.0
+2025-10-17 20:59:59,455 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=140.00, Z=0.00
+2025-10-17 20:59:59,456 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:59,457 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:59,457 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=140.00, Z=-0.00
+2025-10-17 20:59:59,458 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=64.38°, q2=-12.38°, q3=88.82°
+2025-10-17 20:59:59,459 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.20415281e-01  9.01648644e-01 -1.01393858e-01]
+ [ 8.76517339e-01 -4.32469332e-01 -2.11394491e-01]
+ [-2.34453290e-01  1.20757975e-16 -9.72127386e-01]]
+2025-10-17 20:59:59,460 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.34453290e-01  8.76517339e-01 -4.20415281e-01]
+ [ 1.75968031e-16 -4.32469332e-01 -9.01648644e-01]
+ [-9.72127386e-01 -2.11394491e-01  1.01393858e-01]]
+2025-10-17 20:59:59,460 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-115.00°, q5=84.18°, q6=-12.27°
+2025-10-17 20:59:59,461 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=64.38°, q2=-12.38°, q3=88.82°, q4=-115.00°, q5=84.18°, q6=-12.27°
+2025-10-17 20:59:59,466 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=64.38°, q2=-12.38°, q3=88.82°, q4=-115.00°, q5=84.18°, q6=-12.27°
+2025-10-17 20:59:59,638 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=150.0, Z=0.0
+2025-10-17 20:59:59,639 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=150.00, Z=0.00
+2025-10-17 20:59:59,639 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:59,640 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:59,641 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=150.00, Z=-0.00
+2025-10-17 20:59:59,641 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=65.88°, q2=-9.21°, q3=86.15°
+2025-10-17 20:59:59,642 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.98024770e-01  9.12716752e-01 -9.23277462e-02]
+ [ 8.89109687e-01 -4.08592866e-01 -2.06242173e-01]
+ [-2.25965145e-01  1.20880929e-16 -9.74135388e-01]]
+2025-10-17 20:59:59,643 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.25965145e-01  8.89109687e-01 -3.98024770e-01]
+ [ 1.76768712e-16 -4.08592866e-01 -9.12716752e-01]
+ [-9.74135388e-01 -2.06242173e-01  9.23277462e-02]]
+2025-10-17 20:59:59,644 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-113.56°, q5=84.70°, q6=-11.95°
+2025-10-17 20:59:59,644 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=65.88°, q2=-9.21°, q3=86.15°, q4=-113.56°, q5=84.70°, q6=-11.95°
+2025-10-17 20:59:59,649 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=65.88°, q2=-9.21°, q3=86.15°, q4=-113.56°, q5=84.70°, q6=-11.95°
+2025-10-17 20:59:59,811 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=160.0, Z=0.0
+2025-10-17 20:59:59,812 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=160.00, Z=0.00
+2025-10-17 20:59:59,812 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 20:59:59,813 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 20:59:59,814 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=160.00, Z=-0.00
+2025-10-17 20:59:59,815 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=67.23°, q2=-5.99°, q3=83.29°
+2025-10-17 20:59:59,816 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.77517561e-01  9.22084949e-01 -8.50872350e-02]
+ [ 8.99520621e-01 -3.86987527e-01 -2.02739503e-01]
+ [-2.19870743e-01  1.20966264e-16 -9.75529014e-01]]
+2025-10-17 20:59:59,817 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.19870743e-01  8.99520621e-01 -3.77517561e-01]
+ [ 1.77427683e-16 -3.86987527e-01 -9.22084949e-01]
+ [-9.75529014e-01 -2.02739503e-01  8.50872350e-02]]
+2025-10-17 20:59:59,817 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-112.27°, q5=85.12°, q6=-11.74°
+2025-10-17 20:59:59,818 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=67.23°, q2=-5.99°, q3=83.29°, q4=-112.27°, q5=85.12°, q6=-11.74°
+2025-10-17 20:59:59,822 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=67.23°, q2=-5.99°, q3=83.29°, q4=-112.27°, q5=85.12°, q6=-11.74°
+2025-10-17 20:59:59,999 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=170.0, Z=0.0
+2025-10-17 21:00:00,000 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=170.00, Z=0.00
+2025-10-17 21:00:00,000 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:00,001 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:00,002 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=170.00, Z=-0.00
+2025-10-17 21:00:00,002 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=68.45°, q2=-2.72°, q3=80.23°
+2025-10-17 21:00:00,003 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.58680410e-01  9.30071608e-01 -7.94680306e-02]
+ [ 9.08051671e-01 -3.67378285e-01 -2.01184888e-01]
+ [-2.16311181e-01  1.21014972e-16 -9.76324471e-01]]
+2025-10-17 21:00:00,004 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.16311181e-01  9.08051671e-01 -3.58680410e-01]
+ [ 1.77965433e-16 -3.67378285e-01 -9.30071608e-01]
+ [-9.76324471e-01 -2.01184888e-01  7.94680306e-02]]
+2025-10-17 21:00:00,005 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-111.09°, q5=85.44°, q6=-11.64°
+2025-10-17 21:00:00,006 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=68.45°, q2=-2.72°, q3=80.23°, q4=-111.09°, q5=85.44°, q6=-11.64°
+2025-10-17 21:00:00,010 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=68.45°, q2=-2.72°, q3=80.23°, q4=-111.09°, q5=85.44°, q6=-11.64°
+2025-10-17 21:00:00,191 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=180.0, Z=0.0
+2025-10-17 21:00:00,191 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=180.00, Z=0.00
+2025-10-17 21:00:00,192 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:00,193 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:00,193 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=180.00, Z=-0.00
+2025-10-17 21:00:00,194 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=69.54°, q2=0.61°, q3=76.95°
+2025-10-17 21:00:00,195 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.41318564e-01  9.36926764e-01 -7.52985828e-02]
+ [ 9.14926904e-01 -3.49525734e-01 -2.01842813e-01]
+ [-2.15430726e-01  1.21026891e-16 -9.76519125e-01]]
+2025-10-17 21:00:00,196 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.15430726e-01  9.14926904e-01 -3.41318564e-01]
+ [ 1.78397109e-16 -3.49525734e-01 -9.36926764e-01]
+ [-9.76519125e-01 -2.01842813e-01  7.52985828e-02]]
+2025-10-17 21:00:00,197 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-110.02°, q5=85.68°, q6=-11.68°
+2025-10-17 21:00:00,197 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=69.54°, q2=0.61°, q3=76.95°, q4=-110.02°, q5=85.68°, q6=-11.68°
+2025-10-17 21:00:00,201 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=69.54°, q2=0.61°, q3=76.95°, q4=-110.02°, q5=85.68°, q6=-11.68°
+2025-10-17 21:00:00,363 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=190.0, Z=0.0
+2025-10-17 21:00:00,363 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=190.00, Z=0.00
+2025-10-17 21:00:00,364 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:00,365 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:00,366 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=190.00, Z=-0.00
+2025-10-17 21:00:00,366 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=70.54°, q2=4.01°, q3=73.44°
+2025-10-17 21:00:00,367 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.25253323e-01  9.42848248e-01 -7.24393348e-02]
+ [ 9.20299797e-01 -3.33222420e-01 -2.04966100e-01]
+ [-2.17390339e-01  1.21000293e-16 -9.76084751e-01]]
+2025-10-17 21:00:00,368 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.17390339e-01  9.20299797e-01 -3.25253323e-01]
+ [ 1.78733098e-16 -3.33222420e-01 -9.42848248e-01]
+ [-9.76084751e-01 -2.04966100e-01  7.24393348e-02]]
+2025-10-17 21:00:00,369 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-109.03°, q5=85.85°, q6=-11.86°
+2025-10-17 21:00:00,369 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=70.54°, q2=4.01°, q3=73.44°, q4=-109.03°, q5=85.85°, q6=-11.86°
+2025-10-17 21:00:00,374 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=70.54°, q2=4.01°, q3=73.44°, q4=-109.03°, q5=85.85°, q6=-11.86°
+2025-10-17 21:00:00,536 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=200.0, Z=0.0
+2025-10-17 21:00:00,536 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=200.00, Z=0.00
+2025-10-17 21:00:00,537 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:00,538 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:00,539 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=200.00, Z=-0.00
+2025-10-17 21:00:00,539 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=71.44°, q2=7.49°, q3=69.66°
+2025-10-17 21:00:00,540 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.10318653e-01  9.47993762e-01 -7.07824909e-02]
+ [ 9.24255109e-01 -3.18288906e-01 -2.10819035e-01]
+ [-2.22384411e-01  1.20931365e-16 -9.74959063e-01]]
+2025-10-17 21:00:00,541 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.22384411e-01  9.24255109e-01 -3.10318653e-01]
+ [ 1.78979241e-16 -3.18288906e-01 -9.47993762e-01]
+ [-9.74959063e-01 -2.10819035e-01  7.07824909e-02]]
+2025-10-17 21:00:00,542 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-108.13°, q5=85.94°, q6=-12.20°
+2025-10-17 21:00:00,542 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=71.44°, q2=7.49°, q3=69.66°, q4=-108.13°, q5=85.94°, q6=-12.20°
+2025-10-17 21:00:00,546 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=71.44°, q2=7.49°, q3=69.66°, q4=-108.13°, q5=85.94°, q6=-12.20°
+2025-10-17 21:00:00,722 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=210.0, Z=0.0
+2025-10-17 21:00:00,723 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=210.00, Z=0.00
+2025-10-17 21:00:00,723 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:00,724 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:00,725 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=210.00, Z=-0.00
+2025-10-17 21:00:00,725 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=72.27°, q2=11.07°, q3=65.59°
+2025-10-17 21:00:00,726 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.96356834e-01  9.52489955e-01 -7.02532088e-02]
+ [ 9.26804692e-01 -3.04570002e-01 -2.19704748e-01]
+ [-2.30663586e-01  1.20813462e-16 -9.73033561e-01]]
+2025-10-17 21:00:00,727 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.30663586e-01  9.26804692e-01 -2.96356834e-01]
+ [ 1.79136650e-16 -3.04570002e-01 -9.52489955e-01]
+ [-9.73033561e-01 -2.19704748e-01  7.02532088e-02]]
+2025-10-17 21:00:00,728 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-107.28°, q5=85.97°, q6=-12.72°
+2025-10-17 21:00:00,729 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=72.27°, q2=11.07°, q3=65.59°, q4=-107.28°, q5=85.97°, q6=-12.72°
+2025-10-17 21:00:00,733 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=72.27°, q2=11.07°, q3=65.59°, q4=-107.28°, q5=85.97°, q6=-12.72°
+2025-10-17 21:00:00,893 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=220.0, Z=0.0
+2025-10-17 21:00:00,894 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=220.00, Z=0.00
+2025-10-17 21:00:00,894 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:00,895 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:00,896 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=220.00, Z=-0.00
+2025-10-17 21:00:00,896 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.03°, q2=14.79°, q3=61.17°
+2025-10-17 21:00:00,897 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.83212575e-01  9.56439275e-01 -7.08134956e-02]
+ [ 9.27874409e-01 -2.91931351e-01 -2.32002517e-01]
+ [-2.42568999e-01  1.20635924e-16 -9.70134156e-01]]
+2025-10-17 21:00:00,898 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.42568999e-01  9.27874409e-01 -2.83212575e-01]
+ [ 1.79200939e-16 -2.91931351e-01 -9.56439275e-01]
+ [-9.70134156e-01 -2.32002517e-01  7.08134956e-02]]
+2025-10-17 21:00:00,899 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-106.49°, q5=85.94°, q6=-13.45°
+2025-10-17 21:00:00,900 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.03°, q2=14.79°, q3=61.17°, q4=-106.49°, q5=85.94°, q6=-13.45°
+2025-10-17 21:00:00,904 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.03°, q2=14.79°, q3=61.17°, q4=-106.49°, q5=85.94°, q6=-13.45°
+2025-10-17 21:00:01,080 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=0.0
+2025-10-17 21:00:01,080 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=0.00
+2025-10-17 21:00:01,080 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:01,081 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:01,082 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:01,082 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=18.68°, q3=56.34°
+2025-10-17 21:00:01,083 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.70724184e-01  9.59925175e-01 -7.24711964e-02]
+ [ 9.27275687e-01 -2.80256415e-01 -2.48225989e-01]
+ [-2.58588894e-01  1.20382013e-16 -9.65987466e-01]]
+2025-10-17 21:00:01,084 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.58588894e-01  9.27275687e-01 -2.70724184e-01]
+ [ 1.79160478e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.65987466e-01 -2.48225989e-01  7.24711964e-02]]
+2025-10-17 21:00:01,084 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:01,085 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=18.68°, q3=56.34°, q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:01,087 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=18.68°, q3=56.34°, q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:01,838 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=10.0, Y=230.0, Z=0.0
+2025-10-17 21:00:01,838 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=10.00, Y=230.00, Z=0.00
+2025-10-17 21:00:01,839 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:01,840 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:01,840 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=77.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:01,841 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=71.46°, q2=19.93°, q3=54.73°
+2025-10-17 21:00:01,842 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.06691814e-01  9.48083898e-01 -8.41252215e-02]
+ [ 9.14311305e-01 -3.18020316e-01 -2.50794568e-01]
+ [-2.64527821e-01  1.20283465e-16 -9.64378054e-01]]
+2025-10-17 21:00:01,843 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.64527821e-01  9.14311305e-01 -3.06691814e-01]
+ [ 1.78336860e-16 -3.18020316e-01 -9.48083898e-01]
+ [-9.64378054e-01 -2.50794568e-01  8.41252215e-02]]
+2025-10-17 21:00:01,844 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-107.93°, q5=85.17°, q6=-14.58°
+2025-10-17 21:00:01,844 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=71.46°, q2=19.93°, q3=54.73°, q4=-107.93°, q5=85.17°, q6=-14.58°
+2025-10-17 21:00:01,848 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=71.46°, q2=19.93°, q3=54.73°, q4=-107.93°, q5=85.17°, q6=-14.58°
+2025-10-17 21:00:02,075 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=20.0, Y=230.0, Z=0.0
+2025-10-17 21:00:02,076 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=20.00, Y=230.00, Z=0.00
+2025-10-17 21:00:02,076 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:02,077 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:02,078 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=87.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:02,078 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=69.25°, q2=21.37°, q3=52.86°
+2025-10-17 21:00:02,079 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.40991359e-01  9.35120668e-01 -9.63028033e-02]
+ [ 8.99919822e-01 -3.54329418e-01 -2.54155419e-01]
+ [-2.71788901e-01  1.20159705e-16 -9.62356895e-01]]
+2025-10-17 21:00:02,080 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.71788901e-01  8.99919822e-01 -3.40991359e-01]
+ [ 1.77419331e-16 -3.54329418e-01 -9.35120668e-01]
+ [-9.62356895e-01 -2.54155419e-01  9.63028033e-02]]
+2025-10-17 21:00:02,081 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-110.03°, q5=84.47°, q6=-14.79°
+2025-10-17 21:00:02,081 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=69.25°, q2=21.37°, q3=52.86°, q4=-110.03°, q5=84.47°, q6=-14.79°
+2025-10-17 21:00:02,086 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=69.25°, q2=21.37°, q3=52.86°, q4=-110.03°, q5=84.47°, q6=-14.79°
+2025-10-17 21:00:02,260 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=30.0, Y=230.0, Z=0.0
+2025-10-17 21:00:02,260 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=30.00, Y=230.00, Z=0.00
+2025-10-17 21:00:02,261 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:02,262 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:02,263 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=97.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:02,263 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=67.10°, q2=23.00°, q3=50.71°
+2025-10-17 21:00:02,264 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.73472319e-01  9.21193738e-01 -1.09181154e-01]
+ [ 8.84185624e-01 -3.89104224e-01 -2.58483432e-01]
+ [-2.80596167e-01  1.20004727e-16 -9.59825917e-01]]
+2025-10-17 21:00:02,265 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.80596167e-01  8.84185624e-01 -3.73472319e-01]
+ [ 1.76411575e-16 -3.89104224e-01 -9.21193738e-01]
+ [-9.59825917e-01 -2.58483432e-01  1.09181154e-01]]
+2025-10-17 21:00:02,266 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-112.07°, q5=83.73°, q6=-15.07°
+2025-10-17 21:00:02,266 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=67.10°, q2=23.00°, q3=50.71°, q4=-112.07°, q5=83.73°, q6=-15.07°
+2025-10-17 21:00:02,271 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=67.10°, q2=23.00°, q3=50.71°, q4=-112.07°, q5=83.73°, q6=-15.07°
+2025-10-17 21:00:02,449 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=40.0, Y=230.0, Z=0.0
+2025-10-17 21:00:02,449 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=40.00, Y=230.00, Z=0.00
+2025-10-17 21:00:02,450 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:02,451 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:02,452 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=107.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:02,452 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=65.02°, q2=24.83°, q3=48.24°
+2025-10-17 21:00:02,453 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.03986766e-01  9.06459832e-01 -1.22984820e-01]
+ [ 8.67167114e-01 -4.22292048e-01 -2.63989815e-01]
+ [-2.91231675e-01  1.19810414e-16 -9.56652555e-01]]
+2025-10-17 21:00:02,454 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.91231675e-01  8.67167114e-01 -4.03986766e-01]
+ [ 1.75315071e-16 -4.22292048e-01 -9.06459832e-01]
+ [-9.56652555e-01 -2.63989815e-01  1.22984820e-01]]
+2025-10-17 21:00:02,455 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-114.02°, q5=82.94°, q6=-15.43°
+2025-10-17 21:00:02,456 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=65.02°, q2=24.83°, q3=48.24°, q4=-114.02°, q5=82.94°, q6=-15.43°
+2025-10-17 21:00:02,460 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=65.02°, q2=24.83°, q3=48.24°, q4=-114.02°, q5=82.94°, q6=-15.43°
+2025-10-17 21:00:02,635 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=50.0, Y=230.0, Z=0.0
+2025-10-17 21:00:02,635 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=50.00, Y=230.00, Z=0.00
+2025-10-17 21:00:02,636 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:02,637 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:02,637 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=117.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:02,638 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=63.01°, q2=26.88°, q3=45.41°
+2025-10-17 21:00:02,639 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.32375456e-01  8.91070539e-01 -1.38002751e-01]
+ [ 8.48880538e-01 -4.53864842e-01 -2.70940101e-01]
+ [-3.04061338e-01  1.19565479e-16 -9.52652456e-01]]
+2025-10-17 21:00:02,640 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.04061338e-01  8.48880538e-01 -4.32375456e-01]
+ [ 1.74127813e-16 -4.53864842e-01 -8.91070539e-01]
+ [-9.52652456e-01 -2.70940101e-01  1.38002751e-01]]
+2025-10-17 21:00:02,641 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-115.88°, q5=82.07°, q6=-15.88°
+2025-10-17 21:00:02,641 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=63.01°, q2=26.88°, q3=45.41°, q4=-115.88°, q5=82.07°, q6=-15.88°
+2025-10-17 21:00:02,645 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=63.01°, q2=26.88°, q3=45.41°, q4=-115.88°, q5=82.07°, q6=-15.88°
+2025-10-17 21:00:02,823 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=60.0, Y=230.0, Z=0.0
+2025-10-17 21:00:02,824 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=60.00, Y=230.00, Z=0.00
+2025-10-17 21:00:02,825 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:02,825 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:02,826 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=127.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:02,827 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=61.07°, q2=29.19°, q3=42.17°
+2025-10-17 21:00:02,828 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.58444630e-01  8.75169461e-01 -1.54618678e-01]
+ [ 8.29274596e-01 -4.83816509e-01 -2.79687738e-01]
+ [-3.19581235e-01  1.19253588e-16 -9.47558882e-01]]
+2025-10-17 21:00:02,829 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.19581235e-01  8.29274596e-01 -4.58444630e-01]
+ [ 1.72842261e-16 -4.83816509e-01 -8.75169461e-01]
+ [-9.47558882e-01 -2.79687738e-01  1.54618678e-01]]
+2025-10-17 21:00:02,830 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-117.65°, q5=81.11°, q6=-16.44°
+2025-10-17 21:00:02,830 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=61.07°, q2=29.19°, q3=42.17°, q4=-117.65°, q5=81.11°, q6=-16.44°
+2025-10-17 21:00:02,834 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=61.07°, q2=29.19°, q3=42.17°, q4=-117.65°, q5=81.11°, q6=-16.44°
+2025-10-17 21:00:02,979 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=70.0, Y=230.0, Z=0.0
+2025-10-17 21:00:02,980 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=70.00, Y=230.00, Z=0.00
+2025-10-17 21:00:02,980 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:02,981 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:02,982 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=137.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:02,982 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=59.19°, q2=31.79°, q3=38.42°
+2025-10-17 21:00:02,983 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.81923995e-01  8.58890114e-01 -1.73369651e-01]
+ [ 8.08184606e-01 -5.12159909e-01 -2.90740209e-01]
+ [-3.38506876e-01  1.18849762e-16 -9.40963918e-01]]
+2025-10-17 21:00:02,984 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.38506876e-01  8.08184606e-01 -4.81923995e-01]
+ [ 1.71441614e-16 -5.12159909e-01 -8.58890114e-01]
+ [-9.40963918e-01 -2.90740209e-01  1.73369651e-01]]
+2025-10-17 21:00:02,985 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-119.30°, q5=80.02°, q6=-17.17°
+2025-10-17 21:00:02,986 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=59.19°, q2=31.79°, q3=38.42°, q4=-119.30°, q5=80.02°, q6=-17.17°
+2025-10-17 21:00:02,990 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=59.19°, q2=31.79°, q3=38.42°, q4=-119.30°, q5=80.02°, q6=-17.17°
+2025-10-17 21:00:03,169 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=80.0, Y=230.0, Z=0.0
+2025-10-17 21:00:03,169 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=80.00, Y=230.00, Z=0.00
+2025-10-17 21:00:03,170 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:03,171 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:03,171 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=147.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:03,171 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=57.39°, q2=34.78°, q3=34.00°
+2025-10-17 21:00:03,172 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.02380210e-01  8.42354533e-01 -1.95071695e-01]
+ [ 7.85235802e-01 -5.38923780e-01 -3.04903091e-01]
+ [-3.61965276e-01  1.18312612e-16 -9.32191578e-01]]
+2025-10-17 21:00:03,173 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.61965276e-01  7.85235802e-01 -5.02380210e-01]
+ [ 1.69891951e-16 -5.38923780e-01 -8.42354533e-01]
+ [-9.32191578e-01 -3.04903091e-01  1.95071695e-01]]
+2025-10-17 21:00:03,173 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-120.81°, q5=78.75°, q6=-18.11°
+2025-10-17 21:00:03,174 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=57.39°, q2=34.78°, q3=34.00°, q4=-120.81°, q5=78.75°, q6=-18.11°
+2025-10-17 21:00:03,176 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=57.39°, q2=34.78°, q3=34.00°, q4=-120.81°, q5=78.75°, q6=-18.11°
+2025-10-17 21:00:03,350 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=90.0, Y=230.0, Z=0.0
+2025-10-17 21:00:03,350 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=90.00, Y=230.00, Z=0.00
+2025-10-17 21:00:03,351 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:03,351 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:03,351 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=157.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:03,352 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=55.66°, q2=38.30°, q3=28.62°
+2025-10-17 21:00:03,352 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.19001638e-01  8.25672511e-01 -2.21138428e-01]
+ [ 7.59595143e-01 -5.64149718e-01 -3.23651533e-01]
+ [-3.91985356e-01  1.17564345e-16 -9.19971457e-01]]
+2025-10-17 21:00:03,353 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.91985356e-01  7.59595143e-01 -5.19001638e-01]
+ [ 1.68122205e-16 -5.64149718e-01 -8.25672511e-01]
+ [-9.19971457e-01 -3.23651533e-01  2.21138428e-01]]
+2025-10-17 21:00:03,353 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-122.15°, q5=77.22°, q6=-19.38°
+2025-10-17 21:00:03,354 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=55.66°, q2=38.30°, q3=28.62°, q4=-122.15°, q5=77.22°, q6=-19.38°
+2025-10-17 21:00:03,356 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=55.66°, q2=38.30°, q3=28.62°, q4=-122.15°, q5=77.22°, q6=-19.38°
+2025-10-17 21:00:03,553 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=100.0, Y=230.0, Z=0.0
+2025-10-17 21:00:03,553 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=100.00, Y=230.00, Z=0.00
+2025-10-17 21:00:03,554 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:03,555 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:03,556 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=167.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:03,556 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=53.99°, q2=42.73°, q3=21.60°
+2025-10-17 21:00:03,557 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.29867604e-01  8.08941360e-01 -2.54664875e-01]
+ [ 7.29102895e-01 -5.87889340e-01 -3.50421306e-01]
+ [-4.33185053e-01  1.16421354e-16 -9.01305004e-01]]
+2025-10-17 21:00:03,558 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-4.33185053e-01  7.29102895e-01 -5.29867604e-01]
+ [ 1.65954727e-16 -5.87889340e-01 -8.08941360e-01]
+ [-9.01305004e-01 -3.50421306e-01  2.54664875e-01]]
+2025-10-17 21:00:03,559 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-123.23°, q5=75.25°, q6=-21.25°
+2025-10-17 21:00:03,559 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=53.99°, q2=42.73°, q3=21.60°, q4=-123.23°, q5=75.25°, q6=-21.25°
+2025-10-17 21:00:03,564 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=53.99°, q2=42.73°, q3=21.60°, q4=-123.23°, q5=75.25°, q6=-21.25°
+2025-10-17 21:00:04,416 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=90.0, Y=230.0, Z=0.0
+2025-10-17 21:00:04,417 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=90.00, Y=230.00, Z=0.00
+2025-10-17 21:00:04,417 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:04,418 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:04,419 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=157.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:04,420 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=55.66°, q2=38.30°, q3=28.62°
+2025-10-17 21:00:04,421 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.19001638e-01  8.25672511e-01 -2.21138428e-01]
+ [ 7.59595143e-01 -5.64149718e-01 -3.23651533e-01]
+ [-3.91985356e-01  1.17564345e-16 -9.19971457e-01]]
+2025-10-17 21:00:04,422 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.91985356e-01  7.59595143e-01 -5.19001638e-01]
+ [ 1.68122205e-16 -5.64149718e-01 -8.25672511e-01]
+ [-9.19971457e-01 -3.23651533e-01  2.21138428e-01]]
+2025-10-17 21:00:04,422 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-122.15°, q5=77.22°, q6=-19.38°
+2025-10-17 21:00:04,423 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=55.66°, q2=38.30°, q3=28.62°, q4=-122.15°, q5=77.22°, q6=-19.38°
+2025-10-17 21:00:04,427 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=55.66°, q2=38.30°, q3=28.62°, q4=-122.15°, q5=77.22°, q6=-19.38°
+2025-10-17 21:00:04,654 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=80.0, Y=230.0, Z=0.0
+2025-10-17 21:00:04,655 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=80.00, Y=230.00, Z=0.00
+2025-10-17 21:00:04,655 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:04,656 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:04,657 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=147.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:04,657 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=57.39°, q2=34.78°, q3=34.00°
+2025-10-17 21:00:04,658 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 5.02380210e-01  8.42354533e-01 -1.95071695e-01]
+ [ 7.85235802e-01 -5.38923780e-01 -3.04903091e-01]
+ [-3.61965276e-01  1.18312612e-16 -9.32191578e-01]]
+2025-10-17 21:00:04,659 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.61965276e-01  7.85235802e-01 -5.02380210e-01]
+ [ 1.69891951e-16 -5.38923780e-01 -8.42354533e-01]
+ [-9.32191578e-01 -3.04903091e-01  1.95071695e-01]]
+2025-10-17 21:00:04,660 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-120.81°, q5=78.75°, q6=-18.11°
+2025-10-17 21:00:04,660 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=57.39°, q2=34.78°, q3=34.00°, q4=-120.81°, q5=78.75°, q6=-18.11°
+2025-10-17 21:00:04,665 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=57.39°, q2=34.78°, q3=34.00°, q4=-120.81°, q5=78.75°, q6=-18.11°
+2025-10-17 21:00:04,841 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=70.0, Y=230.0, Z=0.0
+2025-10-17 21:00:04,841 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=70.00, Y=230.00, Z=0.00
+2025-10-17 21:00:04,842 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:04,843 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:04,843 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=137.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:04,844 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=59.19°, q2=31.79°, q3=38.42°
+2025-10-17 21:00:04,845 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.81923995e-01  8.58890114e-01 -1.73369651e-01]
+ [ 8.08184606e-01 -5.12159909e-01 -2.90740209e-01]
+ [-3.38506876e-01  1.18849762e-16 -9.40963918e-01]]
+2025-10-17 21:00:04,846 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.38506876e-01  8.08184606e-01 -4.81923995e-01]
+ [ 1.71441614e-16 -5.12159909e-01 -8.58890114e-01]
+ [-9.40963918e-01 -2.90740209e-01  1.73369651e-01]]
+2025-10-17 21:00:04,847 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-119.30°, q5=80.02°, q6=-17.17°
+2025-10-17 21:00:04,847 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=59.19°, q2=31.79°, q3=38.42°, q4=-119.30°, q5=80.02°, q6=-17.17°
+2025-10-17 21:00:04,851 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=59.19°, q2=31.79°, q3=38.42°, q4=-119.30°, q5=80.02°, q6=-17.17°
+2025-10-17 21:00:05,043 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=60.0, Y=230.0, Z=0.0
+2025-10-17 21:00:05,043 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=60.00, Y=230.00, Z=0.00
+2025-10-17 21:00:05,044 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:05,045 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:05,045 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=127.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:05,046 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=61.07°, q2=29.19°, q3=42.17°
+2025-10-17 21:00:05,047 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.58444630e-01  8.75169461e-01 -1.54618678e-01]
+ [ 8.29274596e-01 -4.83816509e-01 -2.79687738e-01]
+ [-3.19581235e-01  1.19253588e-16 -9.47558882e-01]]
+2025-10-17 21:00:05,048 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.19581235e-01  8.29274596e-01 -4.58444630e-01]
+ [ 1.72842261e-16 -4.83816509e-01 -8.75169461e-01]
+ [-9.47558882e-01 -2.79687738e-01  1.54618678e-01]]
+2025-10-17 21:00:05,049 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-117.65°, q5=81.11°, q6=-16.44°
+2025-10-17 21:00:05,049 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=61.07°, q2=29.19°, q3=42.17°, q4=-117.65°, q5=81.11°, q6=-16.44°
+2025-10-17 21:00:05,053 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=61.07°, q2=29.19°, q3=42.17°, q4=-117.65°, q5=81.11°, q6=-16.44°
+2025-10-17 21:00:05,250 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=50.0, Y=230.0, Z=0.0
+2025-10-17 21:00:05,251 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=50.00, Y=230.00, Z=0.00
+2025-10-17 21:00:05,252 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:05,253 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:05,253 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=117.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:05,254 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=63.01°, q2=26.88°, q3=45.41°
+2025-10-17 21:00:05,255 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.32375456e-01  8.91070539e-01 -1.38002751e-01]
+ [ 8.48880538e-01 -4.53864842e-01 -2.70940101e-01]
+ [-3.04061338e-01  1.19565479e-16 -9.52652456e-01]]
+2025-10-17 21:00:05,256 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.04061338e-01  8.48880538e-01 -4.32375456e-01]
+ [ 1.74127813e-16 -4.53864842e-01 -8.91070539e-01]
+ [-9.52652456e-01 -2.70940101e-01  1.38002751e-01]]
+2025-10-17 21:00:05,257 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-115.88°, q5=82.07°, q6=-15.88°
+2025-10-17 21:00:05,257 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=63.01°, q2=26.88°, q3=45.41°, q4=-115.88°, q5=82.07°, q6=-15.88°
+2025-10-17 21:00:05,261 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=63.01°, q2=26.88°, q3=45.41°, q4=-115.88°, q5=82.07°, q6=-15.88°
+2025-10-17 21:00:05,436 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=40.0, Y=230.0, Z=0.0
+2025-10-17 21:00:05,436 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=40.00, Y=230.00, Z=0.00
+2025-10-17 21:00:05,437 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:05,437 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:05,438 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=107.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:05,438 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=65.02°, q2=24.83°, q3=48.24°
+2025-10-17 21:00:05,439 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 4.03986766e-01  9.06459832e-01 -1.22984820e-01]
+ [ 8.67167114e-01 -4.22292048e-01 -2.63989815e-01]
+ [-2.91231675e-01  1.19810414e-16 -9.56652555e-01]]
+2025-10-17 21:00:05,440 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.91231675e-01  8.67167114e-01 -4.03986766e-01]
+ [ 1.75315071e-16 -4.22292048e-01 -9.06459832e-01]
+ [-9.56652555e-01 -2.63989815e-01  1.22984820e-01]]
+2025-10-17 21:00:05,441 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-114.02°, q5=82.94°, q6=-15.43°
+2025-10-17 21:00:05,441 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=65.02°, q2=24.83°, q3=48.24°, q4=-114.02°, q5=82.94°, q6=-15.43°
+2025-10-17 21:00:05,445 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=65.02°, q2=24.83°, q3=48.24°, q4=-114.02°, q5=82.94°, q6=-15.43°
+2025-10-17 21:00:05,623 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=30.0, Y=230.0, Z=0.0
+2025-10-17 21:00:05,623 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=30.00, Y=230.00, Z=0.00
+2025-10-17 21:00:05,624 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:05,625 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:05,625 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=97.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:05,626 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=67.10°, q2=23.00°, q3=50.71°
+2025-10-17 21:00:05,627 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.73472319e-01  9.21193738e-01 -1.09181154e-01]
+ [ 8.84185624e-01 -3.89104224e-01 -2.58483432e-01]
+ [-2.80596167e-01  1.20004727e-16 -9.59825917e-01]]
+2025-10-17 21:00:05,627 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.80596167e-01  8.84185624e-01 -3.73472319e-01]
+ [ 1.76411575e-16 -3.89104224e-01 -9.21193738e-01]
+ [-9.59825917e-01 -2.58483432e-01  1.09181154e-01]]
+2025-10-17 21:00:05,628 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-112.07°, q5=83.73°, q6=-15.07°
+2025-10-17 21:00:05,628 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=67.10°, q2=23.00°, q3=50.71°, q4=-112.07°, q5=83.73°, q6=-15.07°
+2025-10-17 21:00:05,632 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=67.10°, q2=23.00°, q3=50.71°, q4=-112.07°, q5=83.73°, q6=-15.07°
+2025-10-17 21:00:05,810 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=20.0, Y=230.0, Z=0.0
+2025-10-17 21:00:05,811 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=20.00, Y=230.00, Z=0.00
+2025-10-17 21:00:05,811 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:05,812 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:05,813 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=87.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:05,814 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=69.25°, q2=21.37°, q3=52.86°
+2025-10-17 21:00:05,815 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.40991359e-01  9.35120668e-01 -9.63028033e-02]
+ [ 8.99919822e-01 -3.54329418e-01 -2.54155419e-01]
+ [-2.71788901e-01  1.20159705e-16 -9.62356895e-01]]
+2025-10-17 21:00:05,816 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.71788901e-01  8.99919822e-01 -3.40991359e-01]
+ [ 1.77419331e-16 -3.54329418e-01 -9.35120668e-01]
+ [-9.62356895e-01 -2.54155419e-01  9.63028033e-02]]
+2025-10-17 21:00:05,816 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-110.03°, q5=84.47°, q6=-14.79°
+2025-10-17 21:00:05,817 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=69.25°, q2=21.37°, q3=52.86°, q4=-110.03°, q5=84.47°, q6=-14.79°
+2025-10-17 21:00:05,821 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=69.25°, q2=21.37°, q3=52.86°, q4=-110.03°, q5=84.47°, q6=-14.79°
+2025-10-17 21:00:05,998 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=10.0, Y=230.0, Z=0.0
+2025-10-17 21:00:05,999 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=10.00, Y=230.00, Z=0.00
+2025-10-17 21:00:05,999 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:06,000 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:06,001 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=77.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:06,002 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=71.46°, q2=19.93°, q3=54.73°
+2025-10-17 21:00:06,003 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 3.06691814e-01  9.48083898e-01 -8.41252215e-02]
+ [ 9.14311305e-01 -3.18020316e-01 -2.50794568e-01]
+ [-2.64527821e-01  1.20283465e-16 -9.64378054e-01]]
+2025-10-17 21:00:06,004 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.64527821e-01  9.14311305e-01 -3.06691814e-01]
+ [ 1.78336860e-16 -3.18020316e-01 -9.48083898e-01]
+ [-9.64378054e-01 -2.50794568e-01  8.41252215e-02]]
+2025-10-17 21:00:06,005 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-107.93°, q5=85.17°, q6=-14.58°
+2025-10-17 21:00:06,005 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=71.46°, q2=19.93°, q3=54.73°, q4=-107.93°, q5=85.17°, q6=-14.58°
+2025-10-17 21:00:06,009 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=71.46°, q2=19.93°, q3=54.73°, q4=-107.93°, q5=85.17°, q6=-14.58°
+2025-10-17 21:00:06,188 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=0.0
+2025-10-17 21:00:06,189 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=0.00
+2025-10-17 21:00:06,189 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:06,190 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:06,191 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:06,191 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=18.68°, q3=56.34°
+2025-10-17 21:00:06,192 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.70724184e-01  9.59925175e-01 -7.24711964e-02]
+ [ 9.27275687e-01 -2.80256415e-01 -2.48225989e-01]
+ [-2.58588894e-01  1.20382013e-16 -9.65987466e-01]]
+2025-10-17 21:00:06,193 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.58588894e-01  9.27275687e-01 -2.70724184e-01]
+ [ 1.79160478e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.65987466e-01 -2.48225989e-01  7.24711964e-02]]
+2025-10-17 21:00:06,194 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:06,195 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=18.68°, q3=56.34°, q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:06,199 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=18.68°, q3=56.34°, q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:10,899 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-10.0
+2025-10-17 21:00:10,899 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-10.00
+2025-10-17 21:00:10,900 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:10,901 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:10,901 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-10.00
+2025-10-17 21:00:10,902 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=19.95°, q3=51.64°
+2025-10-17 21:00:10,903 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.65905541e-01  9.59925175e-01 -8.85319244e-02]
+ [ 9.10771026e-01 -2.80256415e-01 -3.03236673e-01]
+ [-3.15896156e-01  1.19329203e-16 -9.48793770e-01]]
+2025-10-17 21:00:10,904 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.15896156e-01  9.10771026e-01 -2.65905541e-01]
+ [ 1.78107667e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.48793770e-01 -3.03236673e-01  8.85319244e-02]]
+2025-10-17 21:00:10,905 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.48°, q5=84.92°, q6=-17.72°
+2025-10-17 21:00:10,905 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=19.95°, q3=51.64°, q4=-105.48°, q5=84.92°, q6=-17.72°
+2025-10-17 21:00:10,909 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=19.95°, q3=51.64°, q4=-105.48°, q5=84.92°, q6=-17.72°
+2025-10-17 21:00:11,146 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-20.0
+2025-10-17 21:00:11,147 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-20.00
+2025-10-17 21:00:11,147 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:11,148 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:11,149 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-20.00
+2025-10-17 21:00:11,150 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=21.59°, q3=46.35°
+2025-10-17 21:00:11,150 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.59746489e-01  9.59925175e-01 -1.05239820e-01]
+ [ 8.89675242e-01 -2.80256415e-01 -3.60464015e-01]
+ [-3.75512617e-01  1.17983531e-16 -9.26817282e-01]]
+2025-10-17 21:00:11,151 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.75512617e-01  8.89675242e-01 -2.59746489e-01]
+ [ 1.76761996e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.26817282e-01 -3.60464015e-01  1.05239820e-01]]
+2025-10-17 21:00:11,152 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.14°, q5=83.96°, q6=-21.25°
+2025-10-17 21:00:11,152 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=21.59°, q3=46.35°, q4=-105.14°, q5=83.96°, q6=-21.25°
+2025-10-17 21:00:11,156 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=21.59°, q3=46.35°, q4=-105.14°, q5=83.96°, q6=-21.25°
+2025-10-17 21:00:11,347 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-30.0
+2025-10-17 21:00:11,348 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-30.00
+2025-10-17 21:00:11,349 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:11,350 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:11,350 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-30.00
+2025-10-17 21:00:11,351 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=23.72°, q3=40.27°
+2025-10-17 21:00:11,352 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.51872436e-01  9.59925175e-01 -1.22898065e-01]
+ [ 8.62705289e-01 -2.80256415e-01 -4.20946464e-01]
+ [-4.38520079e-01  1.16263154e-16 -8.98721392e-01]]
+2025-10-17 21:00:11,353 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-4.38520079e-01  8.62705289e-01 -2.51872436e-01]
+ [ 1.75041618e-16 -2.80256415e-01 -9.59925175e-01]
+ [-8.98721392e-01 -4.20946464e-01  1.22898065e-01]]
+2025-10-17 21:00:11,354 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-104.70°, q5=82.94°, q6=-25.10°
+2025-10-17 21:00:11,354 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=23.72°, q3=40.27°, q4=-104.70°, q5=82.94°, q6=-25.10°
+2025-10-17 21:00:11,358 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=23.72°, q3=40.27°, q4=-104.70°, q5=82.94°, q6=-25.10°
+2025-10-17 21:00:11,522 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-40.0
+2025-10-17 21:00:11,522 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-40.00
+2025-10-17 21:00:11,523 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:11,524 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:11,524 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-40.00
+2025-10-17 21:00:11,525 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=26.56°, q3=32.97°
+2025-10-17 21:00:11,526 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.41552942e-01  9.59925175e-01 -1.42112049e-01]
+ [ 8.27359294e-01 -2.80256415e-01 -4.86757578e-01]
+ [-5.07078667e-01  1.14008480e-16 -8.61899777e-01]]
+2025-10-17 21:00:11,527 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-5.07078667e-01  8.27359294e-01 -2.41552942e-01]
+ [ 1.72786945e-16 -2.80256415e-01 -9.59925175e-01]
+ [-8.61899777e-01 -4.86757578e-01  1.42112049e-01]]
+2025-10-17 21:00:11,528 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-104.12°, q5=81.83°, q6=-29.46°
+2025-10-17 21:00:11,528 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=26.56°, q3=32.97°, q4=-104.12°, q5=81.83°, q6=-29.46°
+2025-10-17 21:00:11,533 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=26.56°, q3=32.97°, q4=-104.12°, q5=81.83°, q6=-29.46°
+2025-10-17 21:00:11,693 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-50.0
+2025-10-17 21:00:11,693 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-50.00
+2025-10-17 21:00:11,694 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:11,695 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:11,695 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-50.00
+2025-10-17 21:00:11,696 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=30.71°, q3=23.35°
+2025-10-17 21:00:11,697 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.26917964e-01  9.59925175e-01 -1.64474606e-01]
+ [ 7.77232043e-01 -2.80256415e-01 -5.63353080e-01]
+ [-5.86871867e-01  1.10810930e-16 -8.09679820e-01]]
+2025-10-17 21:00:11,698 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-5.86871867e-01  7.77232043e-01 -2.26917964e-01]
+ [ 1.69589395e-16 -2.80256415e-01 -9.59925175e-01]
+ [-8.09679820e-01 -5.63353080e-01  1.64474606e-01]]
+2025-10-17 21:00:11,699 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-103.30°, q5=80.53°, q6=-34.83°
+2025-10-17 21:00:11,699 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=30.71°, q3=23.35°, q4=-103.30°, q5=80.53°, q6=-34.83°
+2025-10-17 21:00:11,704 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=30.71°, q3=23.35°, q4=-103.30°, q5=80.53°, q6=-34.83°
+2025-10-17 21:00:11,896 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-60.0
+2025-10-17 21:00:11,896 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-60.00
+2025-10-17 21:00:11,897 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:11,898 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:11,899 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-60.00
+2025-10-17 21:00:11,899 - ERROR - [solve_ik_full] IK 6-DOF: Target unreachable: distance 355.04mm exceeds maximum reach 355.00mm
+2025-10-17 21:00:11,903 - WARNING - [calculateIK] IK 6-DOF: Invalid solution - Target unreachable: distance 355.04mm exceeds maximum reach 355.00mm
+2025-10-17 21:00:12,123 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-70.0
+2025-10-17 21:00:12,123 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-70.00
+2025-10-17 21:00:12,124 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:12,125 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:12,125 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-70.00
+2025-10-17 21:00:12,126 - ERROR - [solve_ik_full] IK 6-DOF: Target unreachable: distance 362.48mm exceeds maximum reach 355.00mm
+2025-10-17 21:00:12,130 - WARNING - [calculateIK] IK 6-DOF: Invalid solution - Target unreachable: distance 362.48mm exceeds maximum reach 355.00mm
+2025-10-17 21:00:13,420 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-60.0
+2025-10-17 21:00:13,420 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-60.00
+2025-10-17 21:00:13,421 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:13,422 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:13,422 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-60.00
+2025-10-17 21:00:13,423 - ERROR - [solve_ik_full] IK 6-DOF: Target unreachable: distance 355.04mm exceeds maximum reach 355.00mm
+2025-10-17 21:00:13,427 - WARNING - [calculateIK] IK 6-DOF: Invalid solution - Target unreachable: distance 355.04mm exceeds maximum reach 355.00mm
+2025-10-17 21:00:13,703 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-50.0
+2025-10-17 21:00:13,704 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-50.00
+2025-10-17 21:00:13,704 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:13,705 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:13,706 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-50.00
+2025-10-17 21:00:13,707 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=30.71°, q3=23.35°
+2025-10-17 21:00:13,708 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.26917964e-01  9.59925175e-01 -1.64474606e-01]
+ [ 7.77232043e-01 -2.80256415e-01 -5.63353080e-01]
+ [-5.86871867e-01  1.10810930e-16 -8.09679820e-01]]
+2025-10-17 21:00:13,709 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-5.86871867e-01  7.77232043e-01 -2.26917964e-01]
+ [ 1.69589395e-16 -2.80256415e-01 -9.59925175e-01]
+ [-8.09679820e-01 -5.63353080e-01  1.64474606e-01]]
+2025-10-17 21:00:13,709 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-103.30°, q5=80.53°, q6=-34.83°
+2025-10-17 21:00:13,710 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=30.71°, q3=23.35°, q4=-103.30°, q5=80.53°, q6=-34.83°
+2025-10-17 21:00:13,714 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=30.71°, q3=23.35°, q4=-103.30°, q5=80.53°, q6=-34.83°
+2025-10-17 21:00:13,906 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-40.0
+2025-10-17 21:00:13,906 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-40.00
+2025-10-17 21:00:13,907 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:13,908 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:13,908 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-40.00
+2025-10-17 21:00:13,909 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=26.56°, q3=32.97°
+2025-10-17 21:00:13,910 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.41552942e-01  9.59925175e-01 -1.42112049e-01]
+ [ 8.27359294e-01 -2.80256415e-01 -4.86757578e-01]
+ [-5.07078667e-01  1.14008480e-16 -8.61899777e-01]]
+2025-10-17 21:00:13,911 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-5.07078667e-01  8.27359294e-01 -2.41552942e-01]
+ [ 1.72786945e-16 -2.80256415e-01 -9.59925175e-01]
+ [-8.61899777e-01 -4.86757578e-01  1.42112049e-01]]
+2025-10-17 21:00:13,912 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-104.12°, q5=81.83°, q6=-29.46°
+2025-10-17 21:00:13,912 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=26.56°, q3=32.97°, q4=-104.12°, q5=81.83°, q6=-29.46°
+2025-10-17 21:00:13,916 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=26.56°, q3=32.97°, q4=-104.12°, q5=81.83°, q6=-29.46°
+2025-10-17 21:00:14,094 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-30.0
+2025-10-17 21:00:14,095 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-30.00
+2025-10-17 21:00:14,096 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:14,097 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:14,097 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-30.00
+2025-10-17 21:00:14,098 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=23.72°, q3=40.27°
+2025-10-17 21:00:14,099 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.51872436e-01  9.59925175e-01 -1.22898065e-01]
+ [ 8.62705289e-01 -2.80256415e-01 -4.20946464e-01]
+ [-4.38520079e-01  1.16263154e-16 -8.98721392e-01]]
+2025-10-17 21:00:14,100 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-4.38520079e-01  8.62705289e-01 -2.51872436e-01]
+ [ 1.75041618e-16 -2.80256415e-01 -9.59925175e-01]
+ [-8.98721392e-01 -4.20946464e-01  1.22898065e-01]]
+2025-10-17 21:00:14,101 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-104.70°, q5=82.94°, q6=-25.10°
+2025-10-17 21:00:14,101 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=23.72°, q3=40.27°, q4=-104.70°, q5=82.94°, q6=-25.10°
+2025-10-17 21:00:14,104 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=23.72°, q3=40.27°, q4=-104.70°, q5=82.94°, q6=-25.10°
+2025-10-17 21:00:14,283 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-20.0
+2025-10-17 21:00:14,284 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-20.00
+2025-10-17 21:00:14,284 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:14,285 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:14,286 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-20.00
+2025-10-17 21:00:14,287 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=21.59°, q3=46.35°
+2025-10-17 21:00:14,287 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.59746489e-01  9.59925175e-01 -1.05239820e-01]
+ [ 8.89675242e-01 -2.80256415e-01 -3.60464015e-01]
+ [-3.75512617e-01  1.17983531e-16 -9.26817282e-01]]
+2025-10-17 21:00:14,288 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.75512617e-01  8.89675242e-01 -2.59746489e-01]
+ [ 1.76761996e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.26817282e-01 -3.60464015e-01  1.05239820e-01]]
+2025-10-17 21:00:14,289 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.14°, q5=83.96°, q6=-21.25°
+2025-10-17 21:00:14,290 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=21.59°, q3=46.35°, q4=-105.14°, q5=83.96°, q6=-21.25°
+2025-10-17 21:00:14,294 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=21.59°, q3=46.35°, q4=-105.14°, q5=83.96°, q6=-21.25°
+2025-10-17 21:00:14,471 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=-10.0
+2025-10-17 21:00:14,471 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=-10.00
+2025-10-17 21:00:14,472 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:14,473 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:14,474 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-10.00
+2025-10-17 21:00:14,474 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=19.95°, q3=51.64°
+2025-10-17 21:00:14,475 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.65905541e-01  9.59925175e-01 -8.85319244e-02]
+ [ 9.10771026e-01 -2.80256415e-01 -3.03236673e-01]
+ [-3.15896156e-01  1.19329203e-16 -9.48793770e-01]]
+2025-10-17 21:00:14,476 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-3.15896156e-01  9.10771026e-01 -2.65905541e-01]
+ [ 1.78107667e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.48793770e-01 -3.03236673e-01  8.85319244e-02]]
+2025-10-17 21:00:14,477 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.48°, q5=84.92°, q6=-17.72°
+2025-10-17 21:00:14,477 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=19.95°, q3=51.64°, q4=-105.48°, q5=84.92°, q6=-17.72°
+2025-10-17 21:00:14,482 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=19.95°, q3=51.64°, q4=-105.48°, q5=84.92°, q6=-17.72°
+2025-10-17 21:00:14,643 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=0.0
+2025-10-17 21:00:14,644 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=0.00
+2025-10-17 21:00:14,645 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:14,646 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:14,646 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=-0.00
+2025-10-17 21:00:14,647 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=18.68°, q3=56.34°
+2025-10-17 21:00:14,648 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.70724184e-01  9.59925175e-01 -7.24711964e-02]
+ [ 9.27275687e-01 -2.80256415e-01 -2.48225989e-01]
+ [-2.58588894e-01  1.20382013e-16 -9.65987466e-01]]
+2025-10-17 21:00:14,649 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.58588894e-01  9.27275687e-01 -2.70724184e-01]
+ [ 1.79160478e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.65987466e-01 -2.48225989e-01  7.24711964e-02]]
+2025-10-17 21:00:14,650 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:14,650 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=18.68°, q3=56.34°, q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:14,655 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=18.68°, q3=56.34°, q4=-105.75°, q5=85.84°, q6=-14.41°
+2025-10-17 21:00:14,847 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=10.0
+2025-10-17 21:00:14,848 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=10.00
+2025-10-17 21:00:14,848 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:14,848 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:14,849 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=10.00
+2025-10-17 21:00:14,849 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=17.71°, q3=60.58°
+2025-10-17 21:00:14,849 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.74422863e-01  9.59925175e-01 -5.68836587e-02]
+ [ 9.39944281e-01 -2.80256415e-01 -1.94836061e-01]
+ [-2.02970050e-01  1.21190125e-16 -9.79184946e-01]]
+2025-10-17 21:00:14,850 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-2.02970050e-01  9.39944281e-01 -2.74422863e-01]
+ [ 1.79968590e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.79184946e-01 -1.94836061e-01  5.68836587e-02]]
+2025-10-17 21:00:14,850 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-105.95°, q5=86.74°, q6=-11.25°
+2025-10-17 21:00:14,850 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=17.71°, q3=60.58°, q4=-105.95°, q5=86.74°, q6=-11.25°
+2025-10-17 21:00:14,852 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=17.71°, q3=60.58°, q4=-105.95°, q5=86.74°, q6=-11.25°
+2025-10-17 21:00:15,036 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=20.0
+2025-10-17 21:00:15,036 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=20.00
+2025-10-17 21:00:15,037 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:15,038 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:15,038 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=20.00
+2025-10-17 21:00:15,039 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=17.00°, q3=64.45°
+2025-10-17 21:00:15,040 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.77142475e-01  9.59925175e-01 -4.16618180e-02]
+ [ 9.49259407e-01 -2.80256415e-01 -1.42698707e-01]
+ [-1.48656073e-01  1.21784325e-16 -9.88888958e-01]]
+2025-10-17 21:00:15,041 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-1.48656073e-01  9.49259407e-01 -2.77142475e-01]
+ [ 1.80562789e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.88888958e-01 -1.42698707e-01  4.16618180e-02]]
+2025-10-17 21:00:15,042 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-106.10°, q5=87.61°, q6=-8.21°
+2025-10-17 21:00:15,042 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=17.00°, q3=64.45°, q4=-106.10°, q5=87.61°, q6=-8.21°
+2025-10-17 21:00:15,046 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=17.00°, q3=64.45°, q4=-106.10°, q5=87.61°, q6=-8.21°
+2025-10-17 21:00:15,223 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=30.0
+2025-10-17 21:00:15,223 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=30.00
+2025-10-17 21:00:15,224 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:15,225 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:15,225 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=30.00
+2025-10-17 21:00:15,226 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=16.52°, q3=68.01°
+2025-10-17 21:00:15,227 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.78978122e-01  9.59925175e-01 -2.67369783e-02]
+ [ 9.55546805e-01 -2.80256415e-01 -9.15786300e-02]
+ [-9.54018421e-02  1.22185390e-16 -9.95438842e-01]]
+2025-10-17 21:00:15,228 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-9.54018421e-02  9.55546805e-01 -2.78978122e-01]
+ [ 1.80963854e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.95438842e-01 -9.15786300e-02  2.67369783e-02]]
+2025-10-17 21:00:15,229 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-106.21°, q5=88.47°, q6=-5.26°
+2025-10-17 21:00:15,229 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=16.52°, q3=68.01°, q4=-106.21°, q5=88.47°, q6=-5.26°
+2025-10-17 21:00:15,234 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=16.52°, q3=68.01°, q4=-106.21°, q5=88.47°, q6=-5.26°
+2025-10-17 21:00:15,410 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=40.0
+2025-10-17 21:00:15,411 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=40.00
+2025-10-17 21:00:15,411 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:15,412 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:15,413 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=40.00
+2025-10-17 21:00:15,413 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=16.25°, q3=71.28°
+2025-10-17 21:00:15,414 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.79996580e-01  9.59925175e-01 -1.20653753e-02]
+ [ 9.59035197e-01 -2.80256415e-01 -4.13259317e-02]
+ [-4.30512011e-02  1.22407909e-16 -9.99072867e-01]]
+2025-10-17 21:00:15,415 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[-4.30512011e-02  9.59035197e-01 -2.79996580e-01]
+ [ 1.81186374e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.99072867e-01 -4.13259317e-02  1.20653753e-02]]
+2025-10-17 21:00:15,416 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-106.26°, q5=89.31°, q6=-2.37°
+2025-10-17 21:00:15,417 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=16.25°, q3=71.28°, q4=-106.26°, q5=89.31°, q6=-2.37°
+2025-10-17 21:00:15,421 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=16.25°, q3=71.28°, q4=-106.26°, q5=89.31°, q6=-2.37°
+2025-10-17 21:00:15,583 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=50.0
+2025-10-17 21:00:15,583 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=50.00
+2025-10-17 21:00:15,584 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:15,585 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:15,585 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=50.00
+2025-10-17 21:00:15,586 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=16.19°, q3=74.30°
+2025-10-17 21:00:15,587 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.80246314e-01  9.59925175e-01  2.37940411e-03]
+ [ 9.59890578e-01 -2.80256415e-01  8.14985771e-03]
+ [ 8.49009685e-03  1.22462473e-16 -9.99963958e-01]]
+2025-10-17 21:00:15,588 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[ 8.49009685e-03  9.59890578e-01 -2.80246314e-01]
+ [ 1.81240938e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.99963958e-01  8.14985771e-03 -2.37940411e-03]]
+2025-10-17 21:00:15,588 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-106.27°, q5=90.14°, q6=0.47°
+2025-10-17 21:00:15,589 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=16.19°, q3=74.30°, q4=-106.27°, q5=90.14°, q6=0.47°
+2025-10-17 21:00:15,593 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=16.19°, q3=74.30°, q4=-106.27°, q5=90.14°, q6=0.47°
+2025-10-17 21:00:15,771 - INFO - [calculateIK] IK 6-DOF: Calculating for target X=0.0, Y=230.0, Z=60.0
+2025-10-17 21:00:15,771 - INFO - [solve_ik_full] IK 6-DOF: Solving for TCP position X=0.00, Y=230.00, Z=60.00
+2025-10-17 21:00:15,772 - INFO - [solve_ik_full] IK 6-DOF: Target orientation Roll=0.00°, Pitch=-90.00°, Yaw=0.00°
+2025-10-17 21:00:15,773 - DEBUG - [solve_ik_full] IK 6-DOF: TCP rotation matrix:
+[[ 6.123234e-17  0.000000e+00 -1.000000e+00]
+ [ 0.000000e+00  1.000000e+00  0.000000e+00]
+ [ 1.000000e+00  0.000000e+00  6.123234e-17]]
+2025-10-17 21:00:15,773 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist center (Pm) at X=67.15, Y=230.00, Z=60.00
+2025-10-17 21:00:15,774 - DEBUG - [solve_ik_full] IK 6-DOF: Position joints - q1=73.72°, q2=16.31°, q3=77.08°
+2025-10-17 21:00:15,775 - DEBUG - [solve_ik_full] IK 6-DOF: R_0_3 matrix:
+[[ 2.79763718e-01  9.59925175e-01  1.66108493e-02]
+ [ 9.58237605e-01 -2.80256415e-01  5.68949417e-02]
+ [ 5.92701839e-02  1.22357032e-16 -9.98241977e-01]]
+2025-10-17 21:00:15,775 - DEBUG - [solve_ik_full] IK 6-DOF: R_3_6 matrix:
+[[ 5.92701839e-02  9.58237605e-01 -2.79763718e-01]
+ [ 1.81135497e-16 -2.80256415e-01 -9.59925175e-01]
+ [-9.98241977e-01  5.68949417e-02 -1.66108493e-02]]
+2025-10-17 21:00:15,776 - DEBUG - [solve_ik_full] IK 6-DOF: Wrist joints - q4=-106.25°, q5=90.95°, q6=3.26°
+2025-10-17 21:00:15,777 - INFO - [solve_ik_full] IK 6-DOF: Solution found - q1=73.72°, q2=16.31°, q3=77.08°, q4=-106.25°, q5=90.95°, q6=3.26°
+2025-10-17 21:00:15,780 - INFO - [calculateIK] IK 6-DOF: Valid solution - q1=73.72°, q2=16.31°, q3=77.08°, q4=-106.25°, q5=90.95°, q6=3.26°

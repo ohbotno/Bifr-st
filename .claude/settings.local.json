@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pyuic5:*)"
+      "Bash(pyuic5:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

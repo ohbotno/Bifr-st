@@ -9,6 +9,7 @@ from about import Ui_Dialog as About_Ui_Dialog
 
 import serial_port_finder as spf
 import inverse_kinematics as ik
+import sequence_recorder as seq_rec
 
 import serial
 import time
@@ -211,6 +212,12 @@ class BifrostGUI(Ui_MainWindow):
         self.IkDecButtonY.setEnabled(True)
         self.IkIncButtonZ.setEnabled(True)
         self.IkDecButtonZ.setEnabled(True)
+
+        # Initialize Sequence Recorder
+        self.sequence_recorder = seq_rec.SequenceRecorder()
+        self.sequence_player = None  # Will be initialized when needed
+        self.is_playing_sequence = False
+        self.setupSequenceControls()
 
     def close_application(self):
         # Properly cleanup serial connection and thread
@@ -688,6 +695,290 @@ class BifrostGUI(Ui_MainWindow):
     def IkDecZ(self):
         val = self.IKInputSpinBoxZ.value() - 10
         self.IKInputSpinBoxZ.setValue(val)
+
+# Sequence Recorder Functions
+    def setupSequenceControls(self):
+        """Create sequence recorder GUI controls programmatically"""
+        # Create group box for sequence controls
+        self.sequenceGroupBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.sequenceGroupBox.setGeometry(QtCore.QRect(910, 100, 280, 480))
+        self.sequenceGroupBox.setTitle("Sequence Programmer")
+
+        # List widget for sequence points
+        self.sequencePointsList = QtWidgets.QListWidget(self.sequenceGroupBox)
+        self.sequencePointsList.setGeometry(QtCore.QRect(10, 25, 260, 200))
+
+        # Record controls
+        self.sequenceRecordButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequenceRecordButton.setGeometry(QtCore.QRect(10, 235, 120, 30))
+        self.sequenceRecordButton.setText("Record Point")
+        self.sequenceRecordButton.pressed.connect(self.recordSequencePoint)
+
+        self.sequenceDeleteButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequenceDeleteButton.setGeometry(QtCore.QRect(150, 235, 120, 30))
+        self.sequenceDeleteButton.setText("Delete Point")
+        self.sequenceDeleteButton.pressed.connect(self.deleteSequencePoint)
+
+        self.sequenceClearButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequenceClearButton.setGeometry(QtCore.QRect(10, 270, 260, 30))
+        self.sequenceClearButton.setText("Clear All")
+        self.sequenceClearButton.pressed.connect(self.clearSequence)
+
+        # Playback controls
+        self.sequencePlayButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequencePlayButton.setGeometry(QtCore.QRect(10, 310, 80, 30))
+        self.sequencePlayButton.setText("Play")
+        self.sequencePlayButton.pressed.connect(self.playSequence)
+
+        self.sequencePauseButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequencePauseButton.setGeometry(QtCore.QRect(100, 310, 80, 30))
+        self.sequencePauseButton.setText("Pause")
+        self.sequencePauseButton.setEnabled(False)
+        self.sequencePauseButton.pressed.connect(self.pauseSequence)
+
+        self.sequenceStopButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequenceStopButton.setGeometry(QtCore.QRect(190, 310, 80, 30))
+        self.sequenceStopButton.setText("Stop")
+        self.sequenceStopButton.setEnabled(False)
+        self.sequenceStopButton.pressed.connect(self.stopSequence)
+
+        # Speed control
+        speedLabel = QtWidgets.QLabel(self.sequenceGroupBox)
+        speedLabel.setGeometry(QtCore.QRect(10, 350, 50, 20))
+        speedLabel.setText("Speed:")
+
+        self.sequenceSpeedSpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
+        self.sequenceSpeedSpinBox.setGeometry(QtCore.QRect(60, 350, 80, 22))
+        self.sequenceSpeedSpinBox.setMinimum(0.1)
+        self.sequenceSpeedSpinBox.setMaximum(10.0)
+        self.sequenceSpeedSpinBox.setSingleStep(0.1)
+        self.sequenceSpeedSpinBox.setValue(1.0)
+        self.sequenceSpeedSpinBox.setSuffix("x")
+
+        self.sequenceLoopCheckBox = QtWidgets.QCheckBox(self.sequenceGroupBox)
+        self.sequenceLoopCheckBox.setGeometry(QtCore.QRect(150, 350, 60, 20))
+        self.sequenceLoopCheckBox.setText("Loop")
+
+        # Delay control
+        delayLabel = QtWidgets.QLabel(self.sequenceGroupBox)
+        delayLabel.setGeometry(QtCore.QRect(10, 380, 50, 20))
+        delayLabel.setText("Delay:")
+
+        self.sequenceDelaySpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
+        self.sequenceDelaySpinBox.setGeometry(QtCore.QRect(60, 380, 80, 22))
+        self.sequenceDelaySpinBox.setMinimum(0.0)
+        self.sequenceDelaySpinBox.setMaximum(60.0)
+        self.sequenceDelaySpinBox.setSingleStep(0.1)
+        self.sequenceDelaySpinBox.setValue(1.0)
+        self.sequenceDelaySpinBox.setSuffix("s")
+
+        # File buttons
+        self.sequenceSaveButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequenceSaveButton.setGeometry(QtCore.QRect(10, 415, 260, 30))
+        self.sequenceSaveButton.setText("Save Sequence")
+        self.sequenceSaveButton.pressed.connect(self.saveSequence)
+
+        self.sequenceLoadButton = QtWidgets.QPushButton(self.sequenceGroupBox)
+        self.sequenceLoadButton.setGeometry(QtCore.QRect(10, 450, 260, 30))
+        self.sequenceLoadButton.setText("Load Sequence")
+        self.sequenceLoadButton.pressed.connect(self.loadSequence)
+
+        logger.info("Sequence recorder controls initialized")
+
+    def recordSequencePoint(self):
+        """Record current joint positions to sequence"""
+        q1 = self.SpinBoxArt1.value()
+        q2 = self.SpinBoxArt2.value()
+        q3 = self.SpinBoxArt3.value()
+        q4 = self.SpinBoxArt4.value()
+        q5 = self.SpinBoxArt5.value()
+        q6 = self.SpinBoxArt6.value()
+        gripper = self.SpinBoxGripper.value()
+        delay = self.sequenceDelaySpinBox.value()
+
+        if not self.sequence_recorder.is_recording:
+            self.sequence_recorder.start_recording("Current Sequence")
+
+        self.sequence_recorder.record_point(q1, q2, q3, q4, q5, q6, gripper, delay)
+
+        # Update list display
+        point_text = f"Point {len(self.sequence_recorder.current_sequence)}: q1={q1:.1f}° q2={q2:.1f}° q3={q3:.1f}° delay={delay:.1f}s"
+        self.sequencePointsList.addItem(point_text)
+
+        logger.info(f"Recorded point: {point_text}")
+
+    def deleteSequencePoint(self):
+        """Delete selected point from sequence"""
+        current_row = self.sequencePointsList.currentRow()
+        if current_row >= 0:
+            self.sequence_recorder.current_sequence.remove_point(current_row)
+            self.sequencePointsList.takeItem(current_row)
+            logger.info(f"Deleted point {current_row + 1}")
+
+    def clearSequence(self):
+        """Clear all points from sequence"""
+        self.sequence_recorder.current_sequence.clear()
+        self.sequencePointsList.clear()
+        logger.info("Cleared all sequence points")
+
+    def playSequence(self):
+        """Play the recorded sequence"""
+        if len(self.sequence_recorder.current_sequence) == 0:
+            logger.warning("Cannot play empty sequence")
+            return
+
+        if self.is_playing_sequence:
+            logger.warning("Sequence already playing")
+            return
+
+        # Create player with movement callback
+        self.sequence_player = seq_rec.SequencePlayer(self.executeSequenceMove)
+
+        # Get playback parameters
+        speed = self.sequenceSpeedSpinBox.value()
+        loop = self.sequenceLoopCheckBox.isChecked()
+
+        # Update button states
+        self.sequencePlayButton.setEnabled(False)
+        self.sequencePauseButton.setEnabled(True)
+        self.sequenceStopButton.setEnabled(True)
+        self.is_playing_sequence = True
+
+        # Start playback in a separate thread
+        self.playback_thread = threading.Thread(
+            target=self.runSequencePlayback,
+            args=(speed, loop),
+            daemon=True
+        )
+        self.playback_thread.start()
+
+        logger.info(f"Started sequence playback (speed={speed}x, loop={loop})")
+
+    def runSequencePlayback(self, speed, loop):
+        """Run sequence playback in thread"""
+        try:
+            for current, total in self.sequence_player.play(
+                self.sequence_recorder.current_sequence,
+                speed=speed,
+                loop=loop
+            ):
+                # Update UI progress (would need signal/slot for thread safety)
+                pass
+        except Exception as e:
+            logger.error(f"Error during sequence playback: {e}")
+        finally:
+            self.is_playing_sequence = False
+            # Reset button states (would need signal/slot for thread safety)
+
+    def pauseSequence(self):
+        """Pause/resume sequence playback"""
+        if self.sequence_player:
+            if self.sequence_player.is_paused:
+                self.sequence_player.resume()
+                self.sequencePauseButton.setText("Pause")
+            else:
+                self.sequence_player.pause()
+                self.sequencePauseButton.setText("Resume")
+
+    def stopSequence(self):
+        """Stop sequence playback"""
+        if self.sequence_player:
+            self.sequence_player.stop()
+
+        self.sequencePlayButton.setEnabled(True)
+        self.sequencePauseButton.setEnabled(False)
+        self.sequencePauseButton.setText("Pause")
+        self.sequenceStopButton.setEnabled(False)
+        self.is_playing_sequence = False
+
+        logger.info("Stopped sequence playback")
+
+    def executeSequenceMove(self, q1, q2, q3, q4, q5, q6, gripper):
+        """Execute a single movement during sequence playback"""
+        logger.info(f"Executing sequence move: q1={q1:.1f}°, q2={q2:.1f}°, q3={q3:.1f}°, q4={q4:.1f}°, q5={q5:.1f}°, q6={q6:.1f}°, grip={gripper}")
+
+        if s0.isOpen():
+            # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential, calculate motor positions
+            motor_x = q6 + q5  # Drive 0 (X axis) for differential
+            motor_y = q6 - q5  # Drive 1 (Y axis) for differential
+
+            if self.G1MoveRadioButton.isChecked():
+                typeOfMovement = "G1 "
+                feedRate = " F" + str(self.FeedRateInput.value())
+            else:
+                typeOfMovement = "G0 "
+                feedRate = ""
+
+            # Map all axes: W=Art1, U+V=Art2(coupled), Z=Art3, A=Art4, X/Y=differential(Art5,Art6)
+            message = typeOfMovement + f"W{q1} U{q2} V{q2} Z{q3} A{q4} X{motor_x} Y{motor_y}{feedRate}"
+            messageToSend = message + "\n"
+            s0.write(messageToSend.encode('UTF-8'))
+
+            # Move gripper
+            if gripper > 0:
+                gripper_cmd = f"M3 S{(255/100)*gripper}\n"
+                s0.write(gripper_cmd.encode('UTF-8'))
+
+    def saveSequence(self):
+        """Save sequence to file"""
+        if len(self.sequence_recorder.current_sequence) == 0:
+            logger.warning("Cannot save empty sequence")
+            return
+
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            None,
+            "Save Sequence",
+            "",
+            "JSON Files (*.json);;All Files (*)"
+        )
+
+        if filename:
+            if self.sequence_recorder.save_sequence(filename):
+                logger.info(f"Saved sequence to {filename}")
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Information)
+                msgBox.setText(f"Sequence saved successfully to:\n{filename}")
+                msgBox.setWindowTitle("Save Successful")
+                msgBox.exec_()
+            else:
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Critical)
+                msgBox.setText("Failed to save sequence")
+                msgBox.setWindowTitle("Save Failed")
+                msgBox.exec_()
+
+    def loadSequence(self):
+        """Load sequence from file"""
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+            None,
+            "Load Sequence",
+            "",
+            "JSON Files (*.json);;All Files (*)"
+        )
+
+        if filename:
+            sequence = self.sequence_recorder.load_sequence(filename)
+            if sequence:
+                self.sequence_recorder.set_current_sequence(sequence)
+
+                # Update list display
+                self.sequencePointsList.clear()
+                for i, point in enumerate(sequence.points):
+                    point_text = f"Point {i+1}: q1={point.q1:.1f}° q2={point.q2:.1f}° q3={point.q3:.1f}° delay={point.delay:.1f}s"
+                    self.sequencePointsList.addItem(point_text)
+
+                logger.info(f"Loaded sequence '{sequence.name}' with {len(sequence)} points")
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Information)
+                msgBox.setText(f"Loaded sequence:\n{sequence.name}\n{len(sequence)} points")
+                msgBox.setWindowTitle("Load Successful")
+                msgBox.exec_()
+            else:
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Critical)
+                msgBox.setText("Failed to load sequence")
+                msgBox.setWindowTitle("Load Failed")
+                msgBox.exec_()
 
 # Serial Connection functions
     def getSerialPorts(self):
