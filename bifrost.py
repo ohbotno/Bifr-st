@@ -69,6 +69,55 @@ class SerialManager:
 
 s0 = SerialManager()
 
+class HistoryLineEdit(QtWidgets.QLineEdit):
+    """QLineEdit with command history navigation via up/down arrows"""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.history = []
+        self.history_position = -1
+        self.current_text = ""
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Up:
+            # Navigate up through history (older commands)
+            if len(self.history) > 0:
+                if self.history_position == -1:
+                    # Save current text before navigating history
+                    self.current_text = self.text()
+                    self.history_position = len(self.history) - 1
+                elif self.history_position > 0:
+                    self.history_position -= 1
+
+                if 0 <= self.history_position < len(self.history):
+                    self.setText(self.history[self.history_position])
+
+        elif event.key() == QtCore.Qt.Key_Down:
+            # Navigate down through history (newer commands)
+            if self.history_position != -1:
+                if self.history_position < len(self.history) - 1:
+                    self.history_position += 1
+                    self.setText(self.history[self.history_position])
+                else:
+                    # Back to current text
+                    self.history_position = -1
+                    self.setText(self.current_text)
+
+        else:
+            # For any other key, reset history position
+            if event.key() not in (QtCore.Qt.Key_Up, QtCore.Qt.Key_Down):
+                if self.history_position != -1:
+                    self.history_position = -1
+            super().keyPressEvent(event)
+
+    def addToHistory(self, command):
+        """Add a command to history"""
+        if command.strip():  # Don't add empty commands
+            # Don't add duplicate consecutive commands
+            if not self.history or self.history[-1] != command:
+                self.history.append(command)
+            self.history_position = -1
+            self.current_text = ""
+
 class AboutDialog(About_Ui_Dialog):
     def __init__(self, dialog):
         About_Ui_Dialog.__init__(self)
@@ -78,6 +127,14 @@ class BifrostGUI(Ui_MainWindow):
     def __init__(self, dialog):
         Ui_MainWindow.__init__(self)
         self.setupUi(dialog)
+
+        # Replace ConsoleInput with HistoryLineEdit for command history
+        old_console_input = self.ConsoleInput
+        self.ConsoleInput = HistoryLineEdit(self.centralwidget)
+        self.ConsoleInput.setGeometry(old_console_input.geometry())
+        self.ConsoleInput.setObjectName("ConsoleInput")
+        old_console_input.setParent(None)
+        old_console_input.deleteLater()
 
         # Set firmware type - Change this to FIRMWARE_GRBL for GRBL firmware
         self.firmware_type = FIRMWARE_RRF
@@ -92,13 +149,13 @@ class BifrostGUI(Ui_MainWindow):
         logger.info(f"Firmware type: {self.firmware_type}")
         logger.info("GUI Control -> Firmware Axis -> Physical Motor")
         logger.info("-"*60)
-        logger.info("Art1 (Joint 1) -> W axis -> Drive 6")
-        logger.info("Art2 (Joint 2) -> U+V axes -> Drives 4+5 (COUPLED for torque)")
+        logger.info("Art1 (Joint 1) -> X axis -> Drive 0")
+        logger.info("Art2 (Joint 2) -> Y axis -> Drives 1+2 (COUPLED for torque)")
         logger.info("Art3 (Joint 3) -> Z axis -> Drive 3")
-        logger.info("Art4 (Joint 4) -> A axis -> Drive 2")
-        logger.info("Art5 (Joint 5) -> DIFFERENTIAL -> Drives 0+1")
-        logger.info("Art6 (Joint 6) -> DIFFERENTIAL -> Drives 0+1")
-        logger.info("  DIFFERENTIAL: Motor_X(D0) = Art6+Art5, Motor_Y(D1) = Art6-Art5")
+        logger.info("Art4 (Joint 4) -> U axis -> Drive 4")
+        logger.info("Art5 (Joint 5) -> DIFFERENTIAL -> Drives 5+6")
+        logger.info("Art6 (Joint 6) -> DIFFERENTIAL -> Drives 5+6")
+        logger.info("  DIFFERENTIAL: Motor_V(D5) = Art6+Art5, Motor_W(D6) = Art6-Art5")
         logger.info("="*60)
 
         self.getSerialPorts()
@@ -186,6 +243,7 @@ class BifrostGUI(Ui_MainWindow):
         self.SerialPortRefreshButton.pressed.connect(self.getSerialPorts)
         self.ConnectButton.pressed.connect(self.connectSerial)
 
+        # Connect console input signals after replacing with HistoryLineEdit
         self.ConsoleButtonSend.pressed.connect(self.sendSerialCommand)
         self.ConsoleInput.returnPressed.connect(self.sendSerialCommand)
 
@@ -218,6 +276,20 @@ class BifrostGUI(Ui_MainWindow):
         self.sequence_player = None  # Will be initialized when needed
         self.is_playing_sequence = False
         self.setupSequenceControls()
+
+        # Track current differential motor positions for Art5/Art6
+        # Initialize from spinbox values
+        initial_art5 = self.SpinBoxArt5.value()
+        initial_art6 = self.SpinBoxArt6.value()
+        self.current_motor_v = initial_art6 + initial_art5
+        self.current_motor_w = initial_art6 - initial_art5
+
+        # Track desired joint positions for differential control
+        self.desired_art5 = initial_art5
+        self.desired_art6 = initial_art6
+
+        # Setup endstop status displays
+        self.setupEndstopDisplays()
 
     def close_application(self):
         # Properly cleanup serial connection and thread
@@ -279,7 +351,7 @@ class BifrostGUI(Ui_MainWindow):
             else:
                 typeOfMovement="G0 "
                 feedRate=""
-            message=typeOfMovement + "W" + str(joint_value) + feedRate
+            message=typeOfMovement + "X" + str(joint_value) + feedRate
             messageToSend = message + "\n"
             messageToConsole = ">>> " + message
             logger.debug(f"Sending command: {message.strip()}")
@@ -315,10 +387,10 @@ class BifrostGUI(Ui_MainWindow):
 
 #FK Art2 Functions
     def FKMoveArt2(self):
-        # COUPLED MOTORS: Art2 uses Drives 4+5 (U+V axes) for more torque
-        # Both motors receive the same command
+        # COUPLED MOTORS: Art2 uses Drives 1+2 (Y axis) for more torque
+        # Y axis controls both drives in firmware (M584 Y1:2)
         joint_value = self.SpinBoxArt2.value()
-        logger.info(f"Art2 (Joint 2 - COUPLED) commanded to: {joint_value}° -> Axes: U+V (Drives 4+5)")
+        logger.info(f"Art2 (Joint 2 - COUPLED) commanded to: {joint_value}° -> Axis: Y (Drives 1+2)")
         if s0.isOpen():
             if self.G1MoveRadioButton.isChecked():
                 typeOfMovement="G1 "
@@ -326,8 +398,8 @@ class BifrostGUI(Ui_MainWindow):
             else:
                 typeOfMovement="G0 "
                 feedRate=""
-            # Send same command to both U and V axes
-            message=typeOfMovement + "U" + str(joint_value) + " V" + str(joint_value) + feedRate
+            # Y axis controls both drives 1+2 (coupled in firmware)
+            message=typeOfMovement + "Y" + str(joint_value) + feedRate
             messageToSend = message + "\n"
             messageToConsole = ">>> " + message
             logger.debug(f"Sending coupled command: {message.strip()}")
@@ -409,7 +481,7 @@ class BifrostGUI(Ui_MainWindow):
 #FK Art4 Functions
     def FKMoveArt4(self):
         joint_value = self.SpinBoxArt4.value()
-        logger.info(f"Art4 (Joint 4) commanded to: {joint_value}° -> Axis: A")
+        logger.info(f"Art4 (Joint 4) commanded to: {joint_value}° -> Axis: U")
         if s0.isOpen():
             if self.G1MoveRadioButton.isChecked():
                 typeOfMovement="G1 "
@@ -417,7 +489,7 @@ class BifrostGUI(Ui_MainWindow):
             else:
                 typeOfMovement="G0 "
                 feedRate=""
-            message=typeOfMovement + "A" + str(joint_value) + feedRate
+            message=typeOfMovement + "U" + str(joint_value) + feedRate
             messageToSend = message + "\n"
             messageToConsole = ">>> " + message
             logger.debug(f"Sending command: {message.strip()}")
@@ -454,18 +526,33 @@ class BifrostGUI(Ui_MainWindow):
 #FK Art5 Functions
     def FKMoveArt5(self):
         # DIFFERENTIAL MECHANISM: Art5 & Art6 are coupled via bevel gear differential
-        # Motors: Drive0 (X axis) and Drive1 (Y axis)
-        # Forward kinematics: Motor_X = Art6 + Art5, Motor_Y = Art6 - Art5
+        # Motors: Drive5 (V axis) and Drive6 (W axis)
+        # To move only Art5 while keeping Art6 stationary:
+        # - Calculate Art6 from current motor positions (most recent robot state)
+        # - Use new Art5 value from spinbox
 
         art5_value = self.SpinBoxArt5.value()
-        art6_value = self.SpinBoxArt6.value()
 
-        # Calculate differential motor positions
-        motor_x = art6_value + art5_value  # Drive 0 (X axis)
-        motor_y = art6_value - art5_value  # Drive 1 (Y axis)
+        # Check if we have valid position feedback
+        if self.current_motor_v == 0.0 and self.current_motor_w == 0.0:
+            logger.warning("No position feedback received yet - differential control may be inaccurate!")
+            logger.warning("Wait for position update or home the robot first")
+
+        # Calculate current Art6 from motor positions to keep it stationary
+        art6_value = (self.current_motor_v + self.current_motor_w) / 2.0
+
+        # Calculate new motor positions
+        motor_v = art6_value + art5_value  # Drive 5 (V axis)
+        motor_w = art6_value - art5_value  # Drive 6 (W axis)
 
         logger.info(f"Art5 (DIFFERENTIAL) commanded to: {art5_value}°")
-        logger.info(f"  Differential calculation: Motor_X={motor_x:.2f}° Motor_Y={motor_y:.2f}°")
+        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={(self.current_motor_v - self.current_motor_w)/2:.2f}° Art6={art6_value:.2f}°")
+        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_value:.2f}° Art6={art6_value:.2f}° (Art6 should stay same)")
+
+        # Update tracked positions
+        self.current_motor_v = motor_v
+        self.current_motor_w = motor_w
+        self.desired_art5 = art5_value
 
         if s0.isOpen():
             if self.G1MoveRadioButton.isChecked():
@@ -475,7 +562,7 @@ class BifrostGUI(Ui_MainWindow):
                 typeOfMovement="G0 "
                 feedRate=""
             # Send both motor commands for differential
-            message=typeOfMovement + "X" + str(motor_x) + " Y" + str(motor_y) + feedRate
+            message=typeOfMovement + "V" + str(motor_v) + " W" + str(motor_w) + feedRate
             messageToSend = message + "\n"
             messageToConsole = ">>> " + message
             logger.debug(f"Sending differential command: {message.strip()}")
@@ -512,18 +599,33 @@ class BifrostGUI(Ui_MainWindow):
 #FK Art6 Functions
     def FKMoveArt6(self):
         # DIFFERENTIAL MECHANISM: Art5 & Art6 are coupled via bevel gear differential
-        # Motors: Drive0 (X axis) and Drive1 (Y axis)
-        # Forward kinematics: Motor_X = Art6 + Art5, Motor_Y = Art6 - Art5
+        # Motors: Drive5 (V axis) and Drive6 (W axis)
+        # To move only Art6 while keeping Art5 stationary:
+        # - Calculate Art5 from current motor positions (most recent robot state)
+        # - Use new Art6 value from spinbox
 
-        art5_value = self.SpinBoxArt5.value()
         art6_value = self.SpinBoxArt6.value()
 
-        # Calculate differential motor positions
-        motor_x = art6_value + art5_value  # Drive 0 (X axis)
-        motor_y = art6_value - art5_value  # Drive 1 (Y axis)
+        # Check if we have valid position feedback
+        if self.current_motor_v == 0.0 and self.current_motor_w == 0.0:
+            logger.warning("No position feedback received yet - differential control may be inaccurate!")
+            logger.warning("Wait for position update or home the robot first")
+
+        # Calculate current Art5 from motor positions to keep it stationary
+        art5_value = (self.current_motor_v - self.current_motor_w) / 2.0
+
+        # Calculate new motor positions
+        motor_v = art6_value + art5_value  # Drive 5 (V axis)
+        motor_w = art6_value - art5_value  # Drive 6 (W axis)
 
         logger.info(f"Art6 (DIFFERENTIAL) commanded to: {art6_value}°")
-        logger.info(f"  Differential calculation: Motor_X={motor_x:.2f}° Motor_Y={motor_y:.2f}°")
+        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={art5_value:.2f}° Art6={(self.current_motor_v + self.current_motor_w)/2:.2f}°")
+        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_value:.2f}° Art6={art6_value:.2f}° (Art5 should stay same)")
+
+        # Update tracked positions
+        self.current_motor_v = motor_v
+        self.current_motor_w = motor_w
+        self.desired_art6 = art6_value
 
         if s0.isOpen():
             if self.G1MoveRadioButton.isChecked():
@@ -533,7 +635,7 @@ class BifrostGUI(Ui_MainWindow):
                 typeOfMovement="G0 "
                 feedRate=""
             # Send both motor commands for differential
-            message=typeOfMovement + "X" + str(motor_x) + " Y" + str(motor_y) + feedRate
+            message=typeOfMovement + "V" + str(motor_v) + " W" + str(motor_w) + feedRate
             messageToSend = message + "\n"
             messageToConsole = ">>> " + message
             logger.debug(f"Sending differential command: {message.strip()}")
@@ -582,10 +684,10 @@ class BifrostGUI(Ui_MainWindow):
             art6 = self.SpinBoxArt6.value()
 
             # Calculate differential motor positions for Art5/Art6
-            motor_x = art6 + art5  # Drive 0 (X axis) for differential
-            motor_y = art6 - art5  # Drive 1 (Y axis) for differential
+            motor_v = art6 + art5  # Drive 5 (V axis) for differential
+            motor_w = art6 - art5  # Drive 6 (W axis) for differential
 
-            logger.info(f"MoveAll: Art5={art5}° Art6={art6}° → Differential: X={motor_x:.2f}° Y={motor_y:.2f}°")
+            logger.info(f"MoveAll: Art5={art5}° Art6={art6}° → Differential: V={motor_v:.2f}° W={motor_w:.2f}°")
 
             if self.G1MoveRadioButton.isChecked():
                 typeOfMovement="G1 "
@@ -594,8 +696,8 @@ class BifrostGUI(Ui_MainWindow):
                 typeOfMovement="G0 "
                 feedRate=""
 
-            # Map all axes: W=Art1, U+V=Art2(coupled), Z=Art3, A=Art4, X/Y=differential(Art5,Art6)
-            message=typeOfMovement + "W" + str(art1) + " U" + str(art2) + " V" + str(art2) + " Z" + str(art3) + " A" + str(art4) + " X" + str(motor_x) + " Y" + str(motor_y) + feedRate
+            # Map all axes: X=Art1, Y=Art2(coupled), Z=Art3, U=Art4, V/W=differential(Art5,Art6)
+            message=typeOfMovement + "X" + str(art1) + " Y" + str(art2) + " Z" + str(art3) + " U" + str(art4) + " V" + str(motor_v) + " W" + str(motor_w) + feedRate
             messageToSend = message + "\n"
             messageToConsole = ">>> " + message
             s0.write(messageToSend.encode('UTF-8'))
@@ -701,54 +803,54 @@ class BifrostGUI(Ui_MainWindow):
         """Create sequence recorder GUI controls programmatically"""
         # Create group box for sequence controls
         self.sequenceGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.sequenceGroupBox.setGeometry(QtCore.QRect(910, 100, 280, 480))
+        self.sequenceGroupBox.setGeometry(QtCore.QRect(910, 155, 280, 703))
         self.sequenceGroupBox.setTitle("Sequence Programmer")
 
-        # List widget for sequence points
+        # List widget for sequence points (expanded to fill space, aligned with console send button)
         self.sequencePointsList = QtWidgets.QListWidget(self.sequenceGroupBox)
-        self.sequencePointsList.setGeometry(QtCore.QRect(10, 25, 260, 200))
+        self.sequencePointsList.setGeometry(QtCore.QRect(10, 25, 260, 420))
 
         # Record controls
         self.sequenceRecordButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceRecordButton.setGeometry(QtCore.QRect(10, 235, 120, 30))
+        self.sequenceRecordButton.setGeometry(QtCore.QRect(10, 455, 120, 30))
         self.sequenceRecordButton.setText("Record Point")
         self.sequenceRecordButton.pressed.connect(self.recordSequencePoint)
 
         self.sequenceDeleteButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceDeleteButton.setGeometry(QtCore.QRect(150, 235, 120, 30))
+        self.sequenceDeleteButton.setGeometry(QtCore.QRect(150, 455, 120, 30))
         self.sequenceDeleteButton.setText("Delete Point")
         self.sequenceDeleteButton.pressed.connect(self.deleteSequencePoint)
 
         self.sequenceClearButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceClearButton.setGeometry(QtCore.QRect(10, 270, 260, 30))
+        self.sequenceClearButton.setGeometry(QtCore.QRect(10, 490, 260, 30))
         self.sequenceClearButton.setText("Clear All")
         self.sequenceClearButton.pressed.connect(self.clearSequence)
 
         # Playback controls
         self.sequencePlayButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequencePlayButton.setGeometry(QtCore.QRect(10, 310, 80, 30))
+        self.sequencePlayButton.setGeometry(QtCore.QRect(10, 530, 80, 30))
         self.sequencePlayButton.setText("Play")
         self.sequencePlayButton.pressed.connect(self.playSequence)
 
         self.sequencePauseButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequencePauseButton.setGeometry(QtCore.QRect(100, 310, 80, 30))
+        self.sequencePauseButton.setGeometry(QtCore.QRect(100, 530, 80, 30))
         self.sequencePauseButton.setText("Pause")
         self.sequencePauseButton.setEnabled(False)
         self.sequencePauseButton.pressed.connect(self.pauseSequence)
 
         self.sequenceStopButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceStopButton.setGeometry(QtCore.QRect(190, 310, 80, 30))
+        self.sequenceStopButton.setGeometry(QtCore.QRect(190, 530, 80, 30))
         self.sequenceStopButton.setText("Stop")
         self.sequenceStopButton.setEnabled(False)
         self.sequenceStopButton.pressed.connect(self.stopSequence)
 
         # Speed control
         speedLabel = QtWidgets.QLabel(self.sequenceGroupBox)
-        speedLabel.setGeometry(QtCore.QRect(10, 350, 50, 20))
+        speedLabel.setGeometry(QtCore.QRect(10, 570, 50, 20))
         speedLabel.setText("Speed:")
 
         self.sequenceSpeedSpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
-        self.sequenceSpeedSpinBox.setGeometry(QtCore.QRect(60, 350, 80, 22))
+        self.sequenceSpeedSpinBox.setGeometry(QtCore.QRect(60, 570, 80, 22))
         self.sequenceSpeedSpinBox.setMinimum(0.1)
         self.sequenceSpeedSpinBox.setMaximum(10.0)
         self.sequenceSpeedSpinBox.setSingleStep(0.1)
@@ -756,16 +858,16 @@ class BifrostGUI(Ui_MainWindow):
         self.sequenceSpeedSpinBox.setSuffix("x")
 
         self.sequenceLoopCheckBox = QtWidgets.QCheckBox(self.sequenceGroupBox)
-        self.sequenceLoopCheckBox.setGeometry(QtCore.QRect(150, 350, 60, 20))
+        self.sequenceLoopCheckBox.setGeometry(QtCore.QRect(150, 570, 60, 20))
         self.sequenceLoopCheckBox.setText("Loop")
 
         # Delay control
         delayLabel = QtWidgets.QLabel(self.sequenceGroupBox)
-        delayLabel.setGeometry(QtCore.QRect(10, 380, 50, 20))
+        delayLabel.setGeometry(QtCore.QRect(10, 600, 50, 20))
         delayLabel.setText("Delay:")
 
         self.sequenceDelaySpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
-        self.sequenceDelaySpinBox.setGeometry(QtCore.QRect(60, 380, 80, 22))
+        self.sequenceDelaySpinBox.setGeometry(QtCore.QRect(60, 600, 80, 22))
         self.sequenceDelaySpinBox.setMinimum(0.0)
         self.sequenceDelaySpinBox.setMaximum(60.0)
         self.sequenceDelaySpinBox.setSingleStep(0.1)
@@ -774,16 +876,66 @@ class BifrostGUI(Ui_MainWindow):
 
         # File buttons
         self.sequenceSaveButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceSaveButton.setGeometry(QtCore.QRect(10, 415, 260, 30))
+        self.sequenceSaveButton.setGeometry(QtCore.QRect(10, 635, 260, 30))
         self.sequenceSaveButton.setText("Save Sequence")
         self.sequenceSaveButton.pressed.connect(self.saveSequence)
 
         self.sequenceLoadButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceLoadButton.setGeometry(QtCore.QRect(10, 450, 260, 30))
+        self.sequenceLoadButton.setGeometry(QtCore.QRect(10, 670, 260, 30))
         self.sequenceLoadButton.setText("Load Sequence")
         self.sequenceLoadButton.pressed.connect(self.loadSequence)
 
         logger.info("Sequence recorder controls initialized")
+
+    def setupEndstopDisplays(self):
+        """Create endstop status display GUI controls programmatically"""
+        # Create group box for endstop displays
+        self.endstopGroupBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.endstopGroupBox.setGeometry(QtCore.QRect(910, 20, 280, 125))
+        self.endstopGroupBox.setTitle("Endstop Status")
+
+        # Create labels for each endstop (positioned in 2 columns)
+        y_pos = 25
+        col1_x = 10
+        col2_x = 145
+        label_height = 25
+
+        # Column 1: Art1, Art2, Art3
+        self.endstopLabelX = QtWidgets.QLabel(self.endstopGroupBox)
+        self.endstopLabelX.setGeometry(QtCore.QRect(col1_x, y_pos, 120, label_height))
+        self.endstopLabelX.setText("Art1 (X): ---")
+        self.endstopLabelX.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
+
+        self.endstopLabelY = QtWidgets.QLabel(self.endstopGroupBox)
+        self.endstopLabelY.setGeometry(QtCore.QRect(col1_x, y_pos + 30, 120, label_height))
+        self.endstopLabelY.setText("Art2 (Y): ---")
+        self.endstopLabelY.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
+
+        self.endstopLabelZ = QtWidgets.QLabel(self.endstopGroupBox)
+        self.endstopLabelZ.setGeometry(QtCore.QRect(col1_x, y_pos + 60, 120, label_height))
+        self.endstopLabelZ.setText("Art3 (Z): ---")
+        self.endstopLabelZ.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
+
+        # Column 2: Art4, Art5, Art6
+        self.endstopLabelU = QtWidgets.QLabel(self.endstopGroupBox)
+        self.endstopLabelU.setGeometry(QtCore.QRect(col2_x, y_pos, 120, label_height))
+        self.endstopLabelU.setText("Art4 (U): ---")
+        self.endstopLabelU.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
+
+        self.endstopLabelV = QtWidgets.QLabel(self.endstopGroupBox)
+        self.endstopLabelV.setGeometry(QtCore.QRect(col2_x, y_pos + 30, 120, label_height))
+        self.endstopLabelV.setText("Art5 (V): ---")
+        self.endstopLabelV.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
+
+        self.endstopLabelW = QtWidgets.QLabel(self.endstopGroupBox)
+        self.endstopLabelW.setGeometry(QtCore.QRect(col2_x, y_pos + 60, 120, label_height))
+        self.endstopLabelW.setText("Art6 (W): ---")
+        self.endstopLabelW.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
+
+        # Make the group box visible
+        self.endstopGroupBox.show()
+
+        logger.info("Endstop status displays initialized")
 
     def recordSequencePoint(self):
         """Record current joint positions to sequence"""
@@ -899,8 +1051,8 @@ class BifrostGUI(Ui_MainWindow):
 
         if s0.isOpen():
             # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential, calculate motor positions
-            motor_x = q6 + q5  # Drive 0 (X axis) for differential
-            motor_y = q6 - q5  # Drive 1 (Y axis) for differential
+            motor_v = q6 + q5  # Drive 5 (V axis) for differential
+            motor_w = q6 - q5  # Drive 6 (W axis) for differential
 
             if self.G1MoveRadioButton.isChecked():
                 typeOfMovement = "G1 "
@@ -909,8 +1061,8 @@ class BifrostGUI(Ui_MainWindow):
                 typeOfMovement = "G0 "
                 feedRate = ""
 
-            # Map all axes: W=Art1, U+V=Art2(coupled), Z=Art3, A=Art4, X/Y=differential(Art5,Art6)
-            message = typeOfMovement + f"W{q1} U{q2} V{q2} Z{q3} A{q4} X{motor_x} Y{motor_y}{feedRate}"
+            # Map all axes: X=Art1, Y=Art2(coupled), Z=Art3, U=Art4, V/W=differential(Art5,Art6)
+            message = typeOfMovement + f"X{q1} Y{q2} Z{q3} U{q4} V{motor_v} W{motor_w}{feedRate}"
             messageToSend = message + "\n"
             s0.write(messageToSend.encode('UTF-8'))
 
@@ -1015,8 +1167,13 @@ class BifrostGUI(Ui_MainWindow):
             self.SerialThreadClass.serialSignal.connect(self.updateConsole)
             self.SerialThreadClass.start()
 
+            # Request immediate position update to initialize tracking variables
+            if self.firmware_type == FIRMWARE_RRF:
+                s0.write("M114\n".encode('UTF-8'))
+
             logger.info(f"✓ Connected to {serialPort} at {baudrate} baud")
             logger.info(f"✓ Serial thread started (Firmware: {self.firmware_type})")
+            logger.info(f"✓ Requesting position update to initialize differential tracking")
             print(f"Connected to {serialPort} at {baudrate} baud")
         except Exception as e:
             print(f"Error opening serial port: {e}")
@@ -1035,8 +1192,9 @@ class BifrostGUI(Ui_MainWindow):
         okShow=self.ConsoleShowOkRespcheckBox.isChecked()
 
         if self.firmware_type == FIRMWARE_RRF:
-            # RRF: Check if response is JSON status
-            isDataReadVerbose = dataRead.startswith("{") and "status" in dataRead
+            # RRF: Check if response is M114 position response, M119 endstop response, or ok
+            isDataReadVerbose = dataRead.startswith("X:") and "Y:" in dataRead  # M114 response
+            isEndstopResponse = dataRead.startswith("Endstops -")  # M119 response
             isDataOkResponse = "ok" in dataRead.lower()
         else:  # GRBL
             isDataReadVerbose = "MPos" in dataRead
@@ -1048,7 +1206,12 @@ class BifrostGUI(Ui_MainWindow):
             print ("Serial Connection Lost")
 
         else:
-            if not isDataReadVerbose and not isDataOkResponse:
+            # Handle endstop responses
+            if self.firmware_type == FIRMWARE_RRF and isEndstopResponse:
+                self.updateEndstopDisplay(dataRead)
+                if verboseShow:
+                    self.ConsoleOutput.appendPlainText(dataRead)
+            elif not isDataReadVerbose and not isDataOkResponse:
                 self.ConsoleOutput.appendPlainText(dataRead)
             elif isDataOkResponse and okShow:
                 self.ConsoleOutput.appendPlainText(dataRead)
@@ -1058,63 +1221,70 @@ class BifrostGUI(Ui_MainWindow):
                     self.ConsoleOutput.appendPlainText(dataRead)
 
     def sendSerialCommand(self):
-        messageToSent=self.ConsoleInput.text()+"\n"
-        messageToConsole= ">>> "+self.ConsoleInput.text()
+        command = self.ConsoleInput.text()
+        messageToSent = command + "\n"
+        messageToConsole = ">>> " + command
         if s0.isOpen():
-            if messageToSent!="":
+            if messageToSent != "\n":  # Don't send empty commands
                 s0.write(messageToSent.encode('UTF-8'))
                 self.ConsoleOutput.appendPlainText(messageToConsole)
+                self.ConsoleInput.addToHistory(command)
                 self.ConsoleInput.clear()
         else:
             self.noSerialConnection()
 
     def updateFKPosDisplay(self,dataRead):
         if self.firmware_type == FIRMWARE_RRF:
-            # RRF: Parse JSON response
+            # RRF: Parse M114 response format: X:10.000 Y:10.000 Z:0.000 U:0.028 V:-110.000 W:-290.000 E:0.000 ...
             try:
-                data = json.loads(dataRead)
-                # RRF status: I=idle, P=printing, S=stopped, C=config, A=paused, D=pausing, R=resuming, B=busy
-                status_map = {'I': 'Idle', 'P': 'Run', 'S': 'Stopped', 'C': 'Config',
-                             'A': 'Paused', 'D': 'Pausing', 'R': 'Resuming', 'B': 'Busy'}
-                status = status_map.get(data.get('status', ''), 'Unknown')
-                self.updateCurrentState(status)
+                # Extract position values using simple string parsing
+                parts = dataRead.split()
+                pos_dict = {}
+                for part in parts:
+                    if ':' in part:
+                        axis, value = part.split(':')
+                        try:
+                            pos_dict[axis] = float(value)
+                        except ValueError:
+                            continue
 
-                # Get axis positions from coords.xyz array
-                # RRF returns axes in order: X, Y, Z, U, V, W, A, B, C (as many as configured)
-                if 'coords' in data and 'xyz' in data['coords']:
-                    pos = data['coords']['xyz']
-                    if len(pos) >= 7:  # Need at least 7 axes (X,Y,Z,U,V,W,A)
-                        # Raw motor positions from firmware
-                        motor_x = pos[0]  # Drive 0 (X axis) - Differential
-                        motor_y = pos[1]  # Drive 1 (Y axis) - Differential
-                        motor_z = pos[2]  # Drive 3 (Z axis) - Art3
-                        motor_u = pos[3]  # Drive 4 (U axis) - Art2 (coupled)
-                        motor_v = pos[4]  # Drive 5 (V axis) - Art2 (coupled)
-                        motor_w = pos[5]  # Drive 6 (W axis) - Art1
-                        motor_a = pos[6]  # Drive 2 (A axis) - Art4
+                # Extract axis positions
+                if 'V' in pos_dict and 'W' in pos_dict:
+                    motor_x = pos_dict.get('X', 0.0)  # Drive 0 (X axis) - Art1
+                    motor_y = pos_dict.get('Y', 0.0)  # Drives 1+2 (Y axis) - Art2 (coupled)
+                    motor_z = pos_dict.get('Z', 0.0)  # Drive 3 (Z axis) - Art3
+                    motor_u = pos_dict.get('U', 0.0)  # Drive 4 (U axis) - Art4
+                    motor_v = pos_dict.get('V', 0.0)  # Drive 5 (V axis) - Differential
+                    motor_w = pos_dict.get('W', 0.0)  # Drive 6 (W axis) - Differential
 
-                        # INVERSE DIFFERENTIAL: Convert motor positions to joint angles
-                        # Art5 = (Motor_X - Motor_Y) / 2
-                        # Art6 = (Motor_X + Motor_Y) / 2
-                        art5 = (motor_x - motor_y) / 2.0
-                        art6 = (motor_x + motor_y) / 2.0
+                    # INVERSE DIFFERENTIAL: Convert motor positions to joint angles
+                    # Art5 = (Motor_V - Motor_W) / 2
+                    # Art6 = (Motor_V + Motor_W) / 2
+                    art5 = (motor_v - motor_w) / 2.0
+                    art6 = (motor_v + motor_w) / 2.0
 
-                        # Art2 uses coupled motors (U+V), take average for display
-                        art2 = (motor_u + motor_v) / 2.0
+                    # Update tracked motor positions and desired joint positions for differential control
+                    self.current_motor_v = motor_v
+                    self.current_motor_w = motor_w
+                    self.desired_art5 = art5
+                    self.desired_art6 = art6
 
-                        logger.debug(f"Position feedback - X:{motor_x:.2f} Y:{motor_y:.2f} Z:{motor_z:.2f} U:{motor_u:.2f} V:{motor_v:.2f} W:{motor_w:.2f} A:{motor_a:.2f}")
-                        logger.info(f"  Art1<-W:{motor_w:.2f}° | Art2<-U+V(avg):{art2:.2f}° | Art3<-Z:{motor_z:.2f}° | Art4<-A:{motor_a:.2f}° | Art5(calc):{art5:.2f}° | Art6(calc):{art6:.2f}°")
+                    logger.debug(f"Position feedback - X:{motor_x:.2f} Y:{motor_y:.2f} Z:{motor_z:.2f} U:{motor_u:.2f} V:{motor_v:.2f} W:{motor_w:.2f}")
+                    logger.info(f"  Art1<-X:{motor_x:.2f}° | Art2<-Y:{motor_y:.2f}° | Art3<-Z:{motor_z:.2f}° | Art4<-U:{motor_u:.2f}° | Art5(calc):{art5:.2f}° | Art6(calc):{art6:.2f}°")
 
-                        # Display positions
-                        self.FKCurrentPosValueArt1.setText(f"{motor_w:.2f}º")  # W → Art1
-                        self.FKCurrentPosValueArt2.setText(f"{art2:.2f}º")     # U+V average → Art2
-                        self.FKCurrentPosValueArt3.setText(f"{motor_z:.2f}º")  # Z → Art3
-                        self.FKCurrentPosValueArt4.setText(f"{motor_a:.2f}º")  # A → Art4
-                        self.FKCurrentPosValueArt5.setText(f"{art5:.2f}º")     # Differential inverse → Art5
-                        self.FKCurrentPosValueArt6.setText(f"{art6:.2f}º")     # Differential inverse → Art6
-            except (json.JSONDecodeError, KeyError, IndexError) as e:
-                logger.error(f"Error parsing RRF status: {e}")
-                logger.debug(f"Problematic data (first 500 chars): {dataRead[:500]}")
+                    # Display positions
+                    self.FKCurrentPosValueArt1.setText(f"{motor_x:.2f}º")  # X → Art1
+                    self.FKCurrentPosValueArt2.setText(f"{motor_y:.2f}º")  # Y → Art2
+                    self.FKCurrentPosValueArt3.setText(f"{motor_z:.2f}º")  # Z → Art3
+                    self.FKCurrentPosValueArt4.setText(f"{motor_u:.2f}º")  # U → Art4
+                    self.FKCurrentPosValueArt5.setText(f"{art5:.2f}º")     # Differential inverse → Art5
+                    self.FKCurrentPosValueArt6.setText(f"{art6:.2f}º")     # Differential inverse → Art6
+
+                    # Set status to Idle since M114 doesn't provide status
+                    self.updateCurrentState("Idle")
+            except (ValueError, KeyError, IndexError) as e:
+                logger.error(f"Error parsing M114 response: {e}")
+                logger.debug(f"Problematic data: {dataRead}")
         else:  # GRBL
             # GRBL: Parse comma-separated format
             try:
@@ -1132,6 +1302,46 @@ class BifrostGUI(Ui_MainWindow):
                     self.FKCurrentPosValueArt6.setText(data[7][:-2]+"º")
             except (IndexError, ValueError) as e:
                 logger.error(f"Error parsing GRBL status: {e}")
+
+    def updateEndstopDisplay(self, dataRead):
+        """Parse M119 endstop response and update GUI displays"""
+        # Format: "Endstops - X: at min stop, Y: not stopped, Z: not stopped, U: not stopped, V: at min stop, W: at min stop, Z probe: at min stop"
+        try:
+            # Remove "Endstops - " prefix
+            endstop_data = dataRead.replace("Endstops - ", "")
+
+            # Split by comma and parse each endstop
+            endstops = {}
+            for part in endstop_data.split(','):
+                part = part.strip()
+                if ':' in part:
+                    axis, status = part.split(':', 1)
+                    axis = axis.strip()
+                    status = status.strip()
+                    endstops[axis] = status
+
+            # Update GUI labels with color coding
+            # Green = not triggered, Red = triggered
+            # Mapping: X->Art1, Y->Art2, Z->Art3, U->Art4, V->Art5, W->Art6
+            def updateLabel(label, axis_name, art_name):
+                if axis_name in endstops:
+                    status = endstops[axis_name]
+                    label.setText(f"{art_name} ({axis_name}): {status}")
+                    if "not stopped" in status:
+                        label.setStyleSheet("background-color: rgb(0, 255, 0); padding: 3px;")  # Green
+                    else:
+                        label.setStyleSheet("background-color: rgb(255, 0, 0); padding: 3px;")  # Red
+
+            updateLabel(self.endstopLabelX, "X", "Art1")
+            updateLabel(self.endstopLabelY, "Y", "Art2")
+            updateLabel(self.endstopLabelZ, "Z", "Art3")
+            updateLabel(self.endstopLabelU, "U", "Art4")
+            updateLabel(self.endstopLabelV, "V", "Art5")
+            updateLabel(self.endstopLabelW, "W", "Art6")
+
+        except Exception as e:
+            logger.error(f"Error parsing M119 endstop response: {e}")
+            logger.debug(f"Problematic data: {dataRead}")
 
     def updateCurrentState(self, state):
         self.RobotStateDisplay.setText(state)
@@ -1175,6 +1385,7 @@ class SerialThreadClass(QtCore.QThread):
         self.firmware_type = firmware_type
         self.running = True
         self.elapsedTime = time.time()
+        self.endstopCheckTime = time.time()
 
     def stop(self):
         """Gracefully stop the thread"""
@@ -1202,11 +1413,22 @@ class SerialThreadClass(QtCore.QThread):
                     self.elapsedTime = current_time
                     try:
                         if self.firmware_type == FIRMWARE_RRF:
-                            s0.write("M408 S0\n".encode('UTF-8'))
+                            s0.write("M114\n".encode('UTF-8'))  # Use M114 instead of M408 for position feedback
                         else:  # GRBL
                             s0.write("?\n".encode('UTF-8'))
                     except (OSError, serial.SerialException) as e:
                         print(f"Error sending status request: {e}")
+                        self.serialSignal.emit("SERIAL-DISCONNECTED")
+                        break
+
+                # Send endstop status request every 500ms
+                if current_time - self.endstopCheckTime > 0.5:
+                    self.endstopCheckTime = current_time
+                    try:
+                        if self.firmware_type == FIRMWARE_RRF:
+                            s0.write("M119\n".encode('UTF-8'))  # Request endstop status
+                    except (OSError, serial.SerialException) as e:
+                        print(f"Error sending endstop request: {e}")
                         self.serialSignal.emit("SERIAL-DISCONNECTED")
                         break
 
