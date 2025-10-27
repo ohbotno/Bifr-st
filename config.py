@@ -8,8 +8,8 @@ SERIAL_TIMEOUT = 0.1  # seconds - SHORT timeout to prevent blocking on busy firm
 SERIAL_BAUDRATE_DEFAULT = 115200
 
 # Serial thread timing (seconds) - OPTIMIZED to prevent GUI lockups
-SERIAL_STATUS_REQUEST_INTERVAL = 0.2  # 200ms between status requests (M114/?) - reduced from 100ms
-SERIAL_ENDSTOP_REQUEST_INTERVAL = 0.5  # 500ms between endstop requests (M119) - reduced from 100ms (endstops don't change that fast)
+SERIAL_STATUS_REQUEST_INTERVAL = 0.3  # 300ms between status requests (M114/?) - 3.3Hz update rate
+SERIAL_ENDSTOP_REQUEST_INTERVAL = 1.0  # 1000ms between endstop requests (M119) - endstops change rarely during normal operation
 SERIAL_THREAD_SLEEP = 0.005  # 5ms sleep to prevent busy-waiting - reduced for more responsive reads
 SERIAL_THREAD_SHUTDOWN_TIMEOUT = 2000  # milliseconds to wait for thread shutdown
 
@@ -34,7 +34,7 @@ MAX_POSITION_CHANGE_PER_UPDATE = 50  # degrees
 
 # GUI update throttling - OPTIMIZED for performance
 GUI_UPDATE_INTERVAL = 0.1  # seconds (10Hz max) - faster visual feedback
-LOGGING_INTERVAL_POSITIONS = 20  # Log position every Nth update - reduced logging spam
+LOGGING_INTERVAL_POSITIONS = 50  # Log position every Nth update - minimized logging spam
 
 # ========== Sequence Playback ==========
 SEQUENCE_TIMER_INTERVAL = 100  # milliseconds between playback updates
@@ -80,7 +80,7 @@ GRIPPER_PERCENT_MAX = 100
 
 # ========== Position History ==========
 POSITION_HISTORY_MAX_SIZE = 5000  # Maximum snapshots to keep in memory
-POSITION_HISTORY_SAMPLE_RATE = 5  # Record every Nth position update (1=all, 5=every 5th)
+POSITION_HISTORY_SAMPLE_RATE = 10  # Record every Nth position update (1=all, 10=every 10th) - optimized for memory
 POSITION_HISTORY_AUTO_SAVE_INTERVAL = 300  # seconds (5 minutes, 0=disabled)
 POSITION_HISTORY_PLOT_UPDATE_INTERVAL = 1000  # milliseconds
 POSITION_HISTORY_PLOT_WINDOW_SIZE = 100  # Number of recent points to show in real-time plot

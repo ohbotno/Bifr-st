@@ -1633,29 +1633,38 @@ class SerialThreadClass(QtCore.QThread):
                     except Exception as e:
                         logger.error(f"Error queuing endstop request: {e}")
 
-                # NON-BLOCKING READ: Only read if data is available
-                # This prevents the thread from blocking when firmware is busy executing moves
+                # NON-BLOCKING BATCH READ: Process multiple lines if available
+                # This reduces loop overhead when buffer has multiple responses
                 try:
                     if bytes_available > 0:
-                        dataBytes = s0.readline()
-                        if dataBytes:
-                            # Decode bytes to string and strip whitespace
-                            dataCropped = dataBytes.decode('UTF-8', errors='replace').strip()
-                            if dataCropped:
-                                self.serialSignal.emit(dataCropped)
+                        # OPTIMIZATION: Read multiple lines when buffer is full (batch processing)
+                        # Estimate lines available (assuming ~30 bytes per line average)
+                        estimated_lines = max(1, min(10, bytes_available // 30))
 
-                                # Resume status polling when blocking command completes
-                                # Must meet BOTH conditions: received "ok" AND minimum time elapsed
-                                if self.status_polling_paused and "ok" in dataCropped.lower():
-                                    time_elapsed = current_time - self.blocking_command_start_time
-                                    if time_elapsed >= config.BLOCKING_COMMAND_MIN_PAUSE:
-                                        self.status_polling_paused = False
-                                        logger.info(f"Resuming status polling after blocking command completed ({time_elapsed:.1f}s elapsed)")
-                                        # Request immediate position update after resuming
-                                        s0.write("M114\n".encode('UTF-8'), priority=True)
-                                        s0.write("M119\n".encode('UTF-8'), priority=True)
-                                    else:
-                                        logger.debug(f"Received 'ok' but only {time_elapsed:.1f}s elapsed (need {config.BLOCKING_COMMAND_MIN_PAUSE}s), waiting...")
+                        for _ in range(estimated_lines):
+                            # Check if data still available (non-blocking)
+                            if s0.inWaiting() == 0:
+                                break
+
+                            dataBytes = s0.readline()
+                            if dataBytes:
+                                # Decode bytes to string and strip whitespace
+                                dataCropped = dataBytes.decode('UTF-8', errors='replace').strip()
+                                if dataCropped:
+                                    self.serialSignal.emit(dataCropped)
+
+                                    # Resume status polling when blocking command completes
+                                    # Must meet BOTH conditions: received "ok" AND minimum time elapsed
+                                    if self.status_polling_paused and "ok" in dataCropped.lower():
+                                        time_elapsed = current_time - self.blocking_command_start_time
+                                        if time_elapsed >= config.BLOCKING_COMMAND_MIN_PAUSE:
+                                            self.status_polling_paused = False
+                                            logger.info(f"Resuming status polling after blocking command completed ({time_elapsed:.1f}s elapsed)")
+                                            # Request immediate position update after resuming
+                                            s0.write("M114\n".encode('UTF-8'), priority=True)
+                                            s0.write("M119\n".encode('UTF-8'), priority=True)
+                                        else:
+                                            logger.debug(f"Received 'ok' but only {time_elapsed:.1f}s elapsed (need {config.BLOCKING_COMMAND_MIN_PAUSE}s), waiting...")
                 except (OSError, serial.SerialException) as e:
                     logger.error(f"Error reading from serial: {e}")
                     self.serialSignal.emit("SERIAL-DISCONNECTED")
