@@ -438,32 +438,21 @@ class BifrostGUI(Ui_MainWindow):
         joint_value = self.joint_spinboxes[joint_name].value()
 
         # Handle based on joint type
-        if config['type'] == 'simple':
+        if config['type'] in ('simple', 'coupled'):
+            # Simple and coupled use same logic (just different logging)
             self._FKMoveSimple(joint_name, joint_value, config)
-        elif config['type'] == 'coupled':
-            self._FKMoveCoupled(joint_name, joint_value, config)
         elif config['type'] == 'differential':
             self._FKMoveDifferential(joint_name, joint_value, config)
 
     def _FKMoveSimple(self, joint_name, joint_value, config):
-        """Move a simple single-axis joint"""
-        logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']}")
+        """Move a simple single-axis joint (also handles coupled motors)"""
+        # Log with appropriate detail based on joint type
+        if config['type'] == 'coupled':
+            logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']} (Drives {config['drives']})")
+        else:
+            logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']}")
 
-        # Build command using command builder
-        movement_type, feedrate = CommandBuilder.get_movement_params(self)
-        command = CommandBuilder.build_single_axis_command(
-            movement_type, config['axis'], joint_value, feedrate
-        )
-
-        # Send command
-        if not self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection):
-            logger.warning(f"{joint_name} move attempted but serial not connected")
-
-    def _FKMoveCoupled(self, joint_name, joint_value, config):
-        """Move a coupled-motor joint (Art2 uses drives 1+2)"""
-        logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']} (Drives {config['drives']})")
-
-        # Build command using command builder (same as simple, just different logging)
+        # Build and send command (identical for simple and coupled)
         movement_type, feedrate = CommandBuilder.get_movement_params(self)
         command = CommandBuilder.build_single_axis_command(
             movement_type, config['axis'], joint_value, feedrate
@@ -595,10 +584,14 @@ class BifrostGUI(Ui_MainWindow):
         self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection)
 
 # Gripper Functions
+    @staticmethod
+    def _gripper_percent_to_pwm(percent):
+        """Convert gripper percentage (0-100) to PWM value (0-255)"""
+        return (config.GRIPPER_PWM_MAX / config.GRIPPER_PERCENT_MAX) * percent
+
     def MoveGripper(self):
         """Move gripper to specified position"""
-        # Convert percentage to PWM value
-        pwm_value = (255 / 100) * self.SpinBoxGripper.value()
+        pwm_value = self._gripper_percent_to_pwm(self.SpinBoxGripper.value())
         command = f"M3 S{pwm_value}"
 
         # Send command
@@ -1064,7 +1057,7 @@ class BifrostGUI(Ui_MainWindow):
 
         # Move gripper if needed
         if gripper > 0:
-            pwm_value = (255 / 100) * gripper
+            pwm_value = self._gripper_percent_to_pwm(gripper)
             gripper_cmd = f"M3 S{pwm_value}"
             self.command_sender.send(gripper_cmd, show_in_console=False)
 
@@ -1480,36 +1473,49 @@ class BifrostGUI(Ui_MainWindow):
             logger.debug(f"Problematic data: {dataRead}")
 
     def updateCurrentState(self, state):
-        self.RobotStateDisplay.setText(state)
-        if state=="Idle" or state=="Run":
-            self.RobotStateDisplay.setStyleSheet('background-color: rgb(0, 255, 0)')
-        elif state=="Home":
-            self.RobotStateDisplay.setStyleSheet('background-color: rgb(85, 255, 255)')
-        elif state=="Alarm":
-            self.RobotStateDisplay.setStyleSheet('background-color: rgb(255, 255, 0)')
-        elif state=="Hold":
-            self.RobotStateDisplay.setStyleSheet('background-color: rgb(255, 0, 0)')
-        else:
-            self.RobotStateDisplay.setStyleSheet('background-color: rgb(255, 255, 255)')
+        """Update robot state display with appropriate color coding"""
+        # State color mapping for visual feedback
+        STATE_COLORS = {
+            'Idle': 'rgb(0, 255, 0)',      # Green - ready
+            'Run': 'rgb(0, 255, 0)',       # Green - running
+            'Home': 'rgb(85, 255, 255)',   # Cyan - homing
+            'Alarm': 'rgb(255, 255, 0)',   # Yellow - warning
+            'Hold': 'rgb(255, 0, 0)',      # Red - stopped
+        }
 
+        self.RobotStateDisplay.setText(state)
+        color = STATE_COLORS.get(state, 'rgb(255, 255, 255)')  # Default: white
+        self.RobotStateDisplay.setStyleSheet(f'background-color: {color}')
+
+
+    def _showWarningMessage(self, message, title="Warning"):
+        """Helper to display warning message boxes"""
+        msgBox = QtWidgets.QMessageBox()
+        msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+        msgBox.setWindowTitle(title)
+        msgBox.setText(message)
+        msgBox.exec_()
 
     def blankSerialPort(self):
-        msgBox = QtWidgets.QMessageBox()
-        msgBox.setIcon(QtWidgets.QMessageBox.Warning)
-        msgBox.setText("There is not Serial Port value indicated to establish the connection.\nPlease check it and try to connect again.")
-        msgBox.exec_()
+        """Show warning for missing serial port"""
+        self._showWarningMessage(
+            "There is not Serial Port value indicated to establish the connection.\n"
+            "Please check it and try to connect again."
+        )
 
     def blankBaudRate(self):
-        msgBox = QtWidgets.QMessageBox()
-        msgBox.setIcon(QtWidgets.QMessageBox.Warning)
-        msgBox.setText("There is not Baud Rate value indicated to establish the connection.\nPlease check it and try to connect again.")
-        msgBox.exec_()
+        """Show warning for missing baud rate"""
+        self._showWarningMessage(
+            "There is not Baud Rate value indicated to establish the connection.\n"
+            "Please check it and try to connect again."
+        )
 
     def noSerialConnection(self):
-        msgBox = QtWidgets.QMessageBox()
-        msgBox.setIcon(QtWidgets.QMessageBox.Warning)
-        msgBox.setText("The connection has not been established yet. Please establish the connection before trying to control.")
-        msgBox.exec_()
+        """Show warning for no serial connection"""
+        self._showWarningMessage(
+            "The connection has not been established yet. "
+            "Please establish the connection before trying to control."
+        )
 
 ############### SERIAL READ THREAD CLASS ###############
 
