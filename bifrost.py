@@ -15,6 +15,7 @@ import position_history as pos_hist
 import config
 import parsing_patterns
 from command_builder import CommandBuilder, SerialCommandSender
+from robot_controller import RobotController
 
 import serial
 import time
@@ -217,21 +218,9 @@ class BifrostGUI(Ui_MainWindow):
         # Initialize command sender (will use ConsoleOutput widget)
         self.command_sender = SerialCommandSender(s0, None)  # Console widget set later after full init
 
-        # Log axis mapping configuration
-        logger.info("="*60)
-        logger.info("BIFROST GUI - MOTOR TO AXIS MAPPING")
-        logger.info("="*60)
-        logger.info("Firmware: RepRapFirmware (RRF)")
-        logger.info("GUI Control -> Firmware Axis -> Physical Motor")
-        logger.info("-"*60)
-        logger.info("Art1 (Joint 1) -> X axis -> Drive 0")
-        logger.info("Art2 (Joint 2) -> Y axis -> Drives 1+2 (COUPLED for torque)")
-        logger.info("Art3 (Joint 3) -> Z axis -> Drive 3")
-        logger.info("Art4 (Joint 4) -> U axis -> Drive 4")
-        logger.info("Art5 (Joint 5) -> DIFFERENTIAL -> Drives 5+6")
-        logger.info("Art6 (Joint 6) -> DIFFERENTIAL -> Drives 5+6")
-        logger.info("  DIFFERENTIAL: Motor_V(D5) = Art6+Art5, Motor_W(D6) = Art6-Art5")
-        logger.info("="*60)
+        # Initialize robot controller
+        self.robot_controller = RobotController()
+        logger.info("RobotController initialized and integrated with GUI")
 
         self.getSerialPorts()
 
