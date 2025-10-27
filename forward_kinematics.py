@@ -16,7 +16,9 @@ TCP  | 0        | L4 | 0  | 0°
 Reference: https://hackaday.io/project/12989-thor/log/43941-forward-kinematics
 """
 
+from typing import List, Tuple
 import numpy as np
+import numpy.typing as npt
 import logging
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,7 @@ DH_PARAMS = [
 ]
 
 
-def dh_transform(theta, d, a, alpha):
+def dh_transform(theta: float, d: float, a: float, alpha: float) -> npt.NDArray[np.float64]:
     """
     Calculate DH transformation matrix
 
@@ -74,7 +76,7 @@ def dh_transform(theta, d, a, alpha):
     ])
 
 
-def compute_all_joint_positions(q1, q2, q3, q4, q5, q6):
+def compute_all_joint_positions(q1: float, q2: float, q3: float, q4: float, q5: float, q6: float) -> List[Tuple[float, float, float]]:
     """
     Compute positions of all joints and TCP using forward kinematics
 
@@ -126,7 +128,7 @@ def compute_all_joint_positions(q1, q2, q3, q4, q5, q6):
     return positions
 
 
-def compute_tcp_position_only(q1, q2, q3, q4, q5, q6):
+def compute_tcp_position_only(q1: float, q2: float, q3: float, q4: float, q5: float, q6: float) -> Tuple[float, float, float]:
     """
     Compute only TCP position (faster than computing all joints)
 
@@ -159,7 +161,7 @@ def compute_tcp_position_only(q1, q2, q3, q4, q5, q6):
     return (x, y, z)
 
 
-def compute_workspace_envelope():
+def compute_workspace_envelope() -> dict:
     """
     Compute workspace envelope parameters for visualization
 

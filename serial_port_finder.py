@@ -1,10 +1,11 @@
+from typing import List, Optional, Tuple
 import sys
 import glob
 import serial
 from serial.tools import list_ports
 
 
-def serial_ports():
+def serial_ports() -> List[str]:
     """ Lists serial port names
 
         :raises EnvironmentError:
@@ -17,7 +18,7 @@ def serial_ports():
     return [port.device for port in list_ports.comports()]
 
 
-def get_robot_port():
+def get_robot_port() -> Optional[str]:
     """
     Automatically detect the robot's COM port by filtering out system ports
     and looking for USB/serial adapters.
@@ -71,7 +72,7 @@ def get_robot_port():
     return None
 
 
-def get_available_ports_with_info():
+def get_available_ports_with_info() -> List[Tuple[str, str]]:
     """
     Get all available ports with their descriptions
 
