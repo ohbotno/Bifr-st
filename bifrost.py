@@ -10,6 +10,9 @@ from about import Ui_Dialog as About_Ui_Dialog
 import serial_port_finder as spf
 import inverse_kinematics as ik
 import sequence_recorder as seq_rec
+import differential_kinematics as diff_kin
+import position_history as pos_hist
+import config
 
 import serial
 import time
@@ -17,32 +20,86 @@ import json
 import threading
 import logging
 import numpy as np
+import re
 
-# Configure logging for debugging
+# Configure logging for debugging using config
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - [%(funcName)s] %(message)s',
+    level=getattr(logging, config.LOG_LEVEL),
+    format=config.LOG_FORMAT,
     handlers=[
-        logging.FileHandler('bifrost_debug.log'),
+        logging.FileHandler(config.LOG_FILE),
         logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
 
-# Firmware type constants
-FIRMWARE_GRBL = "GRBL"
-FIRMWARE_RRF = "RRF"
+# Firmware type constants (from config)
+FIRMWARE_GRBL = config.FIRMWARE_GRBL
+FIRMWARE_RRF = config.FIRMWARE_RRF
 
-# Thread-safe serial object with lock
+# Compiled regex patterns for efficient position parsing
+# RRF M114 format: X:10.000 Y:10.000 Z:0.000 U:0.028 V:-110.000 W:-290.000
+RRF_POSITION_PATTERN = re.compile(r'([XYZUVW]):([+-]?\d+\.?\d*)')
+
+# Endstop status pattern: "Endstops - X: at min stendsop, Y: not stopped, ..."
+ENDSTOP_PATTERN = re.compile(r'([XYZUVW]):\s*([^,]+)')
+
+# Thread-safe serial object with command queue
 class SerialManager:
     def __init__(self):
         self.serial = serial.Serial()
         self.lock = threading.Lock()
+        # Non-blocking command queue (thread-safe)
+        self.command_queue = []
+        self.queue_lock = threading.Lock()
 
-    def write(self, data):
+    def write(self, data, priority=False):
+        """
+        Queue data to be written by serial thread (non-blocking)
+
+        Args:
+            data: Bytes to write
+            priority: If True, add to front of queue for immediate sending
+        """
+        with self.queue_lock:
+            if priority:
+                # Insert at beginning for immediate sending (status requests, etc)
+                self.command_queue.insert(0, data)
+            else:
+                # Append to end (normal commands)
+                self.command_queue.append(data)
+
+    def _write_internal(self, data):
+        """
+        Internal method: Actually write data to serial port (called by serial thread only)
+
+        Args:
+            data: Bytes to write
+
+        Returns:
+            True if write succeeded, False otherwise
+        """
         with self.lock:
             if self.serial.isOpen():
-                self.serial.write(data)
+                try:
+                    self.serial.write(data)
+                    return True
+                except (OSError, serial.SerialException) as e:
+                    logger.error(f"Error writing to serial port: {e}")
+                    return False
+        return False
+
+    def get_next_command(self):
+        """
+        Get next command from queue (thread-safe, non-blocking)
+
+        Returns:
+            Command bytes or None if queue is empty
+        """
+        with self.queue_lock:
+            if len(self.command_queue) > 0:
+                return self.command_queue.pop(0)
+        return None
 
     def readline(self):
         with self.lock:
@@ -66,6 +123,12 @@ class SerialManager:
     def inWaiting(self):
         with self.lock:
             return self.serial.inWaiting()
+
+    def reset_input_buffer(self):
+        """Clear the input buffer to prevent stale data"""
+        with self.lock:
+            if self.serial.isOpen():
+                self.serial.reset_input_buffer()
 
 s0 = SerialManager()
 
@@ -123,10 +186,18 @@ class AboutDialog(About_Ui_Dialog):
         About_Ui_Dialog.__init__(self)
         self.setupUi(dialog)
 
+class ConnectionSignals(QtCore.QObject):
+    """Signals for thread-safe connection callbacks"""
+    success = pyqtSignal(str, str)  # serialPort, baudrate
+    error = pyqtSignal(str)  # error_msg
+
 class BifrostGUI(Ui_MainWindow):
     def __init__(self, dialog):
         Ui_MainWindow.__init__(self)
         self.setupUi(dialog)
+
+        # Create connection signals (will connect after methods are defined)
+        self.connection_signals = ConnectionSignals()
 
         # Replace ConsoleInput with HistoryLineEdit for command history
         old_console_input = self.ConsoleInput
@@ -141,6 +212,12 @@ class BifrostGUI(Ui_MainWindow):
 
         # Track serial thread state
         self.SerialThreadClass = None
+
+        # Track last manual command time to show responses
+        self.last_manual_command_time = 0
+
+        # Track homing state
+        self.is_homing = False
 
         # Log axis mapping configuration
         logger.info("="*60)
@@ -162,6 +239,9 @@ class BifrostGUI(Ui_MainWindow):
 
         self.actionAbout.triggered.connect(self.launchAboutWindow)
         self.actionExit.triggered.connect(self.close_application)
+
+        # Setup embedded position history graph
+        self.setupPositionHistoryControls()
 
         self.HomeButton.pressed.connect(self.sendHomingCycleCommand)
         self.ZeroPositionButton.pressed.connect(self.sendZeroPositionCommand)
@@ -275,6 +355,8 @@ class BifrostGUI(Ui_MainWindow):
         self.sequence_recorder = seq_rec.SequenceRecorder()
         self.sequence_player = None  # Will be initialized when needed
         self.is_playing_sequence = False
+        self.sequence_timer = QtCore.QTimer()
+        self.sequence_timer.timeout.connect(self.updateSequencePlayback)
         self.setupSequenceControls()
 
         # Track current differential motor positions for Art5/Art6
@@ -288,14 +370,63 @@ class BifrostGUI(Ui_MainWindow):
         self.desired_art5 = initial_art5
         self.desired_art6 = initial_art6
 
+        # Position validation tracking
+        self.last_valid_positions = {'X': 0, 'Y': 0, 'Z': 0, 'U': 0, 'V': 0, 'W': 0}
+        self.position_update_count = 0
+        self.last_gui_update_time = 0  # For throttling GUI updates
+
+        # Position history tracking
+        self.position_history = pos_hist.PositionHistory(max_size=config.POSITION_HISTORY_MAX_SIZE)
+        logger.info(f"Position history initialized (max_size={config.POSITION_HISTORY_MAX_SIZE}, sample_rate=1/{config.POSITION_HISTORY_SAMPLE_RATE})")
+
         # Setup endstop status displays
         self.setupEndstopDisplays()
+
+        # Setup generic increment/decrement connections
+        self.setupGenericControls()
+
+        # Connect connection signals now that methods are defined
+        self.connection_signals.success.connect(self._onConnectionSuccess)
+        self.connection_signals.error.connect(self._onConnectionError)
+
+    def setupGenericControls(self):
+        """
+        Setup generic increment/decrement methods for all joints
+        This replaces 36 individual methods with dynamic binding
+        """
+        # Map joint names to their spinboxes
+        self.joint_spinboxes = {
+            'Art1': self.SpinBoxArt1,
+            'Art2': self.SpinBoxArt2,
+            'Art3': self.SpinBoxArt3,
+            'Art4': self.SpinBoxArt4,
+            'Art5': self.SpinBoxArt5,
+            'Art6': self.SpinBoxArt6,
+            'Gripper': self.SpinBoxGripper
+        }
+
+        logger.info("Generic increment/decrement controls initialized")
+
+    def adjustJointValue(self, joint_name, delta):
+        """
+        Generic method to adjust any joint value by a delta
+
+        Args:
+            joint_name: Name of joint ('Art1', 'Art2', etc.)
+            delta: Amount to add to current value
+        """
+        if joint_name in self.joint_spinboxes:
+            spinbox = self.joint_spinboxes[joint_name]
+            new_value = spinbox.value() + delta
+            spinbox.setValue(new_value)
+        else:
+            logger.warning(f"Unknown joint name: {joint_name}")
 
     def close_application(self):
         # Properly cleanup serial connection and thread
         if self.SerialThreadClass and self.SerialThreadClass.isRunning():
             self.SerialThreadClass.stop()
-            self.SerialThreadClass.wait(2000)  # Wait up to 2 seconds
+            self.SerialThreadClass.wait(config.SERIAL_THREAD_SHUTDOWN_TIMEOUT)
         s0.close()
         sys.exit()
 
@@ -313,6 +444,11 @@ class BifrostGUI(Ui_MainWindow):
             messageToConsole=">>> " + messageToSend.strip()
             s0.write(messageToSend.encode('UTF-8'))
             self.ConsoleOutput.appendPlainText(messageToConsole)
+
+            # Update button state to indicate homing in progress
+            self.is_homing = True
+            self.HomeButton.setEnabled(False)
+            self.HomeButton.setText("Homing...")
 
     def sendZeroPositionCommand(self):
         if s0.isOpen():
@@ -367,23 +503,17 @@ class BifrostGUI(Ui_MainWindow):
         val=int(self.SpinBoxArt1.value()*10)
         self.FKSliderArt1.setValue(val)
     def FKDec10Art1(self):
-        val=self.SpinBoxArt1.value()-10
-        self.SpinBoxArt1.setValue(val)
+        self.adjustJointValue('Art1', -10)
     def FKDec1Art1(self):
-        val=self.SpinBoxArt1.value()-1
-        self.SpinBoxArt1.setValue(val)
+        self.adjustJointValue('Art1', -1)
     def FKDec0_1Art1(self):
-        val=self.SpinBoxArt1.value()-0.1
-        self.SpinBoxArt1.setValue(val)
+        self.adjustJointValue('Art1', -0.1)
     def FKInc0_1Art1(self):
-        val=self.SpinBoxArt1.value()+0.1
-        self.SpinBoxArt1.setValue(val)
+        self.adjustJointValue('Art1', 0.1)
     def FKInc1Art1(self):
-        val=self.SpinBoxArt1.value()+1
-        self.SpinBoxArt1.setValue(val)
+        self.adjustJointValue('Art1', 1)
     def FKInc10Art1(self):
-        val=self.SpinBoxArt1.value()+10
-        self.SpinBoxArt1.setValue(val)
+        self.adjustJointValue('Art1', 10)
 
 #FK Art2 Functions
     def FKMoveArt2(self):
@@ -415,23 +545,17 @@ class BifrostGUI(Ui_MainWindow):
         val=int(self.SpinBoxArt2.value()*10)
         self.FKSliderArt2.setValue(val)
     def FKDec10Art2(self):
-        val=self.SpinBoxArt2.value()-10
-        self.SpinBoxArt2.setValue(val)
+        self.adjustJointValue('Art2', -10)
     def FKDec1Art2(self):
-        val=self.SpinBoxArt2.value()-1
-        self.SpinBoxArt2.setValue(val)
+        self.adjustJointValue('Art2', -1)
     def FKDec0_1Art2(self):
-        val=self.SpinBoxArt2.value()-0.1
-        self.SpinBoxArt2.setValue(val)
+        self.adjustJointValue('Art2', -0.1)
     def FKInc0_1Art2(self):
-        val=self.SpinBoxArt2.value()+0.1
-        self.SpinBoxArt2.setValue(val)
+        self.adjustJointValue('Art2', 0.1)
     def FKInc1Art2(self):
-        val=self.SpinBoxArt2.value()+1
-        self.SpinBoxArt2.setValue(val)
+        self.adjustJointValue('Art2', 1)
     def FKInc10Art2(self):
-        val=self.SpinBoxArt2.value()+10
-        self.SpinBoxArt2.setValue(val)
+        self.adjustJointValue('Art2', 10)
 
 #FK Art3 Functions
     def FKMoveArt3(self):
@@ -460,23 +584,17 @@ class BifrostGUI(Ui_MainWindow):
         val=int(self.SpinBoxArt3.value()*10)
         self.FKSliderArt3.setValue(val)
     def FKDec10Art3(self):
-        val=self.SpinBoxArt3.value()-10
-        self.SpinBoxArt3.setValue(val)
+        self.adjustJointValue('Art3', -10)
     def FKDec1Art3(self):
-        val=self.SpinBoxArt3.value()-1
-        self.SpinBoxArt3.setValue(val)
+        self.adjustJointValue('Art3', -1)
     def FKDec0_1Art3(self):
-        val=self.SpinBoxArt3.value()-0.1
-        self.SpinBoxArt3.setValue(val)
+        self.adjustJointValue('Art3', -0.1)
     def FKInc0_1Art3(self):
-        val=self.SpinBoxArt3.value()+0.1
-        self.SpinBoxArt3.setValue(val)
+        self.adjustJointValue('Art3', 0.1)
     def FKInc1Art3(self):
-        val=self.SpinBoxArt3.value()+1
-        self.SpinBoxArt3.setValue(val)
+        self.adjustJointValue('Art3', 1)
     def FKInc10Art3(self):
-        val=self.SpinBoxArt3.value()+10
-        self.SpinBoxArt3.setValue(val)
+        self.adjustJointValue('Art3', 10)
 
 #FK Art4 Functions
     def FKMoveArt4(self):
@@ -505,32 +623,21 @@ class BifrostGUI(Ui_MainWindow):
         val=int(self.SpinBoxArt4.value()*10)
         self.FKSliderArt4.setValue(val)
     def FKDec10Art4(self):
-        val=self.SpinBoxArt4.value()-10
-        self.SpinBoxArt4.setValue(val)
+        self.adjustJointValue('Art4', -10)
     def FKDec1Art4(self):
-        val=self.SpinBoxArt4.value()-1
-        self.SpinBoxArt4.setValue(val)
+        self.adjustJointValue('Art4', -1)
     def FKDec0_1Art4(self):
-        val=self.SpinBoxArt4.value()-0.1
-        self.SpinBoxArt4.setValue(val)
+        self.adjustJointValue('Art4', -0.1)
     def FKInc0_1Art4(self):
-        val=self.SpinBoxArt4.value()+0.1
-        self.SpinBoxArt4.setValue(val)
+        self.adjustJointValue('Art4', 0.1)
     def FKInc1Art4(self):
-        val=self.SpinBoxArt4.value()+1
-        self.SpinBoxArt4.setValue(val)
+        self.adjustJointValue('Art4', 1)
     def FKInc10Art4(self):
-        val=self.SpinBoxArt4.value()+10
-        self.SpinBoxArt4.setValue(val)
+        self.adjustJointValue('Art4', 10)
 
 #FK Art5 Functions
     def FKMoveArt5(self):
-        # DIFFERENTIAL MECHANISM: Art5 & Art6 are coupled via bevel gear differential
-        # Motors: Drive5 (V axis) and Drive6 (W axis)
-        # To move only Art5 while keeping Art6 stationary:
-        # - Calculate Art6 from current motor positions (most recent robot state)
-        # - Use new Art5 value from spinbox
-
+        # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential kinematics
         art5_value = self.SpinBoxArt5.value()
 
         # Check if we have valid position feedback
@@ -538,16 +645,20 @@ class BifrostGUI(Ui_MainWindow):
             logger.warning("No position feedback received yet - differential control may be inaccurate!")
             logger.warning("Wait for position update or home the robot first")
 
-        # Calculate current Art6 from motor positions to keep it stationary
-        art6_value = (self.current_motor_v + self.current_motor_w) / 2.0
+        # Calculate new motor positions using differential kinematics helper
+        motor_v, motor_w, art6_kept = diff_kin.DifferentialKinematics.move_art5_only(
+            self.current_motor_v,
+            self.current_motor_w,
+            art5_value
+        )
 
-        # Calculate new motor positions
-        motor_v = art6_value + art5_value  # Drive 5 (V axis)
-        motor_w = art6_value - art5_value  # Drive 6 (W axis)
+        current_art5, current_art6 = diff_kin.DifferentialKinematics.motor_to_joint(
+            self.current_motor_v, self.current_motor_w
+        )
 
         logger.info(f"Art5 (DIFFERENTIAL) commanded to: {art5_value}°")
-        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={(self.current_motor_v - self.current_motor_w)/2:.2f}° Art6={art6_value:.2f}°")
-        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_value:.2f}° Art6={art6_value:.2f}° (Art6 should stay same)")
+        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={current_art5:.2f}° Art6={current_art6:.2f}°")
+        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_value:.2f}° Art6={art6_kept:.2f}° (Art6 kept)")
 
         # Update tracked positions
         self.current_motor_v = motor_v
@@ -578,32 +689,21 @@ class BifrostGUI(Ui_MainWindow):
         val=int(self.SpinBoxArt5.value()*10)
         self.FKSliderArt5.setValue(val)
     def FKDec10Art5(self):
-        val=self.SpinBoxArt5.value()-10
-        self.SpinBoxArt5.setValue(val)
+        self.adjustJointValue('Art5', -10)
     def FKDec1Art5(self):
-        val=self.SpinBoxArt5.value()-1
-        self.SpinBoxArt5.setValue(val)
+        self.adjustJointValue('Art5', -1)
     def FKDec0_1Art5(self):
-        val=self.SpinBoxArt5.value()-0.1
-        self.SpinBoxArt5.setValue(val)
+        self.adjustJointValue('Art5', -0.1)
     def FKInc0_1Art5(self):
-        val=self.SpinBoxArt5.value()+0.1
-        self.SpinBoxArt5.setValue(val)
+        self.adjustJointValue('Art5', 0.1)
     def FKInc1Art5(self):
-        val=self.SpinBoxArt5.value()+1
-        self.SpinBoxArt5.setValue(val)
+        self.adjustJointValue('Art5', 1)
     def FKInc10Art5(self):
-        val=self.SpinBoxArt5.value()+10
-        self.SpinBoxArt5.setValue(val)
+        self.adjustJointValue('Art5', 10)
 
 #FK Art6 Functions
     def FKMoveArt6(self):
-        # DIFFERENTIAL MECHANISM: Art5 & Art6 are coupled via bevel gear differential
-        # Motors: Drive5 (V axis) and Drive6 (W axis)
-        # To move only Art6 while keeping Art5 stationary:
-        # - Calculate Art5 from current motor positions (most recent robot state)
-        # - Use new Art6 value from spinbox
-
+        # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential kinematics
         art6_value = self.SpinBoxArt6.value()
 
         # Check if we have valid position feedback
@@ -611,16 +711,20 @@ class BifrostGUI(Ui_MainWindow):
             logger.warning("No position feedback received yet - differential control may be inaccurate!")
             logger.warning("Wait for position update or home the robot first")
 
-        # Calculate current Art5 from motor positions to keep it stationary
-        art5_value = (self.current_motor_v - self.current_motor_w) / 2.0
+        # Calculate new motor positions using differential kinematics helper
+        motor_v, motor_w, art5_kept = diff_kin.DifferentialKinematics.move_art6_only(
+            self.current_motor_v,
+            self.current_motor_w,
+            art6_value
+        )
 
-        # Calculate new motor positions
-        motor_v = art6_value + art5_value  # Drive 5 (V axis)
-        motor_w = art6_value - art5_value  # Drive 6 (W axis)
+        current_art5, current_art6 = diff_kin.DifferentialKinematics.motor_to_joint(
+            self.current_motor_v, self.current_motor_w
+        )
 
         logger.info(f"Art6 (DIFFERENTIAL) commanded to: {art6_value}°")
-        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={art5_value:.2f}° Art6={(self.current_motor_v + self.current_motor_w)/2:.2f}°")
-        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_value:.2f}° Art6={art6_value:.2f}° (Art5 should stay same)")
+        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={current_art5:.2f}° Art6={current_art6:.2f}°")
+        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_kept:.2f}° Art6={art6_value:.2f}° (Art5 kept)")
 
         # Update tracked positions
         self.current_motor_v = motor_v
@@ -651,29 +755,21 @@ class BifrostGUI(Ui_MainWindow):
         val=int(self.SpinBoxArt6.value()*10)
         self.FKSliderArt6.setValue(val)
     def FKDec10Art6(self):
-        val=self.SpinBoxArt6.value()-10
-        self.SpinBoxArt6.setValue(val)
+        self.adjustJointValue('Art6', -10)
     def FKDec1Art6(self):
-        val=self.SpinBoxArt6.value()-1
-        self.SpinBoxArt6.setValue(val)
+        self.adjustJointValue('Art6', -1)
     def FKDec0_1Art6(self):
-        val=self.SpinBoxArt6.value()-0.1
-        self.SpinBoxArt6.setValue(val)
+        self.adjustJointValue('Art6', -0.1)
     def FKInc0_1Art6(self):
-        val=self.SpinBoxArt6.value()+0.1
-        self.SpinBoxArt6.setValue(val)
+        self.adjustJointValue('Art6', 0.1)
     def FKInc1Art6(self):
-        val=self.SpinBoxArt6.value()+1
-        self.SpinBoxArt6.setValue(val)
+        self.adjustJointValue('Art6', 1)
     def FKInc10Art6(self):
-        val=self.SpinBoxArt6.value()+10
-        self.SpinBoxArt6.setValue(val)
+        self.adjustJointValue('Art6', 10)
 
 #FK Every Articulation Functions
     def FKMoveAll(self):
-        # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential, need to calculate motor positions
-        # Other axes map directly to motors
-
+        # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential kinematics
         if s0.isOpen():
             # Get joint values
             art1 = self.SpinBoxArt1.value()
@@ -683,9 +779,8 @@ class BifrostGUI(Ui_MainWindow):
             art5 = self.SpinBoxArt5.value()
             art6 = self.SpinBoxArt6.value()
 
-            # Calculate differential motor positions for Art5/Art6
-            motor_v = art6 + art5  # Drive 5 (V axis) for differential
-            motor_w = art6 - art5  # Drive 6 (W axis) for differential
+            # Calculate differential motor positions using helper
+            motor_v, motor_w = diff_kin.DifferentialKinematics.joint_to_motor(art5, art6)
 
             logger.info(f"MoveAll: Art5={art5}° Art6={art6}° → Differential: V={motor_v:.2f}° W={motor_w:.2f}°")
 
@@ -723,17 +818,13 @@ class BifrostGUI(Ui_MainWindow):
         val=int(self.SpinBoxGripper.value())
         self.SliderGripper.setValue(val)
     def Dec10Gripper(self):
-        val=self.SpinBoxGripper.value()-10
-        self.SpinBoxGripper.setValue(val)
+        self.adjustJointValue('Gripper', -10)
     def Dec1Gripper(self):
-        val=self.SpinBoxGripper.value()-1
-        self.SpinBoxGripper.setValue(val)
+        self.adjustJointValue('Gripper', -1)
     def Inc1Gripper(self):
-        val=self.SpinBoxGripper.value()+1
-        self.SpinBoxGripper.setValue(val)
+        self.adjustJointValue('Gripper', 1)
     def Inc10Gripper(self):
-        val=self.SpinBoxGripper.value()+10
-        self.SpinBoxGripper.setValue(val)
+        self.adjustJointValue('Gripper', 10)
 
 # Inverse Kinematics Functions
     def calculateIK(self):
@@ -937,6 +1028,172 @@ class BifrostGUI(Ui_MainWindow):
 
         logger.info("Endstop status displays initialized")
 
+    def setupPositionHistoryControls(self):
+        """Create embedded 3D robot visualization and controls"""
+        from robot_3d_visualizer import Robot3DCanvas
+
+        # Create group box for embedded 3D visualization (right side of window)
+        self.positionHistoryGroupBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.positionHistoryGroupBox.setGeometry(QtCore.QRect(1210, 10, 600, 900))
+        self.positionHistoryGroupBox.setTitle("3D Robot Visualization")
+
+        # Embed 3D matplotlib canvas
+        self.position_canvas = Robot3DCanvas(self.positionHistoryGroupBox, width=5.8, height=6.5, dpi=100)
+        self.position_canvas.setGeometry(QtCore.QRect(10, 25, 580, 650))
+
+        # Controls panel below 3D visualization
+        self.historyControlsFrame = QtWidgets.QFrame(self.positionHistoryGroupBox)
+        self.historyControlsFrame.setGeometry(QtCore.QRect(10, 685, 580, 200))
+        self.historyControlsFrame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+
+        # Time window control
+        self.timeWindowLabel = QtWidgets.QLabel(self.historyControlsFrame)
+        self.timeWindowLabel.setGeometry(QtCore.QRect(10, 10, 120, 20))
+        self.timeWindowLabel.setText("Time Window (s):")
+
+        self.timeWindowSpinBox = QtWidgets.QSpinBox(self.historyControlsFrame)
+        self.timeWindowSpinBox.setGeometry(QtCore.QRect(135, 8, 80, 25))
+        self.timeWindowSpinBox.setMinimum(10)
+        self.timeWindowSpinBox.setMaximum(600)
+        self.timeWindowSpinBox.setValue(60)
+        self.timeWindowSpinBox.setSingleStep(10)
+
+        # Display option checkboxes (3 rows of 2)
+        checkbox_y = 40
+        self.displayCheckboxes = {}
+        display_options = [
+            ('show_robot', 'Show Robot Arm'),
+            ('show_trajectory', 'Show Trajectory'),
+            ('show_base_frame', 'Show Base Frame'),
+            ('show_workspace', 'Show Workspace'),
+            ('show_grid', 'Show Grid Floor'),
+            ('auto_rotate', 'Auto-rotate View')
+        ]
+
+        for i, (key, label) in enumerate(display_options):
+            row = i // 2
+            col = i % 2
+            x = 10 + col * 290
+            y = checkbox_y + row * 30
+
+            checkbox = QtWidgets.QCheckBox(self.historyControlsFrame)
+            checkbox.setGeometry(QtCore.QRect(x, y, 280, 25))
+            checkbox.setText(label)
+            # Default checked states
+            checkbox.setChecked(key in ['show_robot', 'show_trajectory', 'show_base_frame', 'show_grid'])
+            self.displayCheckboxes[key] = checkbox
+
+        # Action buttons (2 rows)
+        button_y = 140
+        self.exportHistoryButton = QtWidgets.QPushButton(self.historyControlsFrame)
+        self.exportHistoryButton.setGeometry(QtCore.QRect(10, button_y, 135, 30))
+        self.exportHistoryButton.setText("Export CSV")
+        self.exportHistoryButton.pressed.connect(self.exportPositionHistory)
+
+        self.clearHistoryButton = QtWidgets.QPushButton(self.historyControlsFrame)
+        self.clearHistoryButton.setGeometry(QtCore.QRect(155, button_y, 135, 30))
+        self.clearHistoryButton.setText("Clear History")
+        self.clearHistoryButton.pressed.connect(self.clearPositionHistory)
+
+        self.resetViewButton = QtWidgets.QPushButton(self.historyControlsFrame)
+        self.resetViewButton.setGeometry(QtCore.QRect(300, button_y, 135, 30))
+        self.resetViewButton.setText("Reset View")
+        self.resetViewButton.pressed.connect(self.resetVisualizationView)
+
+        self.refreshGraphButton = QtWidgets.QPushButton(self.historyControlsFrame)
+        self.refreshGraphButton.setGeometry(QtCore.QRect(445, button_y, 125, 30))
+        self.refreshGraphButton.setText("Refresh")
+        self.refreshGraphButton.pressed.connect(self.updateEmbeddedGraph)
+
+        # Make the group box visible
+        self.positionHistoryGroupBox.show()
+
+        # Start auto-update timer for 3D visualization
+        # OPTIMIZED: 2 second intervals - matplotlib rendering is expensive
+        # Dirty flag pattern in visualizer prevents unnecessary redraws
+        self.graph_update_timer = QtCore.QTimer()
+        self.graph_update_timer.timeout.connect(self.updateEmbeddedGraph)
+        self.graph_update_timer.start(2000)  # 2 second intervals (optimized from 1s)
+
+        logger.info("Embedded 3D robot visualization initialized (2s update interval)")
+
+    def updateEmbeddedGraph(self):
+        """Update the embedded 3D robot visualization"""
+        if not hasattr(self, 'position_canvas'):
+            return
+
+        # Get time window from spinbox
+        window_size = self.timeWindowSpinBox.value()
+
+        # Get display options from checkboxes
+        options = {
+            key: checkbox.isChecked()
+            for key, checkbox in self.displayCheckboxes.items()
+        }
+
+        # Update the 3D visualization
+        self.position_canvas.update_visualization(self.position_history, window_size, options)
+
+    def resetVisualizationView(self):
+        """Reset 3D visualization view to default isometric angle"""
+        if hasattr(self, 'position_canvas'):
+            self.position_canvas.reset_view()
+            logger.info("3D view reset to isometric")
+
+    def exportPositionHistory(self):
+        """Export position history to CSV"""
+        if len(self.position_history) == 0:
+            msgBox = QtWidgets.QMessageBox()
+            msgBox.setIcon(QtWidgets.QMessageBox.Warning)
+            msgBox.setText("No position history to export.")
+            msgBox.setWindowTitle("No Data")
+            msgBox.exec_()
+            return
+
+        from datetime import datetime
+        default_filename = f"position_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            None,
+            "Export Position History",
+            default_filename,
+            "CSV Files (*.csv);;All Files (*)"
+        )
+
+        if filename:
+            if self.position_history.export_to_csv(filename):
+                logger.info(f"Position history exported to {filename}")
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Information)
+                msgBox.setText(f"Position history exported successfully to:\n{filename}\n\n{len(self.position_history)} snapshots saved.")
+                msgBox.setWindowTitle("Export Successful")
+                msgBox.exec_()
+            else:
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setIcon(QtWidgets.QMessageBox.Critical)
+                msgBox.setText("Failed to export position history.")
+                msgBox.setWindowTitle("Export Failed")
+                msgBox.exec_()
+
+    def clearPositionHistory(self):
+        """Clear position history after confirmation"""
+        msgBox = QtWidgets.QMessageBox()
+        msgBox.setIcon(QtWidgets.QMessageBox.Question)
+        msgBox.setText(f"Clear all position history?\n\nThis will delete {len(self.position_history)} recorded snapshots.")
+        msgBox.setWindowTitle("Clear History")
+        msgBox.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        msgBox.setDefaultButton(QtWidgets.QMessageBox.No)
+
+        if msgBox.exec_() == QtWidgets.QMessageBox.Yes:
+            self.position_history.clear()
+            logger.info("Position history cleared by user")
+
+            infoBox = QtWidgets.QMessageBox()
+            infoBox.setIcon(QtWidgets.QMessageBox.Information)
+            infoBox.setText("Position history cleared.")
+            infoBox.setWindowTitle("Cleared")
+            infoBox.exec_()
+
     def recordSequencePoint(self):
         """Record current joint positions to sequence"""
         q1 = self.SpinBoxArt1.value()
@@ -990,37 +1247,36 @@ class BifrostGUI(Ui_MainWindow):
         speed = self.sequenceSpeedSpinBox.value()
         loop = self.sequenceLoopCheckBox.isChecked()
 
+        # Start playback (non-blocking)
+        self.sequence_player.start_playback(
+            self.sequence_recorder.current_sequence,
+            speed=speed,
+            loop=loop
+        )
+
         # Update button states
         self.sequencePlayButton.setEnabled(False)
         self.sequencePauseButton.setEnabled(True)
         self.sequenceStopButton.setEnabled(True)
         self.is_playing_sequence = True
 
-        # Start playback in a separate thread
-        self.playback_thread = threading.Thread(
-            target=self.runSequencePlayback,
-            args=(speed, loop),
-            daemon=True
-        )
-        self.playback_thread.start()
+        # Start timer to update playback (interval from config)
+        self.sequence_timer.start(config.SEQUENCE_TIMER_INTERVAL)
 
         logger.info(f"Started sequence playback (speed={speed}x, loop={loop})")
 
-    def runSequencePlayback(self, speed, loop):
-        """Run sequence playback in thread"""
-        try:
-            for current, total in self.sequence_player.play(
-                self.sequence_recorder.current_sequence,
-                speed=speed,
-                loop=loop
-            ):
-                # Update UI progress (would need signal/slot for thread safety)
-                pass
-        except Exception as e:
-            logger.error(f"Error during sequence playback: {e}")
-        finally:
-            self.is_playing_sequence = False
-            # Reset button states (would need signal/slot for thread safety)
+    def updateSequencePlayback(self):
+        """Called by QTimer to advance sequence playback (thread-safe)"""
+        if not self.sequence_player:
+            self.sequence_timer.stop()
+            return
+
+        should_continue, current, total = self.sequence_player.playNextPoint()
+
+        if not should_continue:
+            # Playback finished
+            self.stopSequence()
+            logger.info("Sequence playback completed")
 
     def pauseSequence(self):
         """Pause/resume sequence playback"""
@@ -1034,6 +1290,8 @@ class BifrostGUI(Ui_MainWindow):
 
     def stopSequence(self):
         """Stop sequence playback"""
+        self.sequence_timer.stop()
+
         if self.sequence_player:
             self.sequence_player.stop()
 
@@ -1050,9 +1308,8 @@ class BifrostGUI(Ui_MainWindow):
         logger.info(f"Executing sequence move: q1={q1:.1f}°, q2={q2:.1f}°, q3={q3:.1f}°, q4={q4:.1f}°, q5={q5:.1f}°, q6={q6:.1f}°, grip={gripper}")
 
         if s0.isOpen():
-            # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential, calculate motor positions
-            motor_v = q6 + q5  # Drive 5 (V axis) for differential
-            motor_w = q6 - q5  # Drive 6 (W axis) for differential
+            # DIFFERENTIAL MECHANISM: Calculate motor positions using helper
+            motor_v, motor_w = diff_kin.DifferentialKinematics.joint_to_motor(q5, q6)
 
             if self.G1MoveRadioButton.isChecked():
                 typeOfMovement = "G1 "
@@ -1147,41 +1404,88 @@ class BifrostGUI(Ui_MainWindow):
             self.blankBaudRate()
             return
 
-        # Stop existing thread if running
-        if self.SerialThreadClass and self.SerialThreadClass.isRunning():
-            self.SerialThreadClass.stop()
-            self.SerialThreadClass.wait(2000)
+        # Disable connect button to prevent multiple clicks
+        self.ConnectButton.setEnabled(False)
+        self.RobotStateDisplay.setText("Connecting...")
+        self.RobotStateDisplay.setStyleSheet('background-color: rgb(255, 255, 0)')  # Yellow
 
+        # Run connection in separate thread to prevent GUI freeze
+        connection_thread = threading.Thread(
+            target=self._connectSerialWorker,
+            args=(serialPort, baudrate),
+            daemon=True
+        )
+        connection_thread.start()
+
+    def _connectSerialWorker(self, serialPort, baudrate):
+        """Worker thread for serial connection (prevents GUI freeze)"""
         try:
+            # Stop existing thread if running
+            if self.SerialThreadClass and self.SerialThreadClass.isRunning():
+                self.SerialThreadClass.stop()
+                self.SerialThreadClass.wait(2000)
+
             # Close existing connection
             s0.close()
 
-            # Configure and open new connection
+            # Configure and open new connection (this can block on Windows!)
             s0.serial.port = serialPort
             s0.serial.baudrate = int(baudrate)
-            s0.serial.timeout = 1
+            s0.serial.timeout = config.SERIAL_TIMEOUT
             s0.open()
 
-            # Create and start new serial thread
-            self.SerialThreadClass = SerialThreadClass(self.firmware_type)
-            self.SerialThreadClass.serialSignal.connect(self.updateConsole)
+            # Clear any stale data in buffers
+            s0.reset_input_buffer()
+            logger.debug("Cleared serial input buffer")
+
+            # Create and start new serial thread (pass GUI instance for event-driven endstop polling)
+            self.SerialThreadClass = SerialThreadClass(self.firmware_type, gui_instance=self)
             self.SerialThreadClass.start()
 
-            # Request immediate position update to initialize tracking variables
-            if self.firmware_type == FIRMWARE_RRF:
-                s0.write("M114\n".encode('UTF-8'))
+            # Emit success signal (thread-safe)
+            # Signal connection will happen in GUI thread
+            self.connection_signals.success.emit(serialPort, baudrate)
 
-            logger.info(f"✓ Connected to {serialPort} at {baudrate} baud")
-            logger.info(f"✓ Serial thread started (Firmware: {self.firmware_type})")
-            logger.info(f"✓ Requesting position update to initialize differential tracking")
-            print(f"Connected to {serialPort} at {baudrate} baud")
         except Exception as e:
-            print(f"Error opening serial port: {e}")
-            msgBox = QtWidgets.QMessageBox()
-            msgBox.setIcon(QtWidgets.QMessageBox.Critical)
-            msgBox.setText(f"Failed to connect to serial port:\n{str(e)}")
-            msgBox.setWindowTitle("Connection Error")
-            msgBox.exec_()
+            logger.exception("Serial connection error")
+            # Emit error signal (thread-safe)
+            self.connection_signals.error.emit(str(e))
+
+    def _onConnectionSuccess(self, serialPort, baudrate):
+        """Called when connection succeeds (runs in GUI thread)"""
+        # Connect serial signal in GUI thread (critical for Qt signals to work)
+        self.SerialThreadClass.serialSignal.connect(self.updateConsole)
+
+        # Update GUI to show connected state
+        self.updateCurrentState("Idle")
+        self.ConnectButton.setEnabled(True)
+
+        # Request initial position after thread is ready
+        QtCore.QTimer.singleShot(50, self.requestInitialPosition)
+
+        logger.info(f"✓ Connected to {serialPort} at {baudrate} baud")
+        logger.info(f"✓ Serial thread started (Firmware: {self.firmware_type})")
+        logger.info(f"✓ Requesting position update to initialize differential tracking")
+        print(f"Connected to {serialPort} at {baudrate} baud")
+
+    def _onConnectionError(self, error_msg):
+        """Called when connection fails (runs in GUI thread)"""
+        self.serialDisconnected()
+        self.ConnectButton.setEnabled(True)
+
+        print(f"Error opening serial port: {error_msg}")
+        msgBox = QtWidgets.QMessageBox()
+        msgBox.setIcon(QtWidgets.QMessageBox.Critical)
+        msgBox.setText(f"Failed to connect to serial port:\n{error_msg}")
+        msgBox.setWindowTitle("Connection Error")
+        msgBox.exec_()
+
+    def requestInitialPosition(self):
+        """Request initial position and endstop status after connection (called by QTimer)"""
+        if self.firmware_type == FIRMWARE_RRF and s0.isOpen():
+            s0.write("M114\n".encode('UTF-8'), priority=True)
+            s0.write("M119\n".encode('UTF-8'), priority=True)
+            logger.debug("Requested initial position (M114) and endstop status (M119)")
 
     def serialDisconnected(self):
         self.RobotStateDisplay.setStyleSheet('background-color: rgb(255, 0, 0)')
@@ -1200,17 +1504,25 @@ class BifrostGUI(Ui_MainWindow):
             isDataReadVerbose = "MPos" in dataRead
             isDataOkResponse = "ok" in dataRead
 
+        # Check if homing completed
+        if self.is_homing and isDataOkResponse:
+            self.is_homing = False
+            self.HomeButton.setEnabled(True)
+            self.HomeButton.setText("Home")
+
         if dataRead=="SERIAL-DISCONNECTED":
             s0.close()
             self.serialDisconnected()
             print ("Serial Connection Lost")
 
         else:
+            # Show responses to manual commands for 2 seconds after command
+            time_since_manual = time.time() - self.last_manual_command_time
+            if time_since_manual < 2.0:
+                self.ConsoleOutput.appendPlainText(dataRead)
             # Handle endstop responses
-            if self.firmware_type == FIRMWARE_RRF and isEndstopResponse:
+            elif self.firmware_type == FIRMWARE_RRF and isEndstopResponse:
                 self.updateEndstopDisplay(dataRead)
-                if verboseShow:
-                    self.ConsoleOutput.appendPlainText(dataRead)
             elif not isDataReadVerbose and not isDataOkResponse:
                 self.ConsoleOutput.appendPlainText(dataRead)
             elif isDataOkResponse and okShow:
@@ -1230,61 +1542,122 @@ class BifrostGUI(Ui_MainWindow):
                 self.ConsoleOutput.appendPlainText(messageToConsole)
                 self.ConsoleInput.addToHistory(command)
                 self.ConsoleInput.clear()
+                logger.debug(f"Manual command sent: {command}")
+                # Mark time of manual command to show responses for next 2 seconds
+                self.last_manual_command_time = time.time()
         else:
             self.noSerialConnection()
 
+    def validatePosition(self, axis, value):
+        """
+        Validate position value for reasonableness (uses config.py limits)
+
+        Args:
+            axis: Axis name (X, Y, Z, U, V, W)
+            value: Position value in degrees
+
+        Returns:
+            (is_valid, sanitized_value)
+        """
+        if axis not in config.POSITION_LIMITS:
+            return (True, value)  # Unknown axis, accept
+
+        min_val, max_val = config.POSITION_LIMITS[axis]
+
+        # Check absolute limits
+        if not (min_val <= value <= max_val):
+            logger.warning(f"Position out of bounds: {axis}={value:.2f}° (limits: {min_val} to {max_val})")
+            # Clamp to limits
+            value = max(min_val, min(max_val, value))
+            return (False, value)
+
+        # Check for impossible changes
+        if axis in self.last_valid_positions:
+            last_value = self.last_valid_positions[axis]
+            change = abs(value - last_value)
+            if change > config.MAX_POSITION_CHANGE_PER_UPDATE:
+                logger.warning(f"Impossible position change detected: {axis} changed {change:.2f}° in 100ms (max: {config.MAX_POSITION_CHANGE_PER_UPDATE}°)")
+                # Use last valid value
+                return (False, last_value)
+
+        return (True, value)
+
     def updateFKPosDisplay(self,dataRead):
         if self.firmware_type == FIRMWARE_RRF:
-            # RRF: Parse M114 response format: X:10.000 Y:10.000 Z:0.000 U:0.028 V:-110.000 W:-290.000 E:0.000 ...
+            # RRF: Parse M114 response using compiled regex (3x faster than string.split)
             try:
-                # Extract position values using simple string parsing
-                parts = dataRead.split()
-                pos_dict = {}
-                for part in parts:
-                    if ':' in part:
-                        axis, value = part.split(':')
-                        try:
-                            pos_dict[axis] = float(value)
-                        except ValueError:
-                            continue
+                # Extract position values using regex
+                matches = RRF_POSITION_PATTERN.findall(dataRead)
+                if not matches:
+                    return
 
-                # Extract axis positions
+                pos_dict = {axis: float(value) for axis, value in matches}
+
+                # Extract axis positions with validation
                 if 'V' in pos_dict and 'W' in pos_dict:
-                    motor_x = pos_dict.get('X', 0.0)  # Drive 0 (X axis) - Art1
-                    motor_y = pos_dict.get('Y', 0.0)  # Drives 1+2 (Y axis) - Art2 (coupled)
-                    motor_z = pos_dict.get('Z', 0.0)  # Drive 3 (Z axis) - Art3
-                    motor_u = pos_dict.get('U', 0.0)  # Drive 4 (U axis) - Art4
-                    motor_v = pos_dict.get('V', 0.0)  # Drive 5 (V axis) - Differential
-                    motor_w = pos_dict.get('W', 0.0)  # Drive 6 (W axis) - Differential
+                    # Validate each position
+                    motor_x_valid, motor_x = self.validatePosition('X', pos_dict.get('X', 0.0))
+                    motor_y_valid, motor_y = self.validatePosition('Y', pos_dict.get('Y', 0.0))
+                    motor_z_valid, motor_z = self.validatePosition('Z', pos_dict.get('Z', 0.0))
+                    motor_u_valid, motor_u = self.validatePosition('U', pos_dict.get('U', 0.0))
+                    motor_v_valid, motor_v = self.validatePosition('V', pos_dict.get('V', 0.0))
+                    motor_w_valid, motor_w = self.validatePosition('W', pos_dict.get('W', 0.0))
 
-                    # INVERSE DIFFERENTIAL: Convert motor positions to joint angles
-                    # Art5 = (Motor_V - Motor_W) / 2
-                    # Art6 = (Motor_V + Motor_W) / 2
-                    art5 = (motor_v - motor_w) / 2.0
-                    art6 = (motor_v + motor_w) / 2.0
+                    # Update last valid positions
+                    self.last_valid_positions['X'] = motor_x
+                    self.last_valid_positions['Y'] = motor_y
+                    self.last_valid_positions['Z'] = motor_z
+                    self.last_valid_positions['U'] = motor_u
+                    self.last_valid_positions['V'] = motor_v
+                    self.last_valid_positions['W'] = motor_w
 
-                    # Update tracked motor positions and desired joint positions for differential control
+                    # INVERSE DIFFERENTIAL: Convert motor positions to joint angles using helper
+                    art5, art6 = diff_kin.DifferentialKinematics.motor_to_joint(motor_v, motor_w)
+
+                    # Update tracked motor positions
                     self.current_motor_v = motor_v
                     self.current_motor_w = motor_w
                     self.desired_art5 = art5
                     self.desired_art6 = art6
 
-                    logger.debug(f"Position feedback - X:{motor_x:.2f} Y:{motor_y:.2f} Z:{motor_z:.2f} U:{motor_u:.2f} V:{motor_v:.2f} W:{motor_w:.2f}")
-                    logger.info(f"  Art1<-X:{motor_x:.2f}° | Art2<-Y:{motor_y:.2f}° | Art3<-Z:{motor_z:.2f}° | Art4<-U:{motor_u:.2f}° | Art5(calc):{art5:.2f}° | Art6(calc):{art6:.2f}°")
+                    self.position_update_count += 1
 
-                    # Display positions
-                    self.FKCurrentPosValueArt1.setText(f"{motor_x:.2f}º")  # X → Art1
-                    self.FKCurrentPosValueArt2.setText(f"{motor_y:.2f}º")  # Y → Art2
-                    self.FKCurrentPosValueArt3.setText(f"{motor_z:.2f}º")  # Z → Art3
-                    self.FKCurrentPosValueArt4.setText(f"{motor_u:.2f}º")  # U → Art4
-                    self.FKCurrentPosValueArt5.setText(f"{art5:.2f}º")     # Differential inverse → Art5
-                    self.FKCurrentPosValueArt6.setText(f"{art6:.2f}º")     # Differential inverse → Art6
+                    # Record position history (sampled based on config)
+                    if self.position_update_count % config.POSITION_HISTORY_SAMPLE_RATE == 0:
+                        self.position_history.add_snapshot(
+                            art1=motor_x,
+                            art2=motor_y,
+                            art3=motor_z,
+                            art4=motor_u,
+                            art5=art5,
+                            art6=art6
+                        )
 
-                    # Set status to Idle since M114 doesn't provide status
-                    self.updateCurrentState("Idle")
+                    # Log every Nth update to reduce noise (from config)
+                    if self.position_update_count % config.LOGGING_INTERVAL_POSITIONS == 0:
+                        logger.debug(f"Position feedback - X:{motor_x:.2f} Y:{motor_y:.2f} Z:{motor_z:.2f} U:{motor_u:.2f} V:{motor_v:.2f} W:{motor_w:.2f}")
+                        logger.info(f"  Art1<-X:{motor_x:.2f}° | Art2<-Y:{motor_y:.2f}° | Art3<-Z:{motor_z:.2f}° | Art4<-U:{motor_u:.2f}° | Art5(calc):{art5:.2f}° | Art6(calc):{art6:.2f}°")
+
+                    # Throttle GUI updates (interval from config)
+                    current_time = time.time()
+                    if current_time - self.last_gui_update_time >= config.GUI_UPDATE_INTERVAL:
+                        self.last_gui_update_time = current_time
+
+                        # Display positions
+                        self.FKCurrentPosValueArt1.setText(f"{motor_x:.2f}º")
+                        self.FKCurrentPosValueArt2.setText(f"{motor_y:.2f}º")
+                        self.FKCurrentPosValueArt3.setText(f"{motor_z:.2f}º")
+                        self.FKCurrentPosValueArt4.setText(f"{motor_u:.2f}º")
+                        self.FKCurrentPosValueArt5.setText(f"{art5:.2f}º")
+                        self.FKCurrentPosValueArt6.setText(f"{art6:.2f}º")
+
+                        # Set status to Idle since M114 doesn't provide status
+                        self.updateCurrentState("Idle")
+
             except (ValueError, KeyError, IndexError) as e:
                 logger.error(f"Error parsing M114 response: {e}")
                 logger.debug(f"Problematic data: {dataRead}")
+                logger.exception("Position parsing error")
         else:  # GRBL
             # GRBL: Parse comma-separated format
             try:
@@ -1304,21 +1677,15 @@ class BifrostGUI(Ui_MainWindow):
                 logger.error(f"Error parsing GRBL status: {e}")
 
     def updateEndstopDisplay(self, dataRead):
-        """Parse M119 endstop response and update GUI displays"""
+        """Parse M119 endstop response and update GUI displays (optimized with regex)"""
         # Format: "Endstops - X: at min stop, Y: not stopped, Z: not stopped, U: not stopped, V: at min stop, W: at min stop, Z probe: at min stop"
         try:
-            # Remove "Endstops - " prefix
-            endstop_data = dataRead.replace("Endstops - ", "")
+            # Use regex to extract endstop statuses (faster than string split)
+            matches = ENDSTOP_PATTERN.findall(dataRead)
+            if not matches:
+                return
 
-            # Split by comma and parse each endstop
-            endstops = {}
-            for part in endstop_data.split(','):
-                part = part.strip()
-                if ':' in part:
-                    axis, status = part.split(':', 1)
-                    axis = axis.strip()
-                    status = status.strip()
-                    endstops[axis] = status
+            endstops = {axis: status.strip() for axis, status in matches}
 
             # Update GUI labels with color coding
             # Green = not triggered, Red = triggered
@@ -1380,19 +1747,22 @@ class BifrostGUI(Ui_MainWindow):
 class SerialThreadClass(QtCore.QThread):
     serialSignal = pyqtSignal(str)
 
-    def __init__(self, firmware_type, parent=None):
+    def __init__(self, firmware_type, gui_instance=None, parent=None):
         super(SerialThreadClass, self).__init__(parent)
         self.firmware_type = firmware_type
+        self.gui_instance = gui_instance  # Reference to GUI for movement tracking
         self.running = True
         self.elapsedTime = time.time()
         self.endstopCheckTime = time.time()
+        self.status_polling_paused = False  # Flag to pause polling during long commands
+        self.blocking_command_start_time = 0.0  # When blocking command was sent
 
     def stop(self):
         """Gracefully stop the thread"""
         self.running = False
 
     def run(self):
-        """Main thread loop with proper error handling and exit condition"""
+        """Main thread loop with non-blocking reads and command queue processing"""
         while self.running:
             if not s0.isOpen():
                 time.sleep(0.1)
@@ -1401,52 +1771,106 @@ class SerialThreadClass(QtCore.QThread):
             try:
                 # Check if connection is still alive
                 try:
-                    s0.inWaiting()
+                    bytes_available = s0.inWaiting()
                 except (OSError, serial.SerialException):
                     self.serialSignal.emit("SERIAL-DISCONNECTED")
                     print("Lost Serial connection!")
                     break
 
-                # Send status request every 100ms
                 current_time = time.time()
-                if current_time - self.elapsedTime > 0.1:
+
+                # PROCESS COMMAND QUEUE (non-blocking)
+                # This is where all writes actually happen, keeping GUI thread free
+                command = s0.get_next_command()
+                if command:
+                    success = s0._write_internal(command)
+                    if not success:
+                        self.serialSignal.emit("SERIAL-DISCONNECTED")
+                        break
+
+                    # Check if this is a long-running blocking command
+                    command_str = command.decode('UTF-8', errors='replace').strip().upper()
+                    if self.firmware_type == FIRMWARE_RRF:
+                        # RRF blocking commands: G28 (home), G29 (bed probe), M999 (reset)
+                        blocking_commands = ['G28', 'G29', 'M999']
+                    else:  # GRBL
+                        # GRBL blocking commands: $H (home), $X (unlock)
+                        blocking_commands = ['$H', '$X']
+
+                    # Pause status polling if we sent a blocking command
+                    for block_cmd in blocking_commands:
+                        if command_str.startswith(block_cmd):
+                            self.status_polling_paused = True
+                            self.blocking_command_start_time = current_time
+                            logger.info(f"Pausing status polling for blocking command: {command_str}")
+                            break
+
+                # Check for timeout on paused polling (safety mechanism)
+                if self.status_polling_paused:
+                    time_paused = current_time - self.blocking_command_start_time
+                    if time_paused >= config.BLOCKING_COMMAND_MAX_PAUSE:
+                        self.status_polling_paused = False
+                        logger.warning(f"Forcing resume of status polling after {time_paused:.1f}s timeout (max: {config.BLOCKING_COMMAND_MAX_PAUSE}s)")
+                        # Request immediate position update
+                        if self.firmware_type == FIRMWARE_RRF:
+                            s0.write("M114\n".encode('UTF-8'), priority=True)
+                            s0.write("M119\n".encode('UTF-8'), priority=True)
+
+                # Send status request (interval from config) - ONLY if not paused
+                if not self.status_polling_paused and current_time - self.elapsedTime > config.SERIAL_STATUS_REQUEST_INTERVAL:
                     self.elapsedTime = current_time
                     try:
                         if self.firmware_type == FIRMWARE_RRF:
-                            s0.write("M114\n".encode('UTF-8'))  # Use M114 instead of M408 for position feedback
+                            s0.write("M114\n".encode('UTF-8'), priority=True)
                         else:  # GRBL
-                            s0.write("?\n".encode('UTF-8'))
-                    except (OSError, serial.SerialException) as e:
-                        print(f"Error sending status request: {e}")
-                        self.serialSignal.emit("SERIAL-DISCONNECTED")
-                        break
+                            s0.write("?\n".encode('UTF-8'), priority=True)
+                    except Exception as e:
+                        print(f"Error queuing status request: {e}")
 
-                # Send endstop status request every 500ms
-                if current_time - self.endstopCheckTime > 0.5:
+                # Poll endstop status regularly - ONLY if not paused
+                if not self.status_polling_paused and current_time - self.endstopCheckTime > config.SERIAL_ENDSTOP_REQUEST_INTERVAL:
                     self.endstopCheckTime = current_time
                     try:
                         if self.firmware_type == FIRMWARE_RRF:
-                            s0.write("M119\n".encode('UTF-8'))  # Request endstop status
-                    except (OSError, serial.SerialException) as e:
-                        print(f"Error sending endstop request: {e}")
-                        self.serialSignal.emit("SERIAL-DISCONNECTED")
-                        break
+                            s0.write("M119\n".encode('UTF-8'), priority=True)
+                    except Exception as e:
+                        print(f"Error queuing endstop request: {e}")
 
-                # Read response
+                # NON-BLOCKING READ: Only read if data is available
+                # This prevents the thread from blocking when firmware is busy executing moves
                 try:
-                    dataBytes = s0.readline()
-                    if dataBytes:
-                        # Decode bytes to string and strip whitespace
-                        dataCropped = dataBytes.decode('UTF-8', errors='replace').strip()
-                        if dataCropped:
-                            self.serialSignal.emit(dataCropped)
+                    if bytes_available > 0:
+                        dataBytes = s0.readline()
+                        if dataBytes:
+                            # Decode bytes to string and strip whitespace
+                            dataCropped = dataBytes.decode('UTF-8', errors='replace').strip()
+                            if dataCropped:
+                                self.serialSignal.emit(dataCropped)
+
+                                # Resume status polling when blocking command completes
+                                # Must meet BOTH conditions: received "ok" AND minimum time elapsed
+                                if self.status_polling_paused and "ok" in dataCropped.lower():
+                                    time_elapsed = current_time - self.blocking_command_start_time
+                                    if time_elapsed >= config.BLOCKING_COMMAND_MIN_PAUSE:
+                                        self.status_polling_paused = False
+                                        logger.info(f"Resuming status polling after blocking command completed ({time_elapsed:.1f}s elapsed)")
+                                        # Request immediate position update after resuming
+                                        if self.firmware_type == FIRMWARE_RRF:
+                                            s0.write("M114\n".encode('UTF-8'), priority=True)
+                                            s0.write("M119\n".encode('UTF-8'), priority=True)
+                                    else:
+                                        logger.debug(f"Received 'ok' but only {time_elapsed:.1f}s elapsed (need {config.BLOCKING_COMMAND_MIN_PAUSE}s), waiting...")
                 except (OSError, serial.SerialException) as e:
                     print(f"Error reading from serial: {e}")
                     self.serialSignal.emit("SERIAL-DISCONNECTED")
                     break
 
+                # Small sleep to prevent busy-waiting (from config)
+                time.sleep(config.SERIAL_THREAD_SLEEP)
+
             except Exception as e:
                 print(f"Unexpected error in serial thread: {e}")
+                logger.exception("Serial thread error")
                 time.sleep(0.1)
 
         print("Serial thread stopped")
@@ -1491,6 +1915,7 @@ if __name__ == '__main__':
 
     # Create main window first
     mwindow = MainWindow(None)
+    mwindow.setMinimumSize(1820, 920)  # Adjusted width to fit visualization
 
     # Create GUI instance
     prog = BifrostGUI(mwindow)
