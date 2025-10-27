@@ -23,12 +23,12 @@ import numpy as np
 import re
 
 # Configure logging for debugging using config
+# Only log to file, not to console
 logging.basicConfig(
     level=getattr(logging, config.LOG_LEVEL),
     format=config.LOG_FORMAT,
     handlers=[
-        logging.FileHandler(config.LOG_FILE),
-        logging.StreamHandler(sys.stdout)
+        logging.FileHandler(config.LOG_FILE)
     ]
 )
 logger = logging.getLogger(__name__)
@@ -1416,7 +1416,6 @@ class BifrostGUI(Ui_MainWindow):
             self.ConnectButton.setEnabled(True)
 
             logger.info("Disconnected from serial port")
-            print("Disconnected from serial port")
 
         except Exception as e:
             logger.error(f"Error during disconnect: {e}")
@@ -1471,7 +1470,6 @@ class BifrostGUI(Ui_MainWindow):
         logger.info(f"✓ Connected to {serialPort} at {baudrate} baud")
         logger.info(f"✓ Serial thread started (Firmware: {self.firmware_type})")
         logger.info(f"✓ Requesting position update to initialize differential tracking")
-        print(f"Connected to {serialPort} at {baudrate} baud")
 
     def _onConnectionError(self, error_msg):
         """Called when connection fails (runs in GUI thread)"""
@@ -1479,7 +1477,7 @@ class BifrostGUI(Ui_MainWindow):
         self.ConnectButton.setText("Connect")
         self.ConnectButton.setEnabled(True)
 
-        print(f"Error opening serial port: {error_msg}")
+        logger.error(f"Error opening serial port: {error_msg}")
         msgBox = QtWidgets.QMessageBox()
         msgBox.setIcon(QtWidgets.QMessageBox.Critical)
         msgBox.setText(f"Failed to connect to serial port:\n{error_msg}")
@@ -1520,7 +1518,7 @@ class BifrostGUI(Ui_MainWindow):
         if dataRead=="SERIAL-DISCONNECTED":
             s0.close()
             self.serialDisconnected()
-            print ("Serial Connection Lost")
+            logger.warning("Serial Connection Lost")
 
         else:
             # Show responses to manual commands for 2 seconds after command
@@ -1789,7 +1787,7 @@ class SerialThreadClass(QtCore.QThread):
                     bytes_available = s0.inWaiting()
                 except (OSError, serial.SerialException):
                     self.serialSignal.emit("SERIAL-DISCONNECTED")
-                    print("Lost Serial connection!")
+                    logger.warning("Lost Serial connection!")
                     break
 
                 current_time = time.time()
@@ -1840,7 +1838,7 @@ class SerialThreadClass(QtCore.QThread):
                         else:  # GRBL
                             s0.write("?\n".encode('UTF-8'), priority=True)
                     except Exception as e:
-                        print(f"Error queuing status request: {e}")
+                        logger.error(f"Error queuing status request: {e}")
 
                 # Poll endstop status regularly - ONLY if not paused
                 if not self.status_polling_paused and current_time - self.endstopCheckTime > config.SERIAL_ENDSTOP_REQUEST_INTERVAL:
@@ -1849,7 +1847,7 @@ class SerialThreadClass(QtCore.QThread):
                         if self.firmware_type == FIRMWARE_RRF:
                             s0.write("M119\n".encode('UTF-8'), priority=True)
                     except Exception as e:
-                        print(f"Error queuing endstop request: {e}")
+                        logger.error(f"Error queuing endstop request: {e}")
 
                 # NON-BLOCKING READ: Only read if data is available
                 # This prevents the thread from blocking when firmware is busy executing moves
@@ -1876,7 +1874,7 @@ class SerialThreadClass(QtCore.QThread):
                                     else:
                                         logger.debug(f"Received 'ok' but only {time_elapsed:.1f}s elapsed (need {config.BLOCKING_COMMAND_MIN_PAUSE}s), waiting...")
                 except (OSError, serial.SerialException) as e:
-                    print(f"Error reading from serial: {e}")
+                    logger.error(f"Error reading from serial: {e}")
                     self.serialSignal.emit("SERIAL-DISCONNECTED")
                     break
 
@@ -1884,11 +1882,10 @@ class SerialThreadClass(QtCore.QThread):
                 time.sleep(config.SERIAL_THREAD_SLEEP)
 
             except Exception as e:
-                print(f"Unexpected error in serial thread: {e}")
-                logger.exception("Serial thread error")
+                logger.exception("Unexpected error in serial thread")
                 time.sleep(0.1)
 
-        print("Serial thread stopped")
+        logger.info("Serial thread stopped")
 
 
 ###############  SERIAL READ THREAD CLASS ###############
@@ -1912,13 +1909,13 @@ class MainWindow(QtWidgets.QMainWindow):
         """Handle window close event with proper cleanup"""
         # Stop serial thread if running
         if self.gui_instance.SerialThreadClass and self.gui_instance.SerialThreadClass.isRunning():
-            print("Stopping serial thread...")
+            logger.info("Stopping serial thread...")
             self.gui_instance.SerialThreadClass.stop()
             self.gui_instance.SerialThreadClass.wait(2000)
 
         # Close serial port
         s0.close()
-        print("Application closed cleanly")
+        logger.info("Application closed cleanly")
         event.accept()
 
 if __name__ == '__main__':
