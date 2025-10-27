@@ -55,7 +55,6 @@ ENDSTOP_PANEL_WIDTH = 280
 ENDSTOP_PANEL_HEIGHT = 125
 
 # ========== Firmware Types ==========
-FIRMWARE_GRBL = "GRBL"
 FIRMWARE_RRF = "RRF"
 
 # ========== Logging ==========

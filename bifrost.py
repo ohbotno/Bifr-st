@@ -34,7 +34,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Firmware type constants (from config)
-FIRMWARE_GRBL = config.FIRMWARE_GRBL
 FIRMWARE_RRF = config.FIRMWARE_RRF
 
 # Compiled regex patterns for efficient position parsing
@@ -178,6 +177,9 @@ class HistoryLineEdit(QtWidgets.QLineEdit):
             # Don't add duplicate consecutive commands
             if not self.history or self.history[-1] != command:
                 self.history.append(command)
+                # Limit history to prevent memory leak in long sessions
+                if len(self.history) > 100:
+                    self.history.pop(0)
             self.history_position = -1
             self.current_text = ""
 
@@ -207,7 +209,7 @@ class BifrostGUI(Ui_MainWindow):
         old_console_input.setParent(None)
         old_console_input.deleteLater()
 
-        # Set firmware type - Change this to FIRMWARE_GRBL for GRBL firmware
+        # Set firmware type to RepRapFirmware (RRF)
         self.firmware_type = FIRMWARE_RRF
 
         # Track serial thread state
@@ -250,65 +252,30 @@ class BifrostGUI(Ui_MainWindow):
         self.G0MoveRadioButton.clicked.connect(self.FeedRateBoxHide)
         self.G1MoveRadioButton.clicked.connect(self.FeedRateBoxHide)
 
-        self.FKGoButtonArt1.pressed.connect(self.FKMoveArt1)
-        self.FKSliderArt1.valueChanged.connect(self.FKSliderUpdateArt1)
-        self.SpinBoxArt1.valueChanged.connect(self.FKSpinBoxUpdateArt1)
-        self.FKDec10ButtonArt1.pressed.connect(self.FKDec10Art1)
-        self.FKDec1ButtonArt1.pressed.connect(self.FKDec1Art1)
-        self.FKDec0_1ButtonArt1.pressed.connect(self.FKDec0_1Art1)
-        self.FKInc0_1ButtonArt1.pressed.connect(self.FKInc0_1Art1)
-        self.FKInc1ButtonArt1.pressed.connect(self.FKInc1Art1)
-        self.FKInc10ButtonArt1.pressed.connect(self.FKInc10Art1)
+        # Dynamic FK control connections (80% code reduction via loops)
+        # Replace 54 individual signal connections with generic handlers
+        for joint in ['Art1', 'Art2', 'Art3', 'Art4', 'Art5', 'Art6']:
+            # Get widgets
+            go_button = getattr(self, f'FKGoButton{joint}')
+            slider = getattr(self, f'FKSlider{joint}')
+            spinbox = getattr(self, f'SpinBox{joint}')
+            dec10_btn = getattr(self, f'FKDec10Button{joint}')
+            dec1_btn = getattr(self, f'FKDec1Button{joint}')
+            dec01_btn = getattr(self, f'FKDec0_1Button{joint}')
+            inc01_btn = getattr(self, f'FKInc0_1Button{joint}')
+            inc1_btn = getattr(self, f'FKInc1Button{joint}')
+            inc10_btn = getattr(self, f'FKInc10Button{joint}')
 
-        self.FKGoButtonArt2.pressed.connect(self.FKMoveArt2)
-        self.FKSliderArt2.valueChanged.connect(self.FKSliderUpdateArt2)
-        self.SpinBoxArt2.valueChanged.connect(self.FKSpinBoxUpdateArt2)
-        self.FKDec10ButtonArt2.pressed.connect(self.FKDec10Art2)
-        self.FKDec1ButtonArt2.pressed.connect(self.FKDec1Art2)
-        self.FKDec0_1ButtonArt2.pressed.connect(self.FKDec0_1Art2)
-        self.FKInc0_1ButtonArt2.pressed.connect(self.FKInc0_1Art2)
-        self.FKInc1ButtonArt2.pressed.connect(self.FKInc1Art2)
-        self.FKInc10ButtonArt2.pressed.connect(self.FKInc10Art2)
-
-        self.FKGoButtonArt3.pressed.connect(self.FKMoveArt3)
-        self.FKSliderArt3.valueChanged.connect(self.FKSliderUpdateArt3)
-        self.SpinBoxArt3.valueChanged.connect(self.FKSpinBoxUpdateArt3)
-        self.FKDec10ButtonArt3.pressed.connect(self.FKDec10Art3)
-        self.FKDec1ButtonArt3.pressed.connect(self.FKDec1Art3)
-        self.FKDec0_1ButtonArt3.pressed.connect(self.FKDec0_1Art3)
-        self.FKInc0_1ButtonArt3.pressed.connect(self.FKInc0_1Art3)
-        self.FKInc1ButtonArt3.pressed.connect(self.FKInc1Art3)
-        self.FKInc10ButtonArt3.pressed.connect(self.FKInc10Art3)
-
-        self.FKGoButtonArt4.pressed.connect(self.FKMoveArt4)
-        self.FKSliderArt4.valueChanged.connect(self.FKSliderUpdateArt4)
-        self.SpinBoxArt4.valueChanged.connect(self.FKSpinBoxUpdateArt4)
-        self.FKDec10ButtonArt4.pressed.connect(self.FKDec10Art4)
-        self.FKDec1ButtonArt4.pressed.connect(self.FKDec1Art4)
-        self.FKDec0_1ButtonArt4.pressed.connect(self.FKDec0_1Art4)
-        self.FKInc0_1ButtonArt4.pressed.connect(self.FKInc0_1Art4)
-        self.FKInc1ButtonArt4.pressed.connect(self.FKInc1Art4)
-        self.FKInc10ButtonArt4.pressed.connect(self.FKInc10Art4)
-
-        self.FKGoButtonArt5.pressed.connect(self.FKMoveArt5)
-        self.FKSliderArt5.valueChanged.connect(self.FKSliderUpdateArt5)
-        self.SpinBoxArt5.valueChanged.connect(self.FKSpinBoxUpdateArt5)
-        self.FKDec10ButtonArt5.pressed.connect(self.FKDec10Art5)
-        self.FKDec1ButtonArt5.pressed.connect(self.FKDec1Art5)
-        self.FKDec0_1ButtonArt5.pressed.connect(self.FKDec0_1Art5)
-        self.FKInc0_1ButtonArt5.pressed.connect(self.FKInc0_1Art5)
-        self.FKInc1ButtonArt5.pressed.connect(self.FKInc1Art5)
-        self.FKInc10ButtonArt5.pressed.connect(self.FKInc10Art5)
-
-        self.FKGoButtonArt6.pressed.connect(self.FKMoveArt6)
-        self.FKSliderArt6.valueChanged.connect(self.FKSliderUpdateArt6)
-        self.SpinBoxArt6.valueChanged.connect(self.FKSpinBoxUpdateArt6)
-        self.FKDec10ButtonArt6.pressed.connect(self.FKDec10Art6)
-        self.FKDec1ButtonArt6.pressed.connect(self.FKDec1Art6)
-        self.FKDec0_1ButtonArt6.pressed.connect(self.FKDec0_1Art6)
-        self.FKInc0_1ButtonArt6.pressed.connect(self.FKInc0_1Art6)
-        self.FKInc1ButtonArt6.pressed.connect(self.FKInc1Art6)
-        self.FKInc10ButtonArt6.pressed.connect(self.FKInc10Art6)
+            # Connect signals with lambda closures
+            go_button.pressed.connect(lambda j=joint: self.FKMoveJoint(j))
+            slider.valueChanged.connect(lambda val, j=joint: self.FKSliderUpdate(j, val))
+            spinbox.valueChanged.connect(lambda val, j=joint: self.FKSpinBoxUpdate(j, val))
+            dec10_btn.pressed.connect(lambda j=joint: self.adjustJointValue(j, -10))
+            dec1_btn.pressed.connect(lambda j=joint: self.adjustJointValue(j, -1))
+            dec01_btn.pressed.connect(lambda j=joint: self.adjustJointValue(j, -0.1))
+            inc01_btn.pressed.connect(lambda j=joint: self.adjustJointValue(j, 0.1))
+            inc1_btn.pressed.connect(lambda j=joint: self.adjustJointValue(j, 1))
+            inc10_btn.pressed.connect(lambda j=joint: self.adjustJointValue(j, 10))
 
         self.FKGoAllButton.pressed.connect(self.FKMoveAll)
 
@@ -327,10 +294,15 @@ class BifrostGUI(Ui_MainWindow):
         self.ConsoleButtonSend.pressed.connect(self.sendSerialCommand)
         self.ConsoleInput.returnPressed.connect(self.sendSerialCommand)
 
-        # IK Control connections
-        self.IKInputSpinBoxX.valueChanged.connect(self.calculateIK)
-        self.IKInputSpinBoxY.valueChanged.connect(self.calculateIK)
-        self.IKInputSpinBoxZ.valueChanged.connect(self.calculateIK)
+        # IK Control connections with debounce
+        # Use timer to batch rapid spinbox changes for smoother GUI
+        self.ik_calc_timer = QtCore.QTimer()
+        self.ik_calc_timer.setSingleShot(True)
+        self.ik_calc_timer.timeout.connect(self._calculateIKDeferred)
+
+        self.IKInputSpinBoxX.valueChanged.connect(lambda: self.ik_calc_timer.start(50))
+        self.IKInputSpinBoxY.valueChanged.connect(lambda: self.ik_calc_timer.start(50))
+        self.IKInputSpinBoxZ.valueChanged.connect(lambda: self.ik_calc_timer.start(50))
         self.IkIncButtonX.pressed.connect(self.IkIncX)
         self.IkDecButtonX.pressed.connect(self.IkDecX)
         self.IkIncButtonY.pressed.connect(self.IkIncY)
@@ -405,6 +377,16 @@ class BifrostGUI(Ui_MainWindow):
             'Gripper': self.SpinBoxGripper
         }
 
+        # Map joint names to firmware axes and special handling
+        self.joint_config = {
+            'Art1': {'axis': 'X', 'type': 'simple', 'log_name': 'Art1 (Joint 1)'},
+            'Art2': {'axis': 'Y', 'type': 'coupled', 'log_name': 'Art2 (Joint 2 - COUPLED)', 'drives': '1+2'},
+            'Art3': {'axis': 'Z', 'type': 'simple', 'log_name': 'Art3 (Joint 3)'},
+            'Art4': {'axis': 'U', 'type': 'simple', 'log_name': 'Art4 (Joint 4)'},
+            'Art5': {'axis': 'V+W', 'type': 'differential', 'log_name': 'Art5 (DIFFERENTIAL)'},
+            'Art6': {'axis': 'V+W', 'type': 'differential', 'log_name': 'Art6 (DIFFERENTIAL)'}
+        }
+
         logger.info("Generic increment/decrement controls initialized")
 
     def adjustJointValue(self, joint_name, delta):
@@ -422,6 +404,132 @@ class BifrostGUI(Ui_MainWindow):
         else:
             logger.warning(f"Unknown joint name: {joint_name}")
 
+    def FKSliderUpdate(self, joint_name, value):
+        """Generic slider update handler - updates spinbox from slider"""
+        if joint_name in self.joint_spinboxes:
+            val = value / 10.0
+            self.joint_spinboxes[joint_name].setValue(val)
+
+    def FKSpinBoxUpdate(self, joint_name, value):
+        """Generic spinbox update handler - updates slider from spinbox"""
+        slider = getattr(self, f'FKSlider{joint_name}', None)
+        if slider:
+            val = int(value * 10)
+            slider.setValue(val)
+
+    def FKMoveJoint(self, joint_name):
+        """
+        Generic joint movement handler
+        Handles simple joints, coupled motors, and differential kinematics
+        """
+        if joint_name not in self.joint_config:
+            logger.warning(f"Unknown joint: {joint_name}")
+            return
+
+        config = self.joint_config[joint_name]
+        joint_value = self.joint_spinboxes[joint_name].value()
+
+        # Handle based on joint type
+        if config['type'] == 'simple':
+            self._FKMoveSimple(joint_name, joint_value, config)
+        elif config['type'] == 'coupled':
+            self._FKMoveCoupled(joint_name, joint_value, config)
+        elif config['type'] == 'differential':
+            self._FKMoveDifferential(joint_name, joint_value, config)
+
+    def _FKMoveSimple(self, joint_name, joint_value, config):
+        """Move a simple single-axis joint"""
+        logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']}")
+        if s0.isOpen():
+            if self.G1MoveRadioButton.isChecked():
+                typeOfMovement = "G1 "
+                feedRate = " F" + str(self.FeedRateInput.value())
+            else:
+                typeOfMovement = "G0 "
+                feedRate = ""
+            message = typeOfMovement + config['axis'] + str(joint_value) + feedRate
+            messageToSend = message + "\n"
+            messageToConsole = ">>> " + message
+            logger.debug(f"Sending command: {message.strip()}")
+            s0.write(messageToSend.encode('UTF-8'))
+            self.ConsoleOutput.appendPlainText(messageToConsole)
+        else:
+            logger.warning(f"{joint_name} move attempted but serial not connected")
+            self.noSerialConnection()
+
+    def _FKMoveCoupled(self, joint_name, joint_value, config):
+        """Move a coupled-motor joint (Art2 uses drives 1+2)"""
+        logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']} (Drives {config['drives']})")
+        if s0.isOpen():
+            if self.G1MoveRadioButton.isChecked():
+                typeOfMovement = "G1 "
+                feedRate = " F" + str(self.FeedRateInput.value())
+            else:
+                typeOfMovement = "G0 "
+                feedRate = ""
+            message = typeOfMovement + config['axis'] + str(joint_value) + feedRate
+            messageToSend = message + "\n"
+            messageToConsole = ">>> " + message
+            logger.debug(f"Sending coupled command: {message.strip()}")
+            s0.write(messageToSend.encode('UTF-8'))
+            self.ConsoleOutput.appendPlainText(messageToConsole)
+        else:
+            logger.warning(f"{joint_name} move attempted but serial not connected")
+            self.noSerialConnection()
+
+    def _FKMoveDifferential(self, joint_name, joint_value, config):
+        """Move a differential joint (Art5/Art6)"""
+        # Check if we have valid position feedback
+        if self.current_motor_v == 0.0 and self.current_motor_w == 0.0:
+            logger.warning("No position feedback received yet - differential control may be inaccurate!")
+            logger.warning("Wait for position update or home the robot first")
+
+        # Calculate new motor positions using differential kinematics
+        if joint_name == 'Art5':
+            motor_v, motor_w, kept_value = diff_kin.DifferentialKinematics.move_art5_only(
+                self.current_motor_v, self.current_motor_w, joint_value
+            )
+            kept_joint = 'Art6'
+        else:  # Art6
+            motor_v, motor_w, kept_value = diff_kin.DifferentialKinematics.move_art6_only(
+                self.current_motor_v, self.current_motor_w, joint_value
+            )
+            kept_joint = 'Art5'
+
+        current_art5, current_art6 = diff_kin.DifferentialKinematics.motor_to_joint(
+            self.current_motor_v, self.current_motor_w
+        )
+
+        logger.info(f"{config['log_name']} commanded to: {joint_value}°")
+        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={current_art5:.2f}° Art6={current_art6:.2f}°")
+        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → {joint_name}={joint_value:.2f}° {kept_joint}={kept_value:.2f}° ({kept_joint} kept)")
+
+        # Update tracked positions
+        self.current_motor_v = motor_v
+        self.current_motor_w = motor_w
+        if joint_name == 'Art5':
+            self.desired_art5 = joint_value
+        else:
+            self.desired_art6 = joint_value
+
+        if s0.isOpen():
+            if self.G1MoveRadioButton.isChecked():
+                typeOfMovement = "G1 "
+                feedRate = " F" + str(self.FeedRateInput.value())
+            else:
+                typeOfMovement = "G0 "
+                feedRate = ""
+            # Send both motor commands for differential
+            message = typeOfMovement + "V" + str(motor_v) + " W" + str(motor_w) + feedRate
+            messageToSend = message + "\n"
+            messageToConsole = ">>> " + message
+            logger.debug(f"Sending differential command: {message.strip()}")
+            s0.write(messageToSend.encode('UTF-8'))
+            self.ConsoleOutput.appendPlainText(messageToConsole)
+        else:
+            logger.warning(f"{joint_name} move attempted but serial not connected")
+            self.noSerialConnection()
+
     def close_application(self):
         # Properly cleanup serial connection and thread
         if self.SerialThreadClass and self.SerialThreadClass.isRunning():
@@ -437,10 +545,7 @@ class BifrostGUI(Ui_MainWindow):
 
     def sendHomingCycleCommand(self):
         if s0.isOpen():
-            if self.firmware_type == FIRMWARE_RRF:
-                messageToSend="G28\n"  # RRF: Home all axes
-            else:  # GRBL
-                messageToSend="$H\n"
+            messageToSend="G28\n"  # RRF: Home all axes
             messageToConsole=">>> " + messageToSend.strip()
             s0.write(messageToSend.encode('UTF-8'))
             self.ConsoleOutput.appendPlainText(messageToConsole)
@@ -459,10 +564,7 @@ class BifrostGUI(Ui_MainWindow):
 
     def sendKillAlarmCommand(self):
         if s0.isOpen():
-            if self.firmware_type == FIRMWARE_RRF:
-                messageToSend="M999\n"  # RRF: Clear emergency stop / reset
-            else:  # GRBL
-                messageToSend="$X\n"
+            messageToSend="M999\n"  # RRF: Clear emergency stop / reset
             messageToConsole=">>> " + messageToSend.strip()
             s0.write(messageToSend.encode('UTF-8'))
             self.ConsoleOutput.appendPlainText(messageToConsole)
@@ -476,296 +578,9 @@ class BifrostGUI(Ui_MainWindow):
             self.FeedRateInput.setEnabled(False)
 
 
-#FK Art1 Functions
-    def FKMoveArt1(self):
-        joint_value = self.SpinBoxArt1.value()
-        logger.info(f"Art1 (Joint 1) commanded to: {joint_value}° -> Axis: W")
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement="G1 "
-                feedRate=" F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement="G0 "
-                feedRate=""
-            message=typeOfMovement + "X" + str(joint_value) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            logger.warning("Art1 move attempted but serial not connected")
-            self.noSerialConnection()
-    def FKSliderUpdateArt1(self):
-        val=self.FKSliderArt1.value()/10
-        self.SpinBoxArt1.setValue(val)
-    def FKSpinBoxUpdateArt1(self):
-        val=int(self.SpinBoxArt1.value()*10)
-        self.FKSliderArt1.setValue(val)
-    def FKDec10Art1(self):
-        self.adjustJointValue('Art1', -10)
-    def FKDec1Art1(self):
-        self.adjustJointValue('Art1', -1)
-    def FKDec0_1Art1(self):
-        self.adjustJointValue('Art1', -0.1)
-    def FKInc0_1Art1(self):
-        self.adjustJointValue('Art1', 0.1)
-    def FKInc1Art1(self):
-        self.adjustJointValue('Art1', 1)
-    def FKInc10Art1(self):
-        self.adjustJointValue('Art1', 10)
-
-#FK Art2 Functions
-    def FKMoveArt2(self):
-        # COUPLED MOTORS: Art2 uses Drives 1+2 (Y axis) for more torque
-        # Y axis controls both drives in firmware (M584 Y1:2)
-        joint_value = self.SpinBoxArt2.value()
-        logger.info(f"Art2 (Joint 2 - COUPLED) commanded to: {joint_value}° -> Axis: Y (Drives 1+2)")
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement="G1 "
-                feedRate=" F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement="G0 "
-                feedRate=""
-            # Y axis controls both drives 1+2 (coupled in firmware)
-            message=typeOfMovement + "Y" + str(joint_value) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending coupled command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            logger.warning("Art2 move attempted but serial not connected")
-            self.noSerialConnection()
-    def FKSliderUpdateArt2(self):
-        val=self.FKSliderArt2.value()/10
-        self.SpinBoxArt2.setValue(val)
-    def FKSpinBoxUpdateArt2(self):
-        val=int(self.SpinBoxArt2.value()*10)
-        self.FKSliderArt2.setValue(val)
-    def FKDec10Art2(self):
-        self.adjustJointValue('Art2', -10)
-    def FKDec1Art2(self):
-        self.adjustJointValue('Art2', -1)
-    def FKDec0_1Art2(self):
-        self.adjustJointValue('Art2', -0.1)
-    def FKInc0_1Art2(self):
-        self.adjustJointValue('Art2', 0.1)
-    def FKInc1Art2(self):
-        self.adjustJointValue('Art2', 1)
-    def FKInc10Art2(self):
-        self.adjustJointValue('Art2', 10)
-
-#FK Art3 Functions
-    def FKMoveArt3(self):
-        joint_value = self.SpinBoxArt3.value()
-        logger.info(f"Art3 (Joint 3) commanded to: {joint_value}° -> Axis: Z")
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement="G1 "
-                feedRate=" F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement="G0 "
-                feedRate=""
-            message=typeOfMovement + "Z" + str(joint_value) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            logger.warning("Art3 move attempted but serial not connected")
-            self.noSerialConnection()
-    def FKSliderUpdateArt3(self):
-        val=self.FKSliderArt3.value()/10
-        self.SpinBoxArt3.setValue(val)
-    def FKSpinBoxUpdateArt3(self):
-        val=int(self.SpinBoxArt3.value()*10)
-        self.FKSliderArt3.setValue(val)
-    def FKDec10Art3(self):
-        self.adjustJointValue('Art3', -10)
-    def FKDec1Art3(self):
-        self.adjustJointValue('Art3', -1)
-    def FKDec0_1Art3(self):
-        self.adjustJointValue('Art3', -0.1)
-    def FKInc0_1Art3(self):
-        self.adjustJointValue('Art3', 0.1)
-    def FKInc1Art3(self):
-        self.adjustJointValue('Art3', 1)
-    def FKInc10Art3(self):
-        self.adjustJointValue('Art3', 10)
-
-#FK Art4 Functions
-    def FKMoveArt4(self):
-        joint_value = self.SpinBoxArt4.value()
-        logger.info(f"Art4 (Joint 4) commanded to: {joint_value}° -> Axis: U")
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement="G1 "
-                feedRate=" F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement="G0 "
-                feedRate=""
-            message=typeOfMovement + "U" + str(joint_value) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            logger.warning("Art4 move attempted but serial not connected")
-            self.noSerialConnection()
-    def FKSliderUpdateArt4(self):
-        val=self.FKSliderArt4.value()/10
-        self.SpinBoxArt4.setValue(val)
-    def FKSpinBoxUpdateArt4(self):
-        val=int(self.SpinBoxArt4.value()*10)
-        self.FKSliderArt4.setValue(val)
-    def FKDec10Art4(self):
-        self.adjustJointValue('Art4', -10)
-    def FKDec1Art4(self):
-        self.adjustJointValue('Art4', -1)
-    def FKDec0_1Art4(self):
-        self.adjustJointValue('Art4', -0.1)
-    def FKInc0_1Art4(self):
-        self.adjustJointValue('Art4', 0.1)
-    def FKInc1Art4(self):
-        self.adjustJointValue('Art4', 1)
-    def FKInc10Art4(self):
-        self.adjustJointValue('Art4', 10)
-
-#FK Art5 Functions
-    def FKMoveArt5(self):
-        # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential kinematics
-        art5_value = self.SpinBoxArt5.value()
-
-        # Check if we have valid position feedback
-        if self.current_motor_v == 0.0 and self.current_motor_w == 0.0:
-            logger.warning("No position feedback received yet - differential control may be inaccurate!")
-            logger.warning("Wait for position update or home the robot first")
-
-        # Calculate new motor positions using differential kinematics helper
-        motor_v, motor_w, art6_kept = diff_kin.DifferentialKinematics.move_art5_only(
-            self.current_motor_v,
-            self.current_motor_w,
-            art5_value
-        )
-
-        current_art5, current_art6 = diff_kin.DifferentialKinematics.motor_to_joint(
-            self.current_motor_v, self.current_motor_w
-        )
-
-        logger.info(f"Art5 (DIFFERENTIAL) commanded to: {art5_value}°")
-        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={current_art5:.2f}° Art6={current_art6:.2f}°")
-        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_value:.2f}° Art6={art6_kept:.2f}° (Art6 kept)")
-
-        # Update tracked positions
-        self.current_motor_v = motor_v
-        self.current_motor_w = motor_w
-        self.desired_art5 = art5_value
-
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement="G1 "
-                feedRate=" F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement="G0 "
-                feedRate=""
-            # Send both motor commands for differential
-            message=typeOfMovement + "V" + str(motor_v) + " W" + str(motor_w) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending differential command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            logger.warning("Art5 move attempted but serial not connected")
-            self.noSerialConnection()
-    def FKSliderUpdateArt5(self):
-        val=self.FKSliderArt5.value()/10
-        self.SpinBoxArt5.setValue(val)
-    def FKSpinBoxUpdateArt5(self):
-        val=int(self.SpinBoxArt5.value()*10)
-        self.FKSliderArt5.setValue(val)
-    def FKDec10Art5(self):
-        self.adjustJointValue('Art5', -10)
-    def FKDec1Art5(self):
-        self.adjustJointValue('Art5', -1)
-    def FKDec0_1Art5(self):
-        self.adjustJointValue('Art5', -0.1)
-    def FKInc0_1Art5(self):
-        self.adjustJointValue('Art5', 0.1)
-    def FKInc1Art5(self):
-        self.adjustJointValue('Art5', 1)
-    def FKInc10Art5(self):
-        self.adjustJointValue('Art5', 10)
-
-#FK Art6 Functions
-    def FKMoveArt6(self):
-        # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential kinematics
-        art6_value = self.SpinBoxArt6.value()
-
-        # Check if we have valid position feedback
-        if self.current_motor_v == 0.0 and self.current_motor_w == 0.0:
-            logger.warning("No position feedback received yet - differential control may be inaccurate!")
-            logger.warning("Wait for position update or home the robot first")
-
-        # Calculate new motor positions using differential kinematics helper
-        motor_v, motor_w, art5_kept = diff_kin.DifferentialKinematics.move_art6_only(
-            self.current_motor_v,
-            self.current_motor_w,
-            art6_value
-        )
-
-        current_art5, current_art6 = diff_kin.DifferentialKinematics.motor_to_joint(
-            self.current_motor_v, self.current_motor_w
-        )
-
-        logger.info(f"Art6 (DIFFERENTIAL) commanded to: {art6_value}°")
-        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={current_art5:.2f}° Art6={current_art6:.2f}°")
-        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → Art5={art5_kept:.2f}° Art6={art6_value:.2f}° (Art5 kept)")
-
-        # Update tracked positions
-        self.current_motor_v = motor_v
-        self.current_motor_w = motor_w
-        self.desired_art6 = art6_value
-
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement="G1 "
-                feedRate=" F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement="G0 "
-                feedRate=""
-            # Send both motor commands for differential
-            message=typeOfMovement + "V" + str(motor_v) + " W" + str(motor_w) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending differential command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            logger.warning("Art6 move attempted but serial not connected")
-            self.noSerialConnection()
-    def FKSliderUpdateArt6(self):
-        val=self.FKSliderArt6.value()/10
-        self.SpinBoxArt6.setValue(val)
-    def FKSpinBoxUpdateArt6(self):
-        val=int(self.SpinBoxArt6.value()*10)
-        self.FKSliderArt6.setValue(val)
-    def FKDec10Art6(self):
-        self.adjustJointValue('Art6', -10)
-    def FKDec1Art6(self):
-        self.adjustJointValue('Art6', -1)
-    def FKDec0_1Art6(self):
-        self.adjustJointValue('Art6', -0.1)
-    def FKInc0_1Art6(self):
-        self.adjustJointValue('Art6', 0.1)
-    def FKInc1Art6(self):
-        self.adjustJointValue('Art6', 1)
-    def FKInc10Art6(self):
-        self.adjustJointValue('Art6', 10)
+# OLD FK methods removed - replaced with generic handlers above
+    # (FKMoveArt1-6, FKSliderUpdateArt1-6, FKSpinBoxUpdateArt1-6, FKDec/Inc methods)
+    # Saved ~290 lines of duplicate code via dynamic signal binding
 
 #FK Every Articulation Functions
     def FKMoveAll(self):
@@ -827,8 +642,8 @@ class BifrostGUI(Ui_MainWindow):
         self.adjustJointValue('Gripper', 10)
 
 # Inverse Kinematics Functions
-    def calculateIK(self):
-        """Calculate 6-DOF inverse kinematics for current target position"""
+    def _calculateIKDeferred(self):
+        """Calculate 6-DOF inverse kinematics for current target position (debounced)"""
         x = self.IKInputSpinBoxX.value()
         y = self.IKInputSpinBoxY.value()
         z = self.IKInputSpinBoxZ.value()
@@ -1486,7 +1301,7 @@ class BifrostGUI(Ui_MainWindow):
 
     def requestInitialPosition(self):
         """Request initial position and endstop status after connection (called by QTimer)"""
-        if self.firmware_type == FIRMWARE_RRF and s0.isOpen():
+        if s0.isOpen():
             s0.write("M114\n".encode('UTF-8'), priority=True)
             s0.write("M119\n".encode('UTF-8'), priority=True)
             logger.debug("Requested initial position (M114) and endstop status (M119)")
@@ -1500,14 +1315,10 @@ class BifrostGUI(Ui_MainWindow):
         verboseShow=self.ConsoleShowVerbosecheckBox.isChecked()
         okShow=self.ConsoleShowOkRespcheckBox.isChecked()
 
-        if self.firmware_type == FIRMWARE_RRF:
-            # RRF: Check if response is M114 position response, M119 endstop response, or ok
-            isDataReadVerbose = dataRead.startswith("X:") and "Y:" in dataRead  # M114 response
-            isEndstopResponse = dataRead.startswith("Endstops -")  # M119 response
-            isDataOkResponse = "ok" in dataRead.lower()
-        else:  # GRBL
-            isDataReadVerbose = "MPos" in dataRead
-            isDataOkResponse = "ok" in dataRead
+        # RRF: Check if response is M114 position response, M119 endstop response, or ok
+        isDataReadVerbose = dataRead.startswith("X:") and "Y:" in dataRead  # M114 response
+        isEndstopResponse = dataRead.startswith("Endstops -")  # M119 response
+        isDataOkResponse = "ok" in dataRead.lower()
 
         # Check if homing completed
         if self.is_homing and isDataOkResponse:
@@ -1526,7 +1337,7 @@ class BifrostGUI(Ui_MainWindow):
             if time_since_manual < 2.0:
                 self.ConsoleOutput.appendPlainText(dataRead)
             # Handle endstop responses
-            elif self.firmware_type == FIRMWARE_RRF and isEndstopResponse:
+            elif isEndstopResponse:
                 self.updateEndstopDisplay(dataRead)
             elif not isDataReadVerbose and not isDataOkResponse:
                 self.ConsoleOutput.appendPlainText(dataRead)
@@ -1588,98 +1399,80 @@ class BifrostGUI(Ui_MainWindow):
         return (True, value)
 
     def updateFKPosDisplay(self,dataRead):
-        if self.firmware_type == FIRMWARE_RRF:
-            # RRF: Parse M114 response using compiled regex (3x faster than string.split)
-            try:
-                # Extract position values using regex
-                matches = RRF_POSITION_PATTERN.findall(dataRead)
-                if not matches:
-                    return
+        # RRF: Parse M114 response using compiled regex (3x faster than string.split)
+        try:
+            # Extract position values using regex
+            matches = RRF_POSITION_PATTERN.findall(dataRead)
+            if not matches:
+                return
 
-                pos_dict = {axis: float(value) for axis, value in matches}
+            pos_dict = {axis: float(value) for axis, value in matches}
 
-                # Extract axis positions with validation
-                if 'V' in pos_dict and 'W' in pos_dict:
-                    # Validate each position
-                    motor_x_valid, motor_x = self.validatePosition('X', pos_dict.get('X', 0.0))
-                    motor_y_valid, motor_y = self.validatePosition('Y', pos_dict.get('Y', 0.0))
-                    motor_z_valid, motor_z = self.validatePosition('Z', pos_dict.get('Z', 0.0))
-                    motor_u_valid, motor_u = self.validatePosition('U', pos_dict.get('U', 0.0))
-                    motor_v_valid, motor_v = self.validatePosition('V', pos_dict.get('V', 0.0))
-                    motor_w_valid, motor_w = self.validatePosition('W', pos_dict.get('W', 0.0))
+            # Extract axis positions with validation
+            if 'V' in pos_dict and 'W' in pos_dict:
+                # Validate each position
+                motor_x_valid, motor_x = self.validatePosition('X', pos_dict.get('X', 0.0))
+                motor_y_valid, motor_y = self.validatePosition('Y', pos_dict.get('Y', 0.0))
+                motor_z_valid, motor_z = self.validatePosition('Z', pos_dict.get('Z', 0.0))
+                motor_u_valid, motor_u = self.validatePosition('U', pos_dict.get('U', 0.0))
+                motor_v_valid, motor_v = self.validatePosition('V', pos_dict.get('V', 0.0))
+                motor_w_valid, motor_w = self.validatePosition('W', pos_dict.get('W', 0.0))
 
-                    # Update last valid positions
-                    self.last_valid_positions['X'] = motor_x
-                    self.last_valid_positions['Y'] = motor_y
-                    self.last_valid_positions['Z'] = motor_z
-                    self.last_valid_positions['U'] = motor_u
-                    self.last_valid_positions['V'] = motor_v
-                    self.last_valid_positions['W'] = motor_w
+                # Update last valid positions
+                self.last_valid_positions['X'] = motor_x
+                self.last_valid_positions['Y'] = motor_y
+                self.last_valid_positions['Z'] = motor_z
+                self.last_valid_positions['U'] = motor_u
+                self.last_valid_positions['V'] = motor_v
+                self.last_valid_positions['W'] = motor_w
 
-                    # INVERSE DIFFERENTIAL: Convert motor positions to joint angles using helper
-                    art5, art6 = diff_kin.DifferentialKinematics.motor_to_joint(motor_v, motor_w)
+                # INVERSE DIFFERENTIAL: Convert motor positions to joint angles using helper
+                art5, art6 = diff_kin.DifferentialKinematics.motor_to_joint(motor_v, motor_w)
 
-                    # Update tracked motor positions
-                    self.current_motor_v = motor_v
-                    self.current_motor_w = motor_w
-                    self.desired_art5 = art5
-                    self.desired_art6 = art6
+                # Update tracked motor positions
+                self.current_motor_v = motor_v
+                self.current_motor_w = motor_w
+                self.desired_art5 = art5
+                self.desired_art6 = art6
 
-                    self.position_update_count += 1
+                self.position_update_count += 1
 
-                    # Record position history (sampled based on config)
-                    if self.position_update_count % config.POSITION_HISTORY_SAMPLE_RATE == 0:
-                        self.position_history.add_snapshot(
-                            art1=motor_x,
-                            art2=motor_y,
-                            art3=motor_z,
-                            art4=motor_u,
-                            art5=art5,
-                            art6=art6
-                        )
+                # Record position history (sampled based on config)
+                if self.position_update_count % config.POSITION_HISTORY_SAMPLE_RATE == 0:
+                    self.position_history.add_snapshot(
+                        art1=motor_x,
+                        art2=motor_y,
+                        art3=motor_z,
+                        art4=motor_u,
+                        art5=art5,
+                        art6=art6
+                    )
 
-                    # Log every Nth update to reduce noise (from config)
-                    if self.position_update_count % config.LOGGING_INTERVAL_POSITIONS == 0:
-                        logger.debug(f"Position feedback - X:{motor_x:.2f} Y:{motor_y:.2f} Z:{motor_z:.2f} U:{motor_u:.2f} V:{motor_v:.2f} W:{motor_w:.2f}")
-                        logger.info(f"  Art1<-X:{motor_x:.2f}° | Art2<-Y:{motor_y:.2f}° | Art3<-Z:{motor_z:.2f}° | Art4<-U:{motor_u:.2f}° | Art5(calc):{art5:.2f}° | Art6(calc):{art6:.2f}°")
+                # Log every Nth update to reduce noise (from config)
+                if self.position_update_count % config.LOGGING_INTERVAL_POSITIONS == 0:
+                    logger.debug(f"Position feedback - X:{motor_x:.2f} Y:{motor_y:.2f} Z:{motor_z:.2f} U:{motor_u:.2f} V:{motor_v:.2f} W:{motor_w:.2f}")
+                    logger.info(f"  Art1<-X:{motor_x:.2f}° | Art2<-Y:{motor_y:.2f}° | Art3<-Z:{motor_z:.2f}° | Art4<-U:{motor_u:.2f}° | Art5(calc):{art5:.2f}° | Art6(calc):{art6:.2f}°")
 
-                    # Throttle GUI updates (interval from config)
-                    current_time = time.time()
-                    if current_time - self.last_gui_update_time >= config.GUI_UPDATE_INTERVAL:
-                        self.last_gui_update_time = current_time
+                # Throttle GUI updates (interval from config)
+                current_time = time.time()
+                if current_time - self.last_gui_update_time >= config.GUI_UPDATE_INTERVAL:
+                    self.last_gui_update_time = current_time
 
-                        # Display positions
-                        self.FKCurrentPosValueArt1.setText(f"{motor_x:.2f}º")
-                        self.FKCurrentPosValueArt2.setText(f"{motor_y:.2f}º")
-                        self.FKCurrentPosValueArt3.setText(f"{motor_z:.2f}º")
-                        self.FKCurrentPosValueArt4.setText(f"{motor_u:.2f}º")
-                        self.FKCurrentPosValueArt5.setText(f"{art5:.2f}º")
-                        self.FKCurrentPosValueArt6.setText(f"{art6:.2f}º")
+                    # Display positions
+                    self.FKCurrentPosValueArt1.setText(f"{motor_x:.2f}º")
+                    self.FKCurrentPosValueArt2.setText(f"{motor_y:.2f}º")
+                    self.FKCurrentPosValueArt3.setText(f"{motor_z:.2f}º")
+                    self.FKCurrentPosValueArt4.setText(f"{motor_u:.2f}º")
+                    self.FKCurrentPosValueArt5.setText(f"{art5:.2f}º")
+                    self.FKCurrentPosValueArt6.setText(f"{art6:.2f}º")
 
-                        # Set status to Idle since M114 doesn't provide status
-                        self.updateCurrentState("Idle")
+                    # Set status to Idle since M114 doesn't provide status
+                    self.updateCurrentState("Idle")
 
-            except (ValueError, KeyError, IndexError) as e:
-                logger.error(f"Error parsing M114 response: {e}")
-                logger.debug(f"Problematic data: {dataRead}")
-                logger.exception("Position parsing error")
-        else:  # GRBL
-            # GRBL: Parse comma-separated format
-            try:
-                data = dataRead[1:][:-1].split(",")
-                if len(data) > 0:
-                    self.updateCurrentState(data[0])
-                if len(data) >= 8:
-                    logger.debug(f"GRBL Position data array: {data}")
-                    logger.info(f"  Art1<-{data[1][5:][:-2]}° | Art2<-{data[2][:-2]}° | Art3<-{data[4][:-2]}° | Art4<-{data[5][:-2]}° | Art5<-{data[6][:-2]}° | Art6<-{data[7][:-2]}°")
-                    self.FKCurrentPosValueArt1.setText(data[1][5:][:-2]+"º")
-                    self.FKCurrentPosValueArt2.setText(data[2][:-2]+"º")
-                    self.FKCurrentPosValueArt3.setText(data[4][:-2]+"º")
-                    self.FKCurrentPosValueArt4.setText(data[5][:-2]+"º")
-                    self.FKCurrentPosValueArt5.setText(data[6][:-2]+"º")
-                    self.FKCurrentPosValueArt6.setText(data[7][:-2]+"º")
-            except (IndexError, ValueError) as e:
-                logger.error(f"Error parsing GRBL status: {e}")
+        except (ValueError, KeyError, IndexError) as e:
+            logger.error(f"Error parsing M114 response: {e}")
+            logger.debug(f"Problematic data: {dataRead}")
+            logger.exception("Position parsing error")
 
     def updateEndstopDisplay(self, dataRead):
         """Parse M119 endstop response and update GUI displays (optimized with regex)"""
@@ -1803,12 +1596,8 @@ class SerialThreadClass(QtCore.QThread):
 
                     # Check if this is a long-running blocking command
                     command_str = command.decode('UTF-8', errors='replace').strip().upper()
-                    if self.firmware_type == FIRMWARE_RRF:
-                        # RRF blocking commands: G28 (home), G29 (bed probe), M999 (reset)
-                        blocking_commands = ['G28', 'G29', 'M999']
-                    else:  # GRBL
-                        # GRBL blocking commands: $H (home), $X (unlock)
-                        blocking_commands = ['$H', '$X']
+                    # RRF blocking commands: G28 (home), G29 (bed probe), M999 (reset)
+                    blocking_commands = ['G28', 'G29', 'M999']
 
                     # Pause status polling if we sent a blocking command
                     for block_cmd in blocking_commands:
@@ -1825,18 +1614,14 @@ class SerialThreadClass(QtCore.QThread):
                         self.status_polling_paused = False
                         logger.warning(f"Forcing resume of status polling after {time_paused:.1f}s timeout (max: {config.BLOCKING_COMMAND_MAX_PAUSE}s)")
                         # Request immediate position update
-                        if self.firmware_type == FIRMWARE_RRF:
-                            s0.write("M114\n".encode('UTF-8'), priority=True)
-                            s0.write("M119\n".encode('UTF-8'), priority=True)
+                        s0.write("M114\n".encode('UTF-8'), priority=True)
+                        s0.write("M119\n".encode('UTF-8'), priority=True)
 
                 # Send status request (interval from config) - ONLY if not paused
                 if not self.status_polling_paused and current_time - self.elapsedTime > config.SERIAL_STATUS_REQUEST_INTERVAL:
                     self.elapsedTime = current_time
                     try:
-                        if self.firmware_type == FIRMWARE_RRF:
-                            s0.write("M114\n".encode('UTF-8'), priority=True)
-                        else:  # GRBL
-                            s0.write("?\n".encode('UTF-8'), priority=True)
+                        s0.write("M114\n".encode('UTF-8'), priority=True)
                     except Exception as e:
                         logger.error(f"Error queuing status request: {e}")
 
@@ -1844,8 +1629,7 @@ class SerialThreadClass(QtCore.QThread):
                 if not self.status_polling_paused and current_time - self.endstopCheckTime > config.SERIAL_ENDSTOP_REQUEST_INTERVAL:
                     self.endstopCheckTime = current_time
                     try:
-                        if self.firmware_type == FIRMWARE_RRF:
-                            s0.write("M119\n".encode('UTF-8'), priority=True)
+                        s0.write("M119\n".encode('UTF-8'), priority=True)
                     except Exception as e:
                         logger.error(f"Error queuing endstop request: {e}")
 
@@ -1868,9 +1652,8 @@ class SerialThreadClass(QtCore.QThread):
                                         self.status_polling_paused = False
                                         logger.info(f"Resuming status polling after blocking command completed ({time_elapsed:.1f}s elapsed)")
                                         # Request immediate position update after resuming
-                                        if self.firmware_type == FIRMWARE_RRF:
-                                            s0.write("M114\n".encode('UTF-8'), priority=True)
-                                            s0.write("M119\n".encode('UTF-8'), priority=True)
+                                        s0.write("M114\n".encode('UTF-8'), priority=True)
+                                        s0.write("M119\n".encode('UTF-8'), priority=True)
                                     else:
                                         logger.debug(f"Received 'ok' but only {time_elapsed:.1f}s elapsed (need {config.BLOCKING_COMMAND_MIN_PAUSE}s), waiting...")
                 except (OSError, serial.SerialException) as e:
