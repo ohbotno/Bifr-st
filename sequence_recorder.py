@@ -7,7 +7,7 @@ import json
 import time
 import logging
 from datetime import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Callable, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class SequencePoint:
     """Represents a single point in a robot movement sequence"""
 
-    def __init__(self, q1, q2, q3, q4, q5, q6, gripper=0, timestamp=None, delay=0):
+    def __init__(self, q1: float, q2: float, q3: float, q4: float, q5: float, q6: float, gripper: float = 0, timestamp: Optional[float] = None, delay: float = 0):
         """
         Args:
             q1-q6: Joint angles in degrees
@@ -33,7 +33,7 @@ class SequencePoint:
         self.timestamp = timestamp if timestamp else time.time()
         self.delay = delay
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, float]:
         """Convert to dictionary for JSON serialization"""
         return {
             'q1': self.q1,
@@ -48,7 +48,7 @@ class SequencePoint:
         }
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: Dict[str, float]) -> 'SequencePoint':
         """Create from dictionary"""
         return cls(
             q1=data['q1'],
@@ -62,14 +62,14 @@ class SequencePoint:
             delay=data.get('delay', 0)
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Point[q1={self.q1:.1f}°, q2={self.q2:.1f}°, q3={self.q3:.1f}°, q4={self.q4:.1f}°, q5={self.q5:.1f}°, q6={self.q6:.1f}°, grip={self.gripper}]"
 
 
 class Sequence:
     """Represents a complete movement sequence"""
 
-    def __init__(self, name="Untitled Sequence", description=""):
+    def __init__(self, name: str = "Untitled Sequence", description: str = ""):
         self.name = name
         self.description = description
         self.points: List[SequencePoint] = []
@@ -82,7 +82,7 @@ class Sequence:
         self.modified_at = datetime.now().isoformat()
         logger.info(f"Added point {len(self.points)} to sequence '{self.name}': {point}")
 
-    def remove_point(self, index: int):
+    def remove_point(self, index: int) -> bool:
         """Remove a point by index"""
         if 0 <= index < len(self.points):
             removed = self.points.pop(index)
@@ -91,7 +91,7 @@ class Sequence:
             return True
         return False
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all points"""
         self.points.clear()
         self.modified_at = datetime.now().isoformat()
@@ -103,7 +103,7 @@ class Sequence:
             return self.points[index]
         return None
 
-    def update_point(self, index: int, point: SequencePoint):
+    def update_point(self, index: int, point: SequencePoint) -> bool:
         """Update a point at index"""
         if 0 <= index < len(self.points):
             self.points[index] = point
@@ -112,13 +112,13 @@ class Sequence:
             return True
         return False
 
-    def get_duration(self):
+    def get_duration(self) -> float:
         """Calculate total sequence duration in seconds"""
         if len(self.points) < 2:
             return 0
         return sum(p.delay for p in self.points)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, any]:
         """Convert to dictionary for JSON serialization"""
         return {
             'name': self.name,
@@ -129,7 +129,7 @@ class Sequence:
         }
 
     @classmethod
-    def from_dict(cls, data):
+    def from_dict(cls, data: Dict[str, any]) -> 'Sequence':
         """Create from dictionary"""
         seq = cls(
             name=data.get('name', 'Untitled Sequence'),
@@ -140,35 +140,35 @@ class Sequence:
         seq.points = [SequencePoint.from_dict(p) for p in data.get('points', [])]
         return seq
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.points)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Sequence '{self.name}' ({len(self.points)} points, {self.get_duration():.1f}s)"
 
 
 class SequenceRecorder:
     """Manages sequence recording and playback"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.current_sequence = Sequence()
         self.is_recording = False
         self.recording_start_time = None
 
-    def start_recording(self, sequence_name="New Sequence"):
+    def start_recording(self, sequence_name: str = "New Sequence") -> None:
         """Start recording a new sequence"""
         self.current_sequence = Sequence(name=sequence_name)
         self.is_recording = True
         self.recording_start_time = time.time()
         logger.info(f"Started recording sequence: {sequence_name}")
 
-    def stop_recording(self):
+    def stop_recording(self) -> Sequence:
         """Stop recording"""
         self.is_recording = False
         logger.info(f"Stopped recording. Sequence has {len(self.current_sequence)} points")
         return self.current_sequence
 
-    def record_point(self, q1, q2, q3, q4, q5, q6, gripper=0, delay=0):
+    def record_point(self, q1: float, q2: float, q3: float, q4: float, q5: float, q6: float, gripper: float = 0, delay: float = 0) -> bool:
         """Record current robot position"""
         if not self.is_recording:
             logger.warning("Attempted to record point while not recording")
@@ -178,7 +178,7 @@ class SequenceRecorder:
         self.current_sequence.add_point(point)
         return True
 
-    def save_sequence(self, filepath: str, sequence: Sequence = None):
+    def save_sequence(self, filepath: str, sequence: Optional[Sequence] = None) -> bool:
         """Save sequence to JSON file"""
         if sequence is None:
             sequence = self.current_sequence
@@ -204,11 +204,11 @@ class SequenceRecorder:
             logger.error(f"Failed to load sequence: {e}")
             return None
 
-    def get_current_sequence(self):
+    def get_current_sequence(self) -> Sequence:
         """Get the current sequence"""
         return self.current_sequence
 
-    def set_current_sequence(self, sequence: Sequence):
+    def set_current_sequence(self, sequence: Sequence) -> None:
         """Set the current sequence"""
         self.current_sequence = sequence
         logger.info(f"Set current sequence to: {sequence}")
@@ -221,7 +221,7 @@ class SequencePlayer:
     Do NOT use threading - use playNextPoint() with QTimer instead.
     """
 
-    def __init__(self, move_callback):
+    def __init__(self, move_callback: Callable[[float, float, float, float, float, float, float], None]) -> None:
         """
         Args:
             move_callback: Function to call for each movement point
@@ -236,7 +236,7 @@ class SequencePlayer:
         self.current_sequence = None
         self.last_move_time = 0
 
-    def start_playback(self, sequence: Sequence, speed=1.0, loop=False):
+    def start_playback(self, sequence: Sequence, speed: float = 1.0, loop: bool = False) -> None:
         """
         Start playback of a sequence
 
@@ -257,7 +257,7 @@ class SequencePlayer:
 
         logger.info(f"Starting playback of '{sequence.name}' (speed={speed}x, loop={loop})")
 
-    def playNextPoint(self):
+    def playNextPoint(self) -> Tuple[bool, int, int]:
         """
         Play the next point in the sequence (called by QTimer)
 
@@ -307,19 +307,19 @@ class SequencePlayer:
 
         return (True, self.current_point_index, len(self.current_sequence))
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop playback"""
         self.is_playing = False
         self.is_paused = False
         logger.info("Playback stopped by user")
 
-    def pause(self):
+    def pause(self) -> None:
         """Pause playback"""
         if self.is_playing:
             self.is_paused = True
             logger.info("Playback paused")
 
-    def resume(self):
+    def resume(self) -> None:
         """Resume playback"""
         if self.is_playing and self.is_paused:
             self.is_paused = False

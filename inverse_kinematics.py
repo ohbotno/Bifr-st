@@ -3,7 +3,9 @@ Inverse Kinematics module for Thor Robot Arm
 Based on kinematic decoupling procedure from Thor project documentation
 """
 
+from typing import Tuple
 import numpy as np
+import numpy.typing as npt
 import logging
 from scipy.spatial.transform import Rotation as R
 
@@ -16,22 +18,22 @@ L3 = 195.00  # Forearm length
 L4 = 67.15   # Wrist to TCP length
 
 
-def rotation_matrix_x(angle_rad):
+def rotation_matrix_x(angle_rad: float) -> npt.NDArray[np.float64]:
     """Rotation matrix around X axis (using scipy for 60% performance improvement)"""
     return R.from_rotvec([angle_rad, 0, 0]).as_matrix()
 
 
-def rotation_matrix_y(angle_rad):
+def rotation_matrix_y(angle_rad: float) -> npt.NDArray[np.float64]:
     """Rotation matrix around Y axis (using scipy for 60% performance improvement)"""
     return R.from_rotvec([0, angle_rad, 0]).as_matrix()
 
 
-def rotation_matrix_z(angle_rad):
+def rotation_matrix_z(angle_rad: float) -> npt.NDArray[np.float64]:
     """Rotation matrix around Z axis (using scipy for 60% performance improvement)"""
     return R.from_rotvec([0, 0, angle_rad]).as_matrix()
 
 
-def dh_transform(theta, d, a, alpha):
+def dh_transform(theta: float, d: float, a: float, alpha: float) -> npt.NDArray[np.float64]:
     """
     Calculate DH transformation matrix
 
@@ -57,7 +59,7 @@ def dh_transform(theta, d, a, alpha):
     ])
 
 
-def euler_to_rotation_matrix(roll, pitch, yaw):
+def euler_to_rotation_matrix(roll: float, pitch: float, yaw: float) -> npt.NDArray[np.float64]:
     """
     Convert Euler angles (ZYX convention) to rotation matrix
     Uses scipy for 60% performance improvement over manual matrix multiplication
@@ -74,7 +76,7 @@ def euler_to_rotation_matrix(roll, pitch, yaw):
 
 class IKSolution:
     """Container for inverse kinematics solution"""
-    def __init__(self, q1, q2, q3, q4=0, q5=0, q6=0, valid=True, error_msg=""):
+    def __init__(self, q1: float, q2: float, q3: float, q4: float = 0, q5: float = 0, q6: float = 0, valid: bool = True, error_msg: str = ""):
         self.q1 = q1  # Base rotation (degrees)
         self.q2 = q2  # Shoulder angle (degrees)
         self.q3 = q3  # Elbow angle (degrees)
@@ -84,14 +86,14 @@ class IKSolution:
         self.valid = valid
         self.error_msg = error_msg
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.valid:
             return f"IK Solution: q1={self.q1:.2f}°, q2={self.q2:.2f}°, q3={self.q3:.2f}°, q4={self.q4:.2f}°, q5={self.q5:.2f}°, q6={self.q6:.2f}°"
         else:
             return f"IK Solution: INVALID - {self.error_msg}"
 
 
-def solve_ik_position(x, y, z):
+def solve_ik_position(x: float, y: float, z: float) -> IKSolution:
     """
     Solve inverse kinematics for 3-DOF positioning (q1, q2, q3)
     This positions the wrist center point (Pm), not the TCP
@@ -188,7 +190,7 @@ def solve_ik_position(x, y, z):
     return IKSolution(q1, q2, q3, valid=True)
 
 
-def solve_ik_full(x, y, z, roll=0, pitch=-np.pi/2, yaw=0):
+def solve_ik_full(x: float, y: float, z: float, roll: float = 0, pitch: float = -np.pi/2, yaw: float = 0) -> IKSolution:
     """
     Solve full 6-DOF inverse kinematics (q1, q2, q3, q4, q5, q6)
 
@@ -311,7 +313,7 @@ def solve_ik_full(x, y, z, roll=0, pitch=-np.pi/2, yaw=0):
     return IKSolution(q1, q2, q3, q4, q5, q6, valid=True)
 
 
-def verify_ik_solution(solution, target_x, target_y, target_z, tolerance=1.0):
+def verify_ik_solution(solution: IKSolution, target_x: float, target_y: float, target_z: float, tolerance: float = 1.0) -> Tuple[bool, float, Tuple[float, float, float]]:
     """
     Verify IK solution by performing forward kinematics
 
