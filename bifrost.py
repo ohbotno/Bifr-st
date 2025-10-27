@@ -13,6 +13,7 @@ import sequence_recorder as seq_rec
 import differential_kinematics as diff_kin
 import position_history as pos_hist
 import config
+from command_builder import CommandBuilder, SerialCommandSender
 
 import serial
 import time
@@ -221,6 +222,9 @@ class BifrostGUI(Ui_MainWindow):
         # Track homing state
         self.is_homing = False
 
+        # Initialize command sender (will use ConsoleOutput widget)
+        self.command_sender = SerialCommandSender(s0, None)  # Console widget set later after full init
+
         # Log axis mapping configuration
         logger.info("="*60)
         logger.info("BIFROST GUI - MOTOR TO AXIS MAPPING")
@@ -361,6 +365,9 @@ class BifrostGUI(Ui_MainWindow):
         self.connection_signals.success.connect(self._onConnectionSuccess)
         self.connection_signals.error.connect(self._onConnectionError)
 
+        # Set console widget for command sender now that UI is fully initialized
+        self.command_sender.console_output = self.ConsoleOutput
+
     def setupGenericControls(self):
         """
         Setup generic increment/decrement methods for all joints
@@ -440,42 +447,30 @@ class BifrostGUI(Ui_MainWindow):
     def _FKMoveSimple(self, joint_name, joint_value, config):
         """Move a simple single-axis joint"""
         logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']}")
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement = "G1 "
-                feedRate = " F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement = "G0 "
-                feedRate = ""
-            message = typeOfMovement + config['axis'] + str(joint_value) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
+
+        # Build command using command builder
+        movement_type, feedrate = CommandBuilder.get_movement_params(self)
+        command = CommandBuilder.build_single_axis_command(
+            movement_type, config['axis'], joint_value, feedrate
+        )
+
+        # Send command
+        if not self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection):
             logger.warning(f"{joint_name} move attempted but serial not connected")
-            self.noSerialConnection()
 
     def _FKMoveCoupled(self, joint_name, joint_value, config):
         """Move a coupled-motor joint (Art2 uses drives 1+2)"""
         logger.info(f"{config['log_name']} commanded to: {joint_value}° -> Axis: {config['axis']} (Drives {config['drives']})")
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement = "G1 "
-                feedRate = " F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement = "G0 "
-                feedRate = ""
-            message = typeOfMovement + config['axis'] + str(joint_value) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending coupled command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
+
+        # Build command using command builder (same as simple, just different logging)
+        movement_type, feedrate = CommandBuilder.get_movement_params(self)
+        command = CommandBuilder.build_single_axis_command(
+            movement_type, config['axis'], joint_value, feedrate
+        )
+
+        # Send command
+        if not self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection):
             logger.warning(f"{joint_name} move attempted but serial not connected")
-            self.noSerialConnection()
 
     def _FKMoveDifferential(self, joint_name, joint_value, config):
         """Move a differential joint (Art5/Art6)"""
@@ -512,23 +507,17 @@ class BifrostGUI(Ui_MainWindow):
         else:
             self.desired_art6 = joint_value
 
-        if s0.isOpen():
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement = "G1 "
-                feedRate = " F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement = "G0 "
-                feedRate = ""
-            # Send both motor commands for differential
-            message = typeOfMovement + "V" + str(motor_v) + " W" + str(motor_w) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            logger.debug(f"Sending differential command: {message.strip()}")
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
+        # Build command using command builder (both V and W motors)
+        movement_type, feedrate = CommandBuilder.get_movement_params(self)
+        command = CommandBuilder.build_axis_command(
+            movement_type,
+            {"V": motor_v, "W": motor_w},
+            feedrate
+        )
+
+        # Send command
+        if not self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection):
             logger.warning(f"{joint_name} move attempted but serial not connected")
-            self.noSerialConnection()
 
     def close_application(self):
         # Properly cleanup serial connection and thread
@@ -544,30 +533,24 @@ class BifrostGUI(Ui_MainWindow):
         self.dialogAbout.exec_()
 
     def sendHomingCycleCommand(self):
-        if s0.isOpen():
-            messageToSend="G28\n"  # RRF: Home all axes
-            messageToConsole=">>> " + messageToSend.strip()
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-
+        """Send G28 homing command (RRF: Home all axes)"""
+        if self.command_sender.send_if_connected("G28"):
             # Update button state to indicate homing in progress
             self.is_homing = True
             self.HomeButton.setEnabled(False)
             self.HomeButton.setText("Homing...")
 
     def sendZeroPositionCommand(self):
-        if s0.isOpen():
-            messageToSend="G0 X0 Y0 Z0 U0 V0 W0"
-            messageToConsole=">>> " + messageToSend
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
+        """Send command to move all axes to zero position"""
+        command = CommandBuilder.build_axis_command(
+            "G0",
+            {"X": 0, "Y": 0, "Z": 0, "U": 0, "V": 0, "W": 0}
+        )
+        self.command_sender.send_if_connected(command)
 
     def sendKillAlarmCommand(self):
-        if s0.isOpen():
-            messageToSend="M999\n"  # RRF: Clear emergency stop / reset
-            messageToConsole=">>> " + messageToSend.strip()
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
+        """Send M999 command (RRF: Clear emergency stop / reset)"""
+        self.command_sender.send_if_connected("M999")
 
     def FeedRateBoxHide(self):
         if self.G1MoveRadioButton.isChecked():
@@ -584,47 +567,41 @@ class BifrostGUI(Ui_MainWindow):
 
 #FK Every Articulation Functions
     def FKMoveAll(self):
-        # DIFFERENTIAL MECHANISM: Art5 & Art6 use differential kinematics
-        if s0.isOpen():
-            # Get joint values
-            art1 = self.SpinBoxArt1.value()
-            art2 = self.SpinBoxArt2.value()
-            art3 = self.SpinBoxArt3.value()
-            art4 = self.SpinBoxArt4.value()
-            art5 = self.SpinBoxArt5.value()
-            art6 = self.SpinBoxArt6.value()
+        """Move all joints simultaneously (DIFFERENTIAL MECHANISM: Art5 & Art6 use differential kinematics)"""
+        # Get joint values
+        art1 = self.SpinBoxArt1.value()
+        art2 = self.SpinBoxArt2.value()
+        art3 = self.SpinBoxArt3.value()
+        art4 = self.SpinBoxArt4.value()
+        art5 = self.SpinBoxArt5.value()
+        art6 = self.SpinBoxArt6.value()
 
-            # Calculate differential motor positions using helper
-            motor_v, motor_w = diff_kin.DifferentialKinematics.joint_to_motor(art5, art6)
+        # Calculate differential motor positions using helper
+        motor_v, motor_w = diff_kin.DifferentialKinematics.joint_to_motor(art5, art6)
 
-            logger.info(f"MoveAll: Art5={art5}° Art6={art6}° → Differential: V={motor_v:.2f}° W={motor_w:.2f}°")
+        logger.info(f"MoveAll: Art5={art5}° Art6={art6}° → Differential: V={motor_v:.2f}° W={motor_w:.2f}°")
 
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement="G1 "
-                feedRate=" F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement="G0 "
-                feedRate=""
+        # Build command using command builder
+        movement_type, feedrate = CommandBuilder.get_movement_params(self)
+        # Map all axes: X=Art1, Y=Art2(coupled), Z=Art3, U=Art4, V/W=differential(Art5,Art6)
+        command = CommandBuilder.build_axis_command(
+            movement_type,
+            {"X": art1, "Y": art2, "Z": art3, "U": art4, "V": motor_v, "W": motor_w},
+            feedrate
+        )
 
-            # Map all axes: X=Art1, Y=Art2(coupled), Z=Art3, U=Art4, V/W=differential(Art5,Art6)
-            message=typeOfMovement + "X" + str(art1) + " Y" + str(art2) + " Z" + str(art3) + " U" + str(art4) + " V" + str(motor_v) + " W" + str(motor_w) + feedRate
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            self.noSerialConnection()
+        # Send command
+        self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection)
 
 # Gripper Functions
     def MoveGripper(self):
-        if s0.isOpen():
-            message="M3 S" + str((255/100)*self.SpinBoxGripper.value())
-            messageToSend = message + "\n"
-            messageToConsole = ">>> " + message
-            s0.write(messageToSend.encode('UTF-8'))
-            self.ConsoleOutput.appendPlainText(messageToConsole)
-        else:
-            self.noSerialConnection()
+        """Move gripper to specified position"""
+        # Convert percentage to PWM value
+        pwm_value = (255 / 100) * self.SpinBoxGripper.value()
+        command = f"M3 S{pwm_value}"
+
+        # Send command
+        self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection)
 
     def SliderUpdateGripper(self):
         val=self.SliderGripper.value()
@@ -1085,26 +1062,23 @@ class BifrostGUI(Ui_MainWindow):
         """Execute a single movement during sequence playback"""
         logger.info(f"Executing sequence move: q1={q1:.1f}°, q2={q2:.1f}°, q3={q3:.1f}°, q4={q4:.1f}°, q5={q5:.1f}°, q6={q6:.1f}°, grip={gripper}")
 
-        if s0.isOpen():
-            # DIFFERENTIAL MECHANISM: Calculate motor positions using helper
-            motor_v, motor_w = diff_kin.DifferentialKinematics.joint_to_motor(q5, q6)
+        # DIFFERENTIAL MECHANISM: Calculate motor positions using helper
+        motor_v, motor_w = diff_kin.DifferentialKinematics.joint_to_motor(q5, q6)
 
-            if self.G1MoveRadioButton.isChecked():
-                typeOfMovement = "G1 "
-                feedRate = " F" + str(self.FeedRateInput.value())
-            else:
-                typeOfMovement = "G0 "
-                feedRate = ""
+        # Build and send movement command
+        movement_type, feedrate = CommandBuilder.get_movement_params(self)
+        command = CommandBuilder.build_axis_command(
+            movement_type,
+            {"X": q1, "Y": q2, "Z": q3, "U": q4, "V": motor_v, "W": motor_w},
+            feedrate
+        )
+        self.command_sender.send(command, show_in_console=False)  # Don't spam console during playback
 
-            # Map all axes: X=Art1, Y=Art2(coupled), Z=Art3, U=Art4, V/W=differential(Art5,Art6)
-            message = typeOfMovement + f"X{q1} Y{q2} Z{q3} U{q4} V{motor_v} W{motor_w}{feedRate}"
-            messageToSend = message + "\n"
-            s0.write(messageToSend.encode('UTF-8'))
-
-            # Move gripper
-            if gripper > 0:
-                gripper_cmd = f"M3 S{(255/100)*gripper}\n"
-                s0.write(gripper_cmd.encode('UTF-8'))
+        # Move gripper if needed
+        if gripper > 0:
+            pwm_value = (255 / 100) * gripper
+            gripper_cmd = f"M3 S{pwm_value}"
+            self.command_sender.send(gripper_cmd, show_in_console=False)
 
     def saveSequence(self):
         """Save sequence to file"""
@@ -1349,20 +1323,21 @@ class BifrostGUI(Ui_MainWindow):
                     self.ConsoleOutput.appendPlainText(dataRead)
 
     def sendSerialCommand(self):
-        command = self.ConsoleInput.text()
-        messageToSent = command + "\n"
-        messageToConsole = ">>> " + command
-        if s0.isOpen():
-            if messageToSent != "\n":  # Don't send empty commands
-                s0.write(messageToSent.encode('UTF-8'))
-                self.ConsoleOutput.appendPlainText(messageToConsole)
-                self.ConsoleInput.addToHistory(command)
-                self.ConsoleInput.clear()
-                logger.debug(f"Manual command sent: {command}")
-                # Mark time of manual command to show responses for next 2 seconds
-                self.last_manual_command_time = time.time()
-        else:
-            self.noSerialConnection()
+        """Send manual command from console input"""
+        command = self.ConsoleInput.text().strip()
+
+        # Don't send empty commands
+        if not command:
+            return
+
+        # Send command
+        if self.command_sender.send_if_connected(command, error_callback=self.noSerialConnection):
+            # Update history and clear input
+            self.ConsoleInput.addToHistory(command)
+            self.ConsoleInput.clear()
+            # Mark time of manual command to show responses for next 2 seconds
+            self.last_manual_command_time = time.time()
+            logger.debug(f"Manual command sent: {command}")
 
     def validatePosition(self, axis, value):
         """
