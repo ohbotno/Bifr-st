@@ -317,20 +317,14 @@ class BifrostGUI(Ui_MainWindow):
         self.sequence_timer.timeout.connect(self.updateSequencePlayback)
         self.setupSequenceControls()
 
-        # Track current differential motor positions for Art5/Art6
-        # Initialize from spinbox values
-        initial_art5 = self.SpinBoxArt5.value()
-        initial_art6 = self.SpinBoxArt6.value()
-        self.current_motor_v = initial_art6 + initial_art5
-        self.current_motor_w = initial_art6 - initial_art5
-
-        # Track desired joint positions for differential control
-        self.desired_art5 = initial_art5
-        self.desired_art6 = initial_art6
-
-        # Position validation tracking
-        self.last_valid_positions = {'X': 0, 'Y': 0, 'Z': 0, 'U': 0, 'V': 0, 'W': 0}
-        self.position_update_count = 0
+        # NOTE: Differential motor tracking, desired positions, and position validation
+        # are now handled by RobotController. Local references kept for backward compatibility
+        # and will be updated from controller as needed.
+        self.current_motor_v = 0.0  # Updated from robot_controller
+        self.current_motor_w = 0.0  # Updated from robot_controller
+        self.desired_art5 = 0.0  # Updated from robot_controller
+        self.desired_art6 = 0.0  # Updated from robot_controller
+        self.position_update_count = 0  # Updated from robot_controller
         self.last_gui_update_time = 0  # For throttling GUI updates
 
         # Position history tracking
@@ -366,17 +360,11 @@ class BifrostGUI(Ui_MainWindow):
             'Gripper': self.SpinBoxGripper
         }
 
-        # Map joint names to firmware axes and special handling
-        self.joint_config = {
-            'Art1': {'axis': 'X', 'type': 'simple', 'log_name': 'Art1 (Joint 1)'},
-            'Art2': {'axis': 'Y', 'type': 'coupled', 'log_name': 'Art2 (Joint 2 - COUPLED)', 'drives': '1+2'},
-            'Art3': {'axis': 'Z', 'type': 'simple', 'log_name': 'Art3 (Joint 3)'},
-            'Art4': {'axis': 'U', 'type': 'simple', 'log_name': 'Art4 (Joint 4)'},
-            'Art5': {'axis': 'V+W', 'type': 'differential', 'log_name': 'Art5 (DIFFERENTIAL)'},
-            'Art6': {'axis': 'V+W', 'type': 'differential', 'log_name': 'Art6 (DIFFERENTIAL)'}
-        }
+        # NOTE: Joint configuration is now managed by RobotController
+        # This reference is kept for backward compatibility with existing GUI methods
+        self.joint_config = self.robot_controller.joint_config
 
-        logger.info("Generic increment/decrement controls initialized")
+        logger.info("Generic increment/decrement controls initialized (using RobotController config)")
 
     def adjustJointValue(self, joint_name, delta):
         """
@@ -444,33 +432,24 @@ class BifrostGUI(Ui_MainWindow):
             logger.warning(f"{joint_name} move attempted but serial not connected")
 
     def _FKMoveDifferential(self, joint_name, joint_value, config):
-        """Move a differential joint (Art5/Art6)"""
-        # Check if we have valid position feedback
-        if self.current_motor_v == 0.0 and self.current_motor_w == 0.0:
+        """
+        Move a differential joint (Art5/Art6)
+        NOW USES: RobotController for differential calculations
+        """
+        # Check if we have valid position feedback using RobotController
+        if not self.robot_controller.check_differential_initialized():
             logger.warning("No position feedback received yet - differential control may be inaccurate!")
             logger.warning("Wait for position update or home the robot first")
 
-        # Calculate new motor positions using differential kinematics
-        if joint_name == 'Art5':
-            motor_v, motor_w, kept_value = diff_kin.DifferentialKinematics.move_art5_only(
-                self.current_motor_v, self.current_motor_w, joint_value
-            )
-            kept_joint = 'Art6'
-        else:  # Art6
-            motor_v, motor_w, kept_value = diff_kin.DifferentialKinematics.move_art6_only(
-                self.current_motor_v, self.current_motor_w, joint_value
-            )
-            kept_joint = 'Art5'
-
-        current_art5, current_art6 = diff_kin.DifferentialKinematics.motor_to_joint(
-            self.current_motor_v, self.current_motor_w
+        # Calculate new motor positions using RobotController
+        motor_v, motor_w, kept_value = self.robot_controller.calculate_differential_move(
+            joint_name, joint_value
         )
 
-        logger.info(f"{config['log_name']} commanded to: {joint_value}°")
-        logger.info(f"  BEFORE: Motor_V={self.current_motor_v:.2f}° Motor_W={self.current_motor_w:.2f}° → Art5={current_art5:.2f}° Art6={current_art6:.2f}°")
-        logger.info(f"  AFTER:  Motor_V={motor_v:.2f}° Motor_W={motor_w:.2f}° → {joint_name}={joint_value:.2f}° {kept_joint}={kept_value:.2f}° ({kept_joint} kept)")
+        # Update tracked positions in controller
+        self.robot_controller.update_differential_motors(motor_v, motor_w)
 
-        # Update tracked positions
+        # Keep local references for backward compatibility
         self.current_motor_v = motor_v
         self.current_motor_w = motor_w
         if joint_name == 'Art5':
@@ -1296,6 +1275,9 @@ class BifrostGUI(Ui_MainWindow):
 
     def validatePosition(self, axis, value):
         """
+        DEPRECATED: Use robot_controller.validate_position() instead
+        This method is kept for backward compatibility only
+
         Validate position value for reasonableness (uses config.py limits)
 
         Args:
@@ -1305,28 +1287,8 @@ class BifrostGUI(Ui_MainWindow):
         Returns:
             (is_valid, sanitized_value)
         """
-        if axis not in config.POSITION_LIMITS:
-            return (True, value)  # Unknown axis, accept
-
-        min_val, max_val = config.POSITION_LIMITS[axis]
-
-        # Check absolute limits
-        if not (min_val <= value <= max_val):
-            logger.warning(f"Position out of bounds: {axis}={value:.2f}° (limits: {min_val} to {max_val})")
-            # Clamp to limits
-            value = max(min_val, min(max_val, value))
-            return (False, value)
-
-        # Check for impossible changes
-        if axis in self.last_valid_positions:
-            last_value = self.last_valid_positions[axis]
-            change = abs(value - last_value)
-            if change > config.MAX_POSITION_CHANGE_PER_UPDATE:
-                logger.warning(f"Impossible position change detected: {axis} changed {change:.2f}° in 100ms (max: {config.MAX_POSITION_CHANGE_PER_UPDATE}°)")
-                # Use last valid value
-                return (False, last_value)
-
-        return (True, value)
+        # Delegate to RobotController
+        return self.robot_controller.validate_position(axis, value)
 
     def _parseM114Response(self, dataRead):
         """
@@ -1344,6 +1306,7 @@ class BifrostGUI(Ui_MainWindow):
     def _validateAllPositions(self, pos_dict):
         """
         Validate all axis positions and return sanitized values
+        NOW USES: RobotController for validation
 
         Args:
             pos_dict: Dictionary of raw positions from M114
@@ -1355,9 +1318,8 @@ class BifrostGUI(Ui_MainWindow):
         positions = {}
 
         for axis in AXES:
-            valid, value = self.validatePosition(axis, pos_dict.get(axis, 0.0))
+            valid, value = self.robot_controller.validate_position(axis, pos_dict.get(axis, 0.0))
             positions[axis] = value
-            self.last_valid_positions[axis] = value
 
             if not valid:
                 logger.warning(f"Position validation corrected for {axis}")
@@ -1367,6 +1329,7 @@ class BifrostGUI(Ui_MainWindow):
     def _updateInternalState(self, positions):
         """
         Update internal tracking variables from validated positions
+        NOW USES: RobotController to update state and calculate Art5/Art6
 
         Args:
             positions: Dictionary of validated axis positions
@@ -1374,25 +1337,17 @@ class BifrostGUI(Ui_MainWindow):
         Returns:
             dict: Updated positions with calculated Art5/Art6
         """
-        # Calculate joint angles from differential motor positions
-        art5, art6 = diff_kin.DifferentialKinematics.motor_to_joint(
-            positions['V'], positions['W']
-        )
+        # Use RobotController to update all state
+        updated_positions = self.robot_controller.update_positions_from_firmware(positions)
 
-        # Update tracked motor positions
-        self.current_motor_v = positions['V']
-        self.current_motor_w = positions['W']
-        self.desired_art5 = art5
-        self.desired_art6 = art6
+        # Keep local references for backward compatibility with existing code
+        self.current_motor_v = self.robot_controller.current_motor_v
+        self.current_motor_w = self.robot_controller.current_motor_w
+        self.desired_art5 = self.robot_controller.desired_art5
+        self.desired_art6 = self.robot_controller.desired_art6
+        self.position_update_count = self.robot_controller.position_update_count
 
-        # Add calculated joint angles to position dict
-        positions['Art5'] = art5
-        positions['Art6'] = art6
-
-        # Increment update counter
-        self.position_update_count += 1
-
-        return positions
+        return updated_positions
 
     def _recordPositionHistory(self, positions):
         """
