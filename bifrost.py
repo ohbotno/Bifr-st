@@ -1467,9 +1467,9 @@ class BifrostGUI(Ui_MainWindow):
         # Request initial position after thread is ready
         QtCore.QTimer.singleShot(50, self.requestInitialPosition)
 
-        logger.info(f"✓ Connected to {serialPort} at {baudrate} baud")
-        logger.info(f"✓ Serial thread started (Firmware: {self.firmware_type})")
-        logger.info(f"✓ Requesting position update to initialize differential tracking")
+        logger.info(f"Connected to {serialPort} at {baudrate} baud")
+        logger.info(f"Serial thread started (Firmware: {self.firmware_type})")
+        logger.info(f"Requesting position update to initialize differential tracking")
 
     def _onConnectionError(self, error_msg):
         """Called when connection fails (runs in GUI thread)"""
