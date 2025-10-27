@@ -1354,76 +1354,172 @@ class BifrostGUI(Ui_MainWindow):
 
         return (True, value)
 
-    def updateFKPosDisplay(self,dataRead):
-        # RRF: Parse M114 response using compiled regex (3x faster than string.split)
+    def _parseM114Response(self, dataRead):
+        """
+        Extract position dictionary from M114 response
+
+        Args:
+            dataRead: Raw M114 response string
+
+        Returns:
+            dict: Axis positions {axis: value} or None if parse failed
+        """
+        matches = RRF_POSITION_PATTERN.findall(dataRead)
+        if not matches:
+            return None
+        return {axis: float(value) for axis, value in matches}
+
+    def _validateAllPositions(self, pos_dict):
+        """
+        Validate all axis positions and return sanitized values
+
+        Args:
+            pos_dict: Dictionary of raw positions from M114
+
+        Returns:
+            dict: Validated positions for all axes
+        """
+        AXES = ['X', 'Y', 'Z', 'U', 'V', 'W']
+        positions = {}
+
+        for axis in AXES:
+            valid, value = self.validatePosition(axis, pos_dict.get(axis, 0.0))
+            positions[axis] = value
+            self.last_valid_positions[axis] = value
+
+            if not valid:
+                logger.warning(f"Position validation corrected for {axis}")
+
+        return positions
+
+    def _updateInternalState(self, positions):
+        """
+        Update internal tracking variables from validated positions
+
+        Args:
+            positions: Dictionary of validated axis positions
+
+        Returns:
+            dict: Updated positions with calculated Art5/Art6
+        """
+        # Calculate joint angles from differential motor positions
+        art5, art6 = diff_kin.DifferentialKinematics.motor_to_joint(
+            positions['V'], positions['W']
+        )
+
+        # Update tracked motor positions
+        self.current_motor_v = positions['V']
+        self.current_motor_w = positions['W']
+        self.desired_art5 = art5
+        self.desired_art6 = art6
+
+        # Add calculated joint angles to position dict
+        positions['Art5'] = art5
+        positions['Art6'] = art6
+
+        # Increment update counter
+        self.position_update_count += 1
+
+        return positions
+
+    def _recordPositionHistory(self, positions):
+        """
+        Record position to history (sampled based on config)
+
+        Args:
+            positions: Dictionary with all position data
+        """
+        if self.position_update_count % config.POSITION_HISTORY_SAMPLE_RATE == 0:
+            self.position_history.add_snapshot(
+                art1=positions['X'],
+                art2=positions['Y'],
+                art3=positions['Z'],
+                art4=positions['U'],
+                art5=positions['Art5'],
+                art6=positions['Art6']
+            )
+
+    def _logPositions(self, positions):
+        """
+        Log position update details (for debugging)
+
+        Args:
+            positions: Dictionary with all position data
+        """
+        logger.debug(
+            f"Position feedback - X:{positions['X']:.2f} Y:{positions['Y']:.2f} "
+            f"Z:{positions['Z']:.2f} U:{positions['U']:.2f} V:{positions['V']:.2f} "
+            f"W:{positions['W']:.2f}"
+        )
+        logger.info(
+            f"  Art1<-X:{positions['X']:.2f}° | Art2<-Y:{positions['Y']:.2f}° | "
+            f"Art3<-Z:{positions['Z']:.2f}° | Art4<-U:{positions['U']:.2f}° | "
+            f"Art5(calc):{positions['Art5']:.2f}° | Art6(calc):{positions['Art6']:.2f}°"
+        )
+
+    def _updateGUIPositions(self, positions):
+        """
+        Update GUI labels with position data (throttled)
+
+        Args:
+            positions: Dictionary with all position data
+        """
+        # Log positions (throttled)
+        if self.position_update_count % config.LOGGING_INTERVAL_POSITIONS == 0:
+            self._logPositions(positions)
+
+        # GUI updates (throttled by time)
+        current_time = time.time()
+        if current_time - self.last_gui_update_time >= config.GUI_UPDATE_INTERVAL:
+            self.last_gui_update_time = current_time
+
+            # Update all display labels
+            self.FKCurrentPosValueArt1.setText(f"{positions['X']:.2f}º")
+            self.FKCurrentPosValueArt2.setText(f"{positions['Y']:.2f}º")
+            self.FKCurrentPosValueArt3.setText(f"{positions['Z']:.2f}º")
+            self.FKCurrentPosValueArt4.setText(f"{positions['U']:.2f}º")
+            self.FKCurrentPosValueArt5.setText(f"{positions['Art5']:.2f}º")
+            self.FKCurrentPosValueArt6.setText(f"{positions['Art6']:.2f}º")
+
+            # Set status to Idle since M114 doesn't provide status
+            self.updateCurrentState("Idle")
+
+    def updateFKPosDisplay(self, dataRead):
+        """
+        Parse M114 position response and update all displays
+
+        This method orchestrates position processing through several steps:
+        1. Parse raw M114 response
+        2. Validate all positions
+        3. Update internal state and differential kinematics
+        4. Record to position history
+        5. Update GUI displays (throttled)
+
+        Args:
+            dataRead: Raw M114 response string from firmware
+        """
         try:
-            # Extract position values using regex
-            matches = RRF_POSITION_PATTERN.findall(dataRead)
-            if not matches:
+            # Step 1: Parse M114 response
+            pos_dict = self._parseM114Response(dataRead)
+            if not pos_dict:
                 return
 
-            pos_dict = {axis: float(value) for axis, value in matches}
+            # Step 2: Validate we have differential axes (V and W required)
+            if 'V' not in pos_dict or 'W' not in pos_dict:
+                logger.warning("M114 response missing V or W axis - skipping update")
+                return
 
-            # Extract axis positions with validation
-            if 'V' in pos_dict and 'W' in pos_dict:
-                # Validate each position
-                motor_x_valid, motor_x = self.validatePosition('X', pos_dict.get('X', 0.0))
-                motor_y_valid, motor_y = self.validatePosition('Y', pos_dict.get('Y', 0.0))
-                motor_z_valid, motor_z = self.validatePosition('Z', pos_dict.get('Z', 0.0))
-                motor_u_valid, motor_u = self.validatePosition('U', pos_dict.get('U', 0.0))
-                motor_v_valid, motor_v = self.validatePosition('V', pos_dict.get('V', 0.0))
-                motor_w_valid, motor_w = self.validatePosition('W', pos_dict.get('W', 0.0))
+            # Step 3: Validate all positions
+            positions = self._validateAllPositions(pos_dict)
 
-                # Update last valid positions
-                self.last_valid_positions['X'] = motor_x
-                self.last_valid_positions['Y'] = motor_y
-                self.last_valid_positions['Z'] = motor_z
-                self.last_valid_positions['U'] = motor_u
-                self.last_valid_positions['V'] = motor_v
-                self.last_valid_positions['W'] = motor_w
+            # Step 4: Update internal state and calculate differential kinematics
+            positions = self._updateInternalState(positions)
 
-                # INVERSE DIFFERENTIAL: Convert motor positions to joint angles using helper
-                art5, art6 = diff_kin.DifferentialKinematics.motor_to_joint(motor_v, motor_w)
+            # Step 5: Record to position history (sampled)
+            self._recordPositionHistory(positions)
 
-                # Update tracked motor positions
-                self.current_motor_v = motor_v
-                self.current_motor_w = motor_w
-                self.desired_art5 = art5
-                self.desired_art6 = art6
-
-                self.position_update_count += 1
-
-                # Record position history (sampled based on config)
-                if self.position_update_count % config.POSITION_HISTORY_SAMPLE_RATE == 0:
-                    self.position_history.add_snapshot(
-                        art1=motor_x,
-                        art2=motor_y,
-                        art3=motor_z,
-                        art4=motor_u,
-                        art5=art5,
-                        art6=art6
-                    )
-
-                # Log every Nth update to reduce noise (from config)
-                if self.position_update_count % config.LOGGING_INTERVAL_POSITIONS == 0:
-                    logger.debug(f"Position feedback - X:{motor_x:.2f} Y:{motor_y:.2f} Z:{motor_z:.2f} U:{motor_u:.2f} V:{motor_v:.2f} W:{motor_w:.2f}")
-                    logger.info(f"  Art1<-X:{motor_x:.2f}° | Art2<-Y:{motor_y:.2f}° | Art3<-Z:{motor_z:.2f}° | Art4<-U:{motor_u:.2f}° | Art5(calc):{art5:.2f}° | Art6(calc):{art6:.2f}°")
-
-                # Throttle GUI updates (interval from config)
-                current_time = time.time()
-                if current_time - self.last_gui_update_time >= config.GUI_UPDATE_INTERVAL:
-                    self.last_gui_update_time = current_time
-
-                    # Display positions
-                    self.FKCurrentPosValueArt1.setText(f"{motor_x:.2f}º")
-                    self.FKCurrentPosValueArt2.setText(f"{motor_y:.2f}º")
-                    self.FKCurrentPosValueArt3.setText(f"{motor_z:.2f}º")
-                    self.FKCurrentPosValueArt4.setText(f"{motor_u:.2f}º")
-                    self.FKCurrentPosValueArt5.setText(f"{art5:.2f}º")
-                    self.FKCurrentPosValueArt6.setText(f"{art6:.2f}º")
-
-                    # Set status to Idle since M114 doesn't provide status
-                    self.updateCurrentState("Idle")
+            # Step 6: Update GUI displays (throttled)
+            self._updateGUIPositions(positions)
 
         except (ValueError, KeyError, IndexError) as e:
             logger.error(f"Error parsing M114 response: {e}")
