@@ -54,9 +54,6 @@ ENDSTOP_PANEL_Y = 20
 ENDSTOP_PANEL_WIDTH = 280
 ENDSTOP_PANEL_HEIGHT = 125
 
-# ========== Firmware Types ==========
-FIRMWARE_RRF = "RRF"
-
 # ========== Logging ==========
 LOG_LEVEL = "DEBUG"
 LOG_FILE = "bifrost_debug.log"
@@ -84,3 +81,20 @@ POSITION_HISTORY_SAMPLE_RATE = 10  # Record every Nth position update (1=all, 10
 POSITION_HISTORY_AUTO_SAVE_INTERVAL = 300  # seconds (5 minutes, 0=disabled)
 POSITION_HISTORY_PLOT_UPDATE_INTERVAL = 1000  # milliseconds
 POSITION_HISTORY_PLOT_WINDOW_SIZE = 100  # Number of recent points to show in real-time plot
+
+# ========== GUI Window & Layout ==========
+MAIN_WINDOW_MIN_WIDTH = 1820
+MAIN_WINDOW_MIN_HEIGHT = 920
+
+# 3D Visualization Panel
+VISUALIZATION_PANEL_X = 1210
+VISUALIZATION_PANEL_Y = 10
+VISUALIZATION_PANEL_WIDTH = 600
+VISUALIZATION_PANEL_HEIGHT = 900
+VISUALIZATION_CANVAS_WIDTH = 580
+VISUALIZATION_CANVAS_HEIGHT = 650
+VISUALIZATION_CONTROLS_Y = 685
+VISUALIZATION_CONTROLS_HEIGHT = 200
+
+# Graph update intervals
+GRAPH_UPDATE_INTERVAL_MS = 2000  # milliseconds between 3D visualization updates

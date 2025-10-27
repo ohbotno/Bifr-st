@@ -13,6 +13,7 @@ import sequence_recorder as seq_rec
 import differential_kinematics as diff_kin
 import position_history as pos_hist
 import config
+import parsing_patterns
 from command_builder import CommandBuilder, SerialCommandSender
 
 import serial
@@ -21,7 +22,6 @@ import json
 import threading
 import logging
 import numpy as np
-import re
 
 # Configure logging for debugging using config
 # Only log to file, not to console
@@ -34,15 +34,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Firmware type constants (from config)
-FIRMWARE_RRF = config.FIRMWARE_RRF
-
-# Compiled regex patterns for efficient position parsing
-# RRF M114 format: X:10.000 Y:10.000 Z:0.000 U:0.028 V:-110.000 W:-290.000
-RRF_POSITION_PATTERN = re.compile(r'([XYZUVW]):([+-]?\d+\.?\d*)')
-
-# Endstop status pattern: "Endstops - X: at min stendsop, Y: not stopped, ..."
-ENDSTOP_PATTERN = re.compile(r'([XYZUVW]):\s*([^,]+)')
+# This application is designed for RepRapFirmware (RRF) only
+# All parsing patterns are now in parsing_patterns.py module
 
 # Thread-safe serial object with command queue
 class SerialManager:
@@ -210,8 +203,7 @@ class BifrostGUI(Ui_MainWindow):
         old_console_input.setParent(None)
         old_console_input.deleteLater()
 
-        # Set firmware type to RepRapFirmware (RRF)
-        self.firmware_type = FIRMWARE_RRF
+        # Using RepRapFirmware (RRF) - this is the only supported firmware
 
         # Track serial thread state
         self.SerialThreadClass = None
@@ -229,7 +221,7 @@ class BifrostGUI(Ui_MainWindow):
         logger.info("="*60)
         logger.info("BIFROST GUI - MOTOR TO AXIS MAPPING")
         logger.info("="*60)
-        logger.info(f"Firmware type: {self.firmware_type}")
+        logger.info("Firmware: RepRapFirmware (RRF)")
         logger.info("GUI Control -> Firmware Axis -> Physical Motor")
         logger.info("-"*60)
         logger.info("Art1 (Joint 1) -> X axis -> Drive 0")
@@ -752,16 +744,9 @@ class BifrostGUI(Ui_MainWindow):
         logger.info("Sequence recorder controls initialized")
 
     def setupEndstopDisplays(self):
-        """Initialize references to endstop labels (now defined in gui.py)"""
-        # Endstop labels are now inline with articulation controls in gui.py
-        # Map old variable names to new ones for backward compatibility
-        self.endstopLabelX = self.endstopLabelArt1
-        self.endstopLabelY = self.endstopLabelArt2
-        self.endstopLabelZ = self.endstopLabelArt3
-        self.endstopLabelU = self.endstopLabelArt4
-        self.endstopLabelV = self.endstopLabelArt5
-        self.endstopLabelW = self.endstopLabelArt6
-
+        """Initialize references to endstop labels (defined in gui.py)"""
+        # Endstop labels are inline with articulation controls in gui.py
+        # Labels: endstopLabelArt1-6 correspond to axes X, Y, Z, U, V, W
         logger.info("Endstop status displays initialized (inline with articulation controls)")
 
     def setupPositionHistoryControls(self):
@@ -845,13 +830,13 @@ class BifrostGUI(Ui_MainWindow):
         self.positionHistoryGroupBox.show()
 
         # Start auto-update timer for 3D visualization
-        # OPTIMIZED: 2 second intervals - matplotlib rendering is expensive
+        # OPTIMIZED: matplotlib rendering is expensive
         # Dirty flag pattern in visualizer prevents unnecessary redraws
         self.graph_update_timer = QtCore.QTimer()
         self.graph_update_timer.timeout.connect(self.updateEmbeddedGraph)
-        self.graph_update_timer.start(2000)  # 2 second intervals (optimized from 1s)
+        self.graph_update_timer.start(config.GRAPH_UPDATE_INTERVAL_MS)
 
-        logger.info("Embedded 3D robot visualization initialized (2s update interval)")
+        logger.info(f"Embedded 3D robot visualization initialized ({config.GRAPH_UPDATE_INTERVAL_MS}ms update interval)")
 
     def updateEmbeddedGraph(self):
         """Update the embedded 3D robot visualization"""
@@ -1212,7 +1197,7 @@ class BifrostGUI(Ui_MainWindow):
             logger.debug("Cleared serial input buffer")
 
             # Create and start new serial thread (pass GUI instance for event-driven endstop polling)
-            self.SerialThreadClass = SerialThreadClass(self.firmware_type, gui_instance=self)
+            self.SerialThreadClass = SerialThreadClass(gui_instance=self)
             self.SerialThreadClass.start()
 
             # Emit success signal (thread-safe)
@@ -1238,8 +1223,8 @@ class BifrostGUI(Ui_MainWindow):
         QtCore.QTimer.singleShot(50, self.requestInitialPosition)
 
         logger.info(f"Connected to {serialPort} at {baudrate} baud")
-        logger.info(f"Serial thread started (Firmware: {self.firmware_type})")
-        logger.info(f"Requesting position update to initialize differential tracking")
+        logger.info("Serial thread started (Firmware: RepRapFirmware)")
+        logger.info("Requesting position update to initialize differential tracking")
 
     def _onConnectionError(self, error_msg):
         """Called when connection fails (runs in GUI thread)"""
@@ -1270,10 +1255,10 @@ class BifrostGUI(Ui_MainWindow):
         verboseShow=self.ConsoleShowVerbosecheckBox.isChecked()
         okShow=self.ConsoleShowOkRespcheckBox.isChecked()
 
-        # RRF: Check if response is M114 position response, M119 endstop response, or ok
-        isDataReadVerbose = dataRead.startswith("X:") and "Y:" in dataRead  # M114 response
-        isEndstopResponse = dataRead.startswith("Endstops -")  # M119 response
-        isDataOkResponse = "ok" in dataRead.lower()
+        # Use parsing module to identify response types
+        isDataReadVerbose = parsing_patterns.is_m114_response(dataRead)
+        isEndstopResponse = parsing_patterns.is_m119_response(dataRead)
+        isDataOkResponse = parsing_patterns.is_ok_response(dataRead)
 
         # Check if homing completed
         if self.is_homing and isDataOkResponse:
@@ -1364,10 +1349,8 @@ class BifrostGUI(Ui_MainWindow):
         Returns:
             dict: Axis positions {axis: value} or None if parse failed
         """
-        matches = RRF_POSITION_PATTERN.findall(dataRead)
-        if not matches:
-            return None
-        return {axis: float(value) for axis, value in matches}
+        result = parsing_patterns.parse_m114_response(dataRead)
+        return result if result else None
 
     def _validateAllPositions(self, pos_dict):
         """
@@ -1527,15 +1510,13 @@ class BifrostGUI(Ui_MainWindow):
             logger.exception("Position parsing error")
 
     def updateEndstopDisplay(self, dataRead):
-        """Parse M119 endstop response and update GUI displays (optimized with regex)"""
+        """Parse M119 endstop response and update GUI displays"""
         # Format: "Endstops - X: at min stop, Y: not stopped, Z: not stopped, U: not stopped, V: at min stop, W: at min stop, Z probe: at min stop"
         try:
-            # Use regex to extract endstop statuses (faster than string split)
-            matches = ENDSTOP_PATTERN.findall(dataRead)
-            if not matches:
+            # Use parsing module to extract endstop statuses
+            endstops = parsing_patterns.parse_m119_response(dataRead)
+            if not endstops:
                 return
-
-            endstops = {axis: status.strip() for axis, status in matches}
 
             # Update GUI labels with color coding (compact format for inline display)
             # Green = not triggered, Red = triggered
@@ -1557,12 +1538,12 @@ class BifrostGUI(Ui_MainWindow):
                         label.setText(f"{axis_name}: {status[:6]}")
                         label.setStyleSheet("background-color: rgb(255, 255, 200); padding: 2px; border-radius: 3px;")  # Yellow
 
-            updateLabel(self.endstopLabelX, "X")
-            updateLabel(self.endstopLabelY, "Y")
-            updateLabel(self.endstopLabelZ, "Z")
-            updateLabel(self.endstopLabelU, "U")
-            updateLabel(self.endstopLabelV, "V")
-            updateLabel(self.endstopLabelW, "W")
+            updateLabel(self.endstopLabelArt1, "X")
+            updateLabel(self.endstopLabelArt2, "Y")
+            updateLabel(self.endstopLabelArt3, "Z")
+            updateLabel(self.endstopLabelArt4, "U")
+            updateLabel(self.endstopLabelArt5, "V")
+            updateLabel(self.endstopLabelArt6, "W")
 
         except Exception as e:
             logger.error(f"Error parsing M119 endstop response: {e}")
@@ -1618,9 +1599,8 @@ class BifrostGUI(Ui_MainWindow):
 class SerialThreadClass(QtCore.QThread):
     serialSignal = pyqtSignal(str)
 
-    def __init__(self, firmware_type, gui_instance=None, parent=None):
+    def __init__(self, gui_instance=None, parent=None):
         super(SerialThreadClass, self).__init__(parent)
-        self.firmware_type = firmware_type
         self.gui_instance = gui_instance  # Reference to GUI for movement tracking
         self.running = True
         self.elapsedTime = time.time()
@@ -1784,7 +1764,7 @@ if __name__ == '__main__':
 
     # Create main window first
     mwindow = MainWindow(None)
-    mwindow.setMinimumSize(1820, 920)  # Adjusted width to fit visualization
+    mwindow.setMinimumSize(config.MAIN_WINDOW_MIN_WIDTH, config.MAIN_WINDOW_MIN_HEIGHT)
 
     # Create GUI instance
     prog = BifrostGUI(mwindow)

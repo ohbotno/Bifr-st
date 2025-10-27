@@ -3,6 +3,7 @@ Command Builder Module for Bifrost
 Provides utilities for building and formatting G-code commands to reduce code duplication
 """
 
+from typing import Tuple, Dict, Optional, Callable
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ class CommandBuilder:
     """Helper class for building G-code commands and formatting serial communication"""
 
     @staticmethod
-    def get_movement_params(gui):
+    def get_movement_params(gui) -> Tuple[str, str]:
         """
         Extract movement type and feed rate from GUI state
 
@@ -33,7 +34,7 @@ class CommandBuilder:
         return movement_type, feedrate
 
     @staticmethod
-    def build_axis_command(movement_type, axes_dict, feedrate=""):
+    def build_axis_command(movement_type: str, axes_dict: Dict[str, float], feedrate: str = "") -> str:
         """
         Build a G-code movement command from axis dictionary
 
@@ -56,7 +57,7 @@ class CommandBuilder:
         return command
 
     @staticmethod
-    def build_single_axis_command(movement_type, axis, value, feedrate=""):
+    def build_single_axis_command(movement_type: str, axis: str, value: float, feedrate: str = "") -> str:
         """
         Build a G-code command for a single axis
 
@@ -72,7 +73,7 @@ class CommandBuilder:
         return f"{movement_type} {axis}{value}{feedrate}"
 
     @staticmethod
-    def format_console_output(command):
+    def format_console_output(command: str) -> str:
         """
         Format command for console display
 
@@ -85,7 +86,7 @@ class CommandBuilder:
         return f">>> {command}"
 
     @staticmethod
-    def prepare_serial_message(command):
+    def prepare_serial_message(command: str) -> bytes:
         """
         Prepare command for serial transmission
 
@@ -112,7 +113,7 @@ class SerialCommandSender:
         self.serial_manager = serial_manager
         self.console_output = console_output_widget
 
-    def send(self, command, show_in_console=True, log_command=True):
+    def send(self, command: str, show_in_console: bool = True, log_command: bool = True) -> bool:
         """
         Send a G-code command through serial port
 
@@ -145,7 +146,7 @@ class SerialCommandSender:
 
         return True
 
-    def send_if_connected(self, command, error_callback=None, **kwargs):
+    def send_if_connected(self, command: str, error_callback: Optional[Callable[[], None]] = None, **kwargs) -> bool:
         """
         Send command if connected, otherwise call error callback
 

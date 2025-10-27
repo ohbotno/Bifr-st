@@ -16,6 +16,7 @@ Inverse Differential (motor positions → joint angles):
     Art6 = (Motor_V + Motor_W) / 2
 """
 
+from typing import Tuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ class DifferentialKinematics:
     """
 
     @staticmethod
-    def joint_to_motor(art5, art6):
+    def joint_to_motor(art5: float, art6: float) -> Tuple[float, float]:
         """
         Convert joint angles to motor positions (forward differential)
 
@@ -43,7 +44,7 @@ class DifferentialKinematics:
         return (motor_v, motor_w)
 
     @staticmethod
-    def motor_to_joint(motor_v, motor_w):
+    def motor_to_joint(motor_v: float, motor_w: float) -> Tuple[float, float]:
         """
         Convert motor positions to joint angles (inverse differential)
 
@@ -59,7 +60,7 @@ class DifferentialKinematics:
         return (art5, art6)
 
     @staticmethod
-    def move_art5_only(current_motor_v, current_motor_w, new_art5):
+    def move_art5_only(current_motor_v: float, current_motor_w: float, new_art5: float) -> Tuple[float, float, float]:
         """
         Calculate motor positions to move Art5 while keeping Art6 stationary
 
@@ -82,7 +83,7 @@ class DifferentialKinematics:
         return (motor_v, motor_w, art6)
 
     @staticmethod
-    def move_art6_only(current_motor_v, current_motor_w, new_art6):
+    def move_art6_only(current_motor_v: float, current_motor_w: float, new_art6: float) -> Tuple[float, float, float]:
         """
         Calculate motor positions to move Art6 while keeping Art5 stationary
 
@@ -105,7 +106,7 @@ class DifferentialKinematics:
         return (motor_v, motor_w, art5)
 
     @staticmethod
-    def validate_differential_consistency(motor_v, motor_w, art5, art6, tolerance=0.1):
+    def validate_differential_consistency(motor_v: float, motor_w: float, art5: float, art6: float, tolerance: float = 0.1) -> Tuple[bool, str]:
         """
         Verify that motor positions and joint angles are consistent
 
