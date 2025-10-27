@@ -307,12 +307,13 @@ class BifrostGUI(Ui_MainWindow):
         self.IKInputSpinBoxX.valueChanged.connect(lambda: self.ik_calc_timer.start(50))
         self.IKInputSpinBoxY.valueChanged.connect(lambda: self.ik_calc_timer.start(50))
         self.IKInputSpinBoxZ.valueChanged.connect(lambda: self.ik_calc_timer.start(50))
-        self.IkIncButtonX.pressed.connect(self.IkIncX)
-        self.IkDecButtonX.pressed.connect(self.IkDecX)
-        self.IkIncButtonY.pressed.connect(self.IkIncY)
-        self.IkDecButtonY.pressed.connect(self.IkDecY)
-        self.IkIncButtonZ.pressed.connect(self.IkIncZ)
-        self.IkDecButtonZ.pressed.connect(self.IkDecZ)
+        # IK increment/decrement buttons using generic method
+        self.IkIncButtonX.pressed.connect(lambda: self.adjustIKValue('X', 10))
+        self.IkDecButtonX.pressed.connect(lambda: self.adjustIKValue('X', -10))
+        self.IkIncButtonY.pressed.connect(lambda: self.adjustIKValue('Y', 10))
+        self.IkDecButtonY.pressed.connect(lambda: self.adjustIKValue('Y', -10))
+        self.IkIncButtonZ.pressed.connect(lambda: self.adjustIKValue('Z', 10))
+        self.IkDecButtonZ.pressed.connect(lambda: self.adjustIKValue('Z', -10))
 
         # Enable IK controls
         self.InverseKinematicsLabel.setEnabled(True)
@@ -657,29 +658,16 @@ class BifrostGUI(Ui_MainWindow):
             self.IkOutputValueFrame.setStyleSheet("background-color:rgb(255, 200, 200)")  # Light red
             logger.warning(f"IK 6-DOF: Invalid solution - {solution.error_msg}")
 
-    def IkIncX(self):
-        val = self.IKInputSpinBoxX.value() + 10
-        self.IKInputSpinBoxX.setValue(val)
+    def adjustIKValue(self, axis, delta):
+        """
+        Generic method to adjust IK input value by a delta
 
-    def IkDecX(self):
-        val = self.IKInputSpinBoxX.value() - 10
-        self.IKInputSpinBoxX.setValue(val)
-
-    def IkIncY(self):
-        val = self.IKInputSpinBoxY.value() + 10
-        self.IKInputSpinBoxY.setValue(val)
-
-    def IkDecY(self):
-        val = self.IKInputSpinBoxY.value() - 10
-        self.IKInputSpinBoxY.setValue(val)
-
-    def IkIncZ(self):
-        val = self.IKInputSpinBoxZ.value() + 10
-        self.IKInputSpinBoxZ.setValue(val)
-
-    def IkDecZ(self):
-        val = self.IKInputSpinBoxZ.value() - 10
-        self.IKInputSpinBoxZ.setValue(val)
+        Args:
+            axis: Axis letter ('X', 'Y', 'Z')
+            delta: Amount to add to current value
+        """
+        spinbox = getattr(self, f'IKInputSpinBox{axis}')
+        spinbox.setValue(spinbox.value() + delta)
 
 # Sequence Recorder Functions
     def setupSequenceControls(self):
