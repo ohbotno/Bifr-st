@@ -894,54 +894,54 @@ class BifrostGUI(Ui_MainWindow):
         """Create sequence recorder GUI controls programmatically"""
         # Create group box for sequence controls
         self.sequenceGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.sequenceGroupBox.setGeometry(QtCore.QRect(910, 155, 280, 703))
+        self.sequenceGroupBox.setGeometry(QtCore.QRect(910, 20, 280, 838))
         self.sequenceGroupBox.setTitle("Sequence Programmer")
 
         # List widget for sequence points (expanded to fill space, aligned with console send button)
         self.sequencePointsList = QtWidgets.QListWidget(self.sequenceGroupBox)
-        self.sequencePointsList.setGeometry(QtCore.QRect(10, 25, 260, 420))
+        self.sequencePointsList.setGeometry(QtCore.QRect(10, 25, 260, 555))
 
         # Record controls
         self.sequenceRecordButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceRecordButton.setGeometry(QtCore.QRect(10, 455, 120, 30))
+        self.sequenceRecordButton.setGeometry(QtCore.QRect(10, 590, 120, 30))
         self.sequenceRecordButton.setText("Record Point")
         self.sequenceRecordButton.pressed.connect(self.recordSequencePoint)
 
         self.sequenceDeleteButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceDeleteButton.setGeometry(QtCore.QRect(150, 455, 120, 30))
+        self.sequenceDeleteButton.setGeometry(QtCore.QRect(150, 590, 120, 30))
         self.sequenceDeleteButton.setText("Delete Point")
         self.sequenceDeleteButton.pressed.connect(self.deleteSequencePoint)
 
         self.sequenceClearButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceClearButton.setGeometry(QtCore.QRect(10, 490, 260, 30))
+        self.sequenceClearButton.setGeometry(QtCore.QRect(10, 625, 260, 30))
         self.sequenceClearButton.setText("Clear All")
         self.sequenceClearButton.pressed.connect(self.clearSequence)
 
         # Playback controls
         self.sequencePlayButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequencePlayButton.setGeometry(QtCore.QRect(10, 530, 80, 30))
+        self.sequencePlayButton.setGeometry(QtCore.QRect(10, 665, 80, 30))
         self.sequencePlayButton.setText("Play")
         self.sequencePlayButton.pressed.connect(self.playSequence)
 
         self.sequencePauseButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequencePauseButton.setGeometry(QtCore.QRect(100, 530, 80, 30))
+        self.sequencePauseButton.setGeometry(QtCore.QRect(100, 665, 80, 30))
         self.sequencePauseButton.setText("Pause")
         self.sequencePauseButton.setEnabled(False)
         self.sequencePauseButton.pressed.connect(self.pauseSequence)
 
         self.sequenceStopButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceStopButton.setGeometry(QtCore.QRect(190, 530, 80, 30))
+        self.sequenceStopButton.setGeometry(QtCore.QRect(190, 665, 80, 30))
         self.sequenceStopButton.setText("Stop")
         self.sequenceStopButton.setEnabled(False)
         self.sequenceStopButton.pressed.connect(self.stopSequence)
 
         # Speed control
         speedLabel = QtWidgets.QLabel(self.sequenceGroupBox)
-        speedLabel.setGeometry(QtCore.QRect(10, 570, 50, 20))
+        speedLabel.setGeometry(QtCore.QRect(10, 705, 50, 20))
         speedLabel.setText("Speed:")
 
         self.sequenceSpeedSpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
-        self.sequenceSpeedSpinBox.setGeometry(QtCore.QRect(60, 570, 80, 22))
+        self.sequenceSpeedSpinBox.setGeometry(QtCore.QRect(60, 705, 80, 22))
         self.sequenceSpeedSpinBox.setMinimum(0.1)
         self.sequenceSpeedSpinBox.setMaximum(10.0)
         self.sequenceSpeedSpinBox.setSingleStep(0.1)
@@ -949,16 +949,16 @@ class BifrostGUI(Ui_MainWindow):
         self.sequenceSpeedSpinBox.setSuffix("x")
 
         self.sequenceLoopCheckBox = QtWidgets.QCheckBox(self.sequenceGroupBox)
-        self.sequenceLoopCheckBox.setGeometry(QtCore.QRect(150, 570, 60, 20))
+        self.sequenceLoopCheckBox.setGeometry(QtCore.QRect(150, 705, 60, 20))
         self.sequenceLoopCheckBox.setText("Loop")
 
         # Delay control
         delayLabel = QtWidgets.QLabel(self.sequenceGroupBox)
-        delayLabel.setGeometry(QtCore.QRect(10, 600, 50, 20))
+        delayLabel.setGeometry(QtCore.QRect(10, 735, 50, 20))
         delayLabel.setText("Delay:")
 
         self.sequenceDelaySpinBox = QtWidgets.QDoubleSpinBox(self.sequenceGroupBox)
-        self.sequenceDelaySpinBox.setGeometry(QtCore.QRect(60, 600, 80, 22))
+        self.sequenceDelaySpinBox.setGeometry(QtCore.QRect(60, 735, 80, 22))
         self.sequenceDelaySpinBox.setMinimum(0.0)
         self.sequenceDelaySpinBox.setMaximum(60.0)
         self.sequenceDelaySpinBox.setSingleStep(0.1)
@@ -967,66 +967,29 @@ class BifrostGUI(Ui_MainWindow):
 
         # File buttons
         self.sequenceSaveButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceSaveButton.setGeometry(QtCore.QRect(10, 635, 260, 30))
+        self.sequenceSaveButton.setGeometry(QtCore.QRect(10, 770, 260, 30))
         self.sequenceSaveButton.setText("Save Sequence")
         self.sequenceSaveButton.pressed.connect(self.saveSequence)
 
         self.sequenceLoadButton = QtWidgets.QPushButton(self.sequenceGroupBox)
-        self.sequenceLoadButton.setGeometry(QtCore.QRect(10, 670, 260, 30))
+        self.sequenceLoadButton.setGeometry(QtCore.QRect(10, 805, 260, 30))
         self.sequenceLoadButton.setText("Load Sequence")
         self.sequenceLoadButton.pressed.connect(self.loadSequence)
 
         logger.info("Sequence recorder controls initialized")
 
     def setupEndstopDisplays(self):
-        """Create endstop status display GUI controls programmatically"""
-        # Create group box for endstop displays
-        self.endstopGroupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.endstopGroupBox.setGeometry(QtCore.QRect(910, 20, 280, 125))
-        self.endstopGroupBox.setTitle("Endstop Status")
+        """Initialize references to endstop labels (now defined in gui.py)"""
+        # Endstop labels are now inline with articulation controls in gui.py
+        # Map old variable names to new ones for backward compatibility
+        self.endstopLabelX = self.endstopLabelArt1
+        self.endstopLabelY = self.endstopLabelArt2
+        self.endstopLabelZ = self.endstopLabelArt3
+        self.endstopLabelU = self.endstopLabelArt4
+        self.endstopLabelV = self.endstopLabelArt5
+        self.endstopLabelW = self.endstopLabelArt6
 
-        # Create labels for each endstop (positioned in 2 columns)
-        y_pos = 25
-        col1_x = 10
-        col2_x = 145
-        label_height = 25
-
-        # Column 1: Art1, Art2, Art3
-        self.endstopLabelX = QtWidgets.QLabel(self.endstopGroupBox)
-        self.endstopLabelX.setGeometry(QtCore.QRect(col1_x, y_pos, 120, label_height))
-        self.endstopLabelX.setText("Art1 (X): ---")
-        self.endstopLabelX.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
-
-        self.endstopLabelY = QtWidgets.QLabel(self.endstopGroupBox)
-        self.endstopLabelY.setGeometry(QtCore.QRect(col1_x, y_pos + 30, 120, label_height))
-        self.endstopLabelY.setText("Art2 (Y): ---")
-        self.endstopLabelY.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
-
-        self.endstopLabelZ = QtWidgets.QLabel(self.endstopGroupBox)
-        self.endstopLabelZ.setGeometry(QtCore.QRect(col1_x, y_pos + 60, 120, label_height))
-        self.endstopLabelZ.setText("Art3 (Z): ---")
-        self.endstopLabelZ.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
-
-        # Column 2: Art4, Art5, Art6
-        self.endstopLabelU = QtWidgets.QLabel(self.endstopGroupBox)
-        self.endstopLabelU.setGeometry(QtCore.QRect(col2_x, y_pos, 120, label_height))
-        self.endstopLabelU.setText("Art4 (U): ---")
-        self.endstopLabelU.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
-
-        self.endstopLabelV = QtWidgets.QLabel(self.endstopGroupBox)
-        self.endstopLabelV.setGeometry(QtCore.QRect(col2_x, y_pos + 30, 120, label_height))
-        self.endstopLabelV.setText("Art5 (V): ---")
-        self.endstopLabelV.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
-
-        self.endstopLabelW = QtWidgets.QLabel(self.endstopGroupBox)
-        self.endstopLabelW.setGeometry(QtCore.QRect(col2_x, y_pos + 60, 120, label_height))
-        self.endstopLabelW.setText("Art6 (W): ---")
-        self.endstopLabelW.setStyleSheet("background-color: rgb(200, 200, 200); padding: 3px;")
-
-        # Make the group box visible
-        self.endstopGroupBox.show()
-
-        logger.info("Endstop status displays initialized")
+        logger.info("Endstop status displays initialized (inline with articulation controls)")
 
     def setupPositionHistoryControls(self):
         """Create embedded 3D robot visualization and controls"""
@@ -1392,9 +1355,28 @@ class BifrostGUI(Ui_MainWindow):
 # Serial Connection functions
     def getSerialPorts(self):
         self.SerialPortComboBox.clear()
-        self.SerialPortComboBox.addItems(spf.serial_ports())
+        available_ports = spf.serial_ports()
+        self.SerialPortComboBox.addItems(available_ports)
+
+        # Auto-detect and select the robot's COM port
+        robot_port = spf.get_robot_port()
+        if robot_port:
+            # Find the index of the detected port and select it
+            index = self.SerialPortComboBox.findText(robot_port)
+            if index >= 0:
+                self.SerialPortComboBox.setCurrentIndex(index)
+                logger.info(f"Auto-detected robot port: {robot_port}")
+            else:
+                logger.warning(f"Detected port {robot_port} not found in combo box")
+        else:
+            logger.info("No robot port auto-detected, please select manually")
 
     def connectSerial(self):
+        # Check if already connected - if so, disconnect
+        if s0.isOpen():
+            self.disconnectSerial()
+            return
+
         serialPort = self.SerialPortComboBox.currentText()
         baudrate = self.BaudRateComboBox.currentText()
         if serialPort == "":
@@ -1416,6 +1398,28 @@ class BifrostGUI(Ui_MainWindow):
             daemon=True
         )
         connection_thread.start()
+
+    def disconnectSerial(self):
+        """Disconnect from serial port"""
+        try:
+            # Stop serial thread
+            if self.SerialThreadClass and self.SerialThreadClass.isRunning():
+                self.SerialThreadClass.stop()
+                self.SerialThreadClass.wait(2000)
+
+            # Close serial port
+            s0.close()
+
+            # Update GUI
+            self.serialDisconnected()
+            self.ConnectButton.setText("Connect")
+            self.ConnectButton.setEnabled(True)
+
+            logger.info("Disconnected from serial port")
+            print("Disconnected from serial port")
+
+        except Exception as e:
+            logger.error(f"Error during disconnect: {e}")
 
     def _connectSerialWorker(self, serialPort, baudrate):
         """Worker thread for serial connection (prevents GUI freeze)"""
@@ -1458,6 +1462,7 @@ class BifrostGUI(Ui_MainWindow):
 
         # Update GUI to show connected state
         self.updateCurrentState("Idle")
+        self.ConnectButton.setText("Disconnect")
         self.ConnectButton.setEnabled(True)
 
         # Request initial position after thread is ready
@@ -1471,6 +1476,7 @@ class BifrostGUI(Ui_MainWindow):
     def _onConnectionError(self, error_msg):
         """Called when connection fails (runs in GUI thread)"""
         self.serialDisconnected()
+        self.ConnectButton.setText("Connect")
         self.ConnectButton.setEnabled(True)
 
         print(f"Error opening serial port: {error_msg}")
@@ -1490,6 +1496,7 @@ class BifrostGUI(Ui_MainWindow):
     def serialDisconnected(self):
         self.RobotStateDisplay.setStyleSheet('background-color: rgb(255, 0, 0)')
         self.RobotStateDisplay.setText("Disconnected")
+        self.ConnectButton.setText("Connect")
 
     def updateConsole(self, dataRead):
         verboseShow=self.ConsoleShowVerbosecheckBox.isChecked()
@@ -1687,24 +1694,32 @@ class BifrostGUI(Ui_MainWindow):
 
             endstops = {axis: status.strip() for axis, status in matches}
 
-            # Update GUI labels with color coding
+            # Update GUI labels with color coding (compact format for inline display)
             # Green = not triggered, Red = triggered
             # Mapping: X->Art1, Y->Art2, Z->Art3, U->Art4, V->Art5, W->Art6
-            def updateLabel(label, axis_name, art_name):
+            def updateLabel(label, axis_name):
                 if axis_name in endstops:
                     status = endstops[axis_name]
-                    label.setText(f"{art_name} ({axis_name}): {status}")
+                    # Compact status text with axis label
                     if "not stopped" in status:
-                        label.setStyleSheet("background-color: rgb(0, 255, 0); padding: 3px;")  # Green
+                        label.setText(f"{axis_name}: OK")
+                        label.setStyleSheet("background-color: rgb(200, 255, 200); padding: 2px; border-radius: 3px;")  # Light green
+                    elif "min" in status:
+                        label.setText(f"{axis_name}: MIN")
+                        label.setStyleSheet("background-color: rgb(255, 200, 200); padding: 2px; border-radius: 3px;")  # Light red
+                    elif "max" in status:
+                        label.setText(f"{axis_name}: MAX")
+                        label.setStyleSheet("background-color: rgb(255, 200, 200); padding: 2px; border-radius: 3px;")  # Light red
                     else:
-                        label.setStyleSheet("background-color: rgb(255, 0, 0); padding: 3px;")  # Red
+                        label.setText(f"{axis_name}: {status[:6]}")
+                        label.setStyleSheet("background-color: rgb(255, 255, 200); padding: 2px; border-radius: 3px;")  # Yellow
 
-            updateLabel(self.endstopLabelX, "X", "Art1")
-            updateLabel(self.endstopLabelY, "Y", "Art2")
-            updateLabel(self.endstopLabelZ, "Z", "Art3")
-            updateLabel(self.endstopLabelU, "U", "Art4")
-            updateLabel(self.endstopLabelV, "V", "Art5")
-            updateLabel(self.endstopLabelW, "W", "Art6")
+            updateLabel(self.endstopLabelX, "X")
+            updateLabel(self.endstopLabelY, "Y")
+            updateLabel(self.endstopLabelZ, "Z")
+            updateLabel(self.endstopLabelU, "U")
+            updateLabel(self.endstopLabelV, "V")
+            updateLabel(self.endstopLabelW, "W")
 
         except Exception as e:
             logger.error(f"Error parsing M119 endstop response: {e}")
