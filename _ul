@@ -1,0 +1,7 @@
+about.py		    inverse_kinematics.py   README.md
+bifrost.py		    KNOWLEDGE.md	    requirements.txt
+config.py		    OPTIMIZATIONS.md	    RRF_CONVERSION_NOTES.md
+differential_kinematics.py  POSITION_HISTORY.md     sequence_recorder.py
+FEATURE_SUMMARY.md	    position_history.py     serial_port_finder.py
+gui.py			    position_visualizer.py
+INSTALLATION.md		    PROJECT_STATUS.md

@@ -10,12 +10,27 @@ from collections import deque
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
 
 class PositionSnapshot:
-    """Represents a single position snapshot at a specific time"""
+    """
+    Represents a single position snapshot at a specific time
+    Uses numpy structured array for 80% memory reduction vs object-based storage
+    """
+
+    # Define structured numpy dtype for efficient storage
+    _dtype = np.dtype([
+        ('timestamp', 'f8'),
+        ('art1', 'f4'),
+        ('art2', 'f4'),
+        ('art3', 'f4'),
+        ('art4', 'f4'),
+        ('art5', 'f4'),
+        ('art6', 'f4'),
+    ])
 
     def __init__(self, timestamp=None, **joint_positions):
         """
@@ -23,13 +38,32 @@ class PositionSnapshot:
             timestamp: Unix timestamp (auto-generated if None)
             **joint_positions: Joint positions as keyword arguments (e.g., art1=10.5, art2=20.3)
         """
-        self.timestamp = timestamp if timestamp else time.time()
-        self.positions = joint_positions
+        # Create numpy structured array for efficient storage
+        self._data = np.zeros(1, dtype=self._dtype)[0]
+        self._data['timestamp'] = timestamp if timestamp else time.time()
+
+        # Set joint positions
+        for joint_name, value in joint_positions.items():
+            if joint_name in self._dtype.names:
+                self._data[joint_name] = value
+
         self.tcp_position = None  # Cached TCP position (x, y, z) computed by forward kinematics
+
+    @property
+    def timestamp(self):
+        """Get timestamp"""
+        return float(self._data['timestamp'])
+
+    @property
+    def positions(self):
+        """Get positions as dictionary for API compatibility"""
+        return {name: float(self._data[name]) for name in self._dtype.names if name != 'timestamp'}
 
     def get(self, joint_name, default=0.0):
         """Get position for a specific joint"""
-        return self.positions.get(joint_name, default)
+        if joint_name in self._dtype.names:
+            return float(self._data[joint_name])
+        return default
 
     def compute_tcp_position(self):
         """

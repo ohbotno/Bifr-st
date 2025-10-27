@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(pyuic5:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "Bash(git add:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": []
